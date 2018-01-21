@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="ConsumerProducer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ConsumerProducer_jar</output-path>
+    <root id="archive" name="ConsumerProducer.jar">
+      <element id="module-output" name="ConsumerProducer" />
+      <element id="archive" name="hyello.jar" />
+    </root>
+  </artifact>
+</component>
