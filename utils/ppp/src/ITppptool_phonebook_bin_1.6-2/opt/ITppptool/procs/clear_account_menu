@@ -1,0 +1,7 @@
+proc clear_account_menu {} {
+
+	global acct_widget
+	$acct_widget delete 0 end
+
+}
+

@@ -1,0 +1,231 @@
+proc build_menus { } {
+
+	##############################
+	# Create GUI
+	##############################
+	wm title . "IT PPP Tool"
+	wm geometry . +300+100 
+
+	. configure -bg lightGray
+	menu .menubar -bg lightGray
+
+	# attach it to the main window
+	. config -menu .menubar
+	global active_account accounts pkghome
+	global connection_state ostype
+	global bulblist bulbs
+	global on_color off_color bulb_colors
+	global acct_width 
+	set acct_width 30
+
+	#set bulb_colors { yellow red green blue orange violet pink }
+	#set bulb_colors { yellow red lightGreen black }
+	#set bulb_colors { black green red #000000 }
+	set bulb_colors { black red #000000 }
+
+	set on_color [lindex $bulb_colors 0]
+	set off_color [lindex $bulb_colors 1] 
+
+	global save_accounts_prompt
+	set save_accounts_prompt "false"
+
+	set connection_state "disconnected"
+
+	###############################
+	# Create more cascade menus
+	##############################
+	foreach m {File Edit Accounts Help} {
+
+		# same as 'set File [ menu .. ]'
+		set $m [menu .menubar.m$m -tearoff false]
+
+		if { $m == "Help" } {
+			# figure out how to put on the right side
+			#.menubar add cascade -label "     " -menu .menubar.mFill 
+			.menubar add cascade -label $m -menu .menubar.m$m 
+		} else {
+			.menubar add cascade -label $m -menu .menubar.m$m
+		}
+	}
+	##############################
+	# Add Menu Items
+	##############################
+	#puts "\$File = $File"
+	$File add command -label "Save Accounts" -command { 
+		puts "Save Settings" 
+		set save_accounts_prompt "true"
+		if { [save_accounts "save"] == 1 } { 
+			set save_accounts_prompt "false"
+		}
+		set save_accounts_prompt "false"
+	}
+	$File add command -label "View Log" -command { 
+			view_log
+	} 
+	$File add command -label Quit -command {
+		puts "Quit"
+
+  	# remove connect.script
+  	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+  	puts "Remove $pppd_config_file"
+     if { [info exists pppd_config_file] == 1 } {
+        if { [file exists $pppd_config_file] == 1 } {
+            puts "exec rm -rf $pppd_config_file"
+            exec rm -rf $pppd_config_file
+        }
+     }
+
+
+		global connection_state
+		if { $connection_state == "connecting" ||  $connection_state == "connected" } {
+			puts "connection_state == $connection_state"
+			disconnect "User Quit"
+		}
+
+		# remove any extra resolv.conf files
+
+		global save_accounts_prompt
+		# Check if files need saving
+		set save_accounts_prompt "true"
+		if { [save_accounts "exit"] == 1 } { 
+			set save_accounts_prompt "false"
+			exit 
+		}
+		set save_accounts_prompt "false"
+		
+ }
+
+	$Edit add command  -label "Manage Accounts" -command { 
+		puts "Manage Accounts" 
+		manage_accounts
+	}
+	$Edit add command -label "Edit Preferences" -command { 
+		puts "Edit Preferences" 
+		edit_prefs
+	}
+
+	$Help add command -label "About PPP Tool" -command { 
+
+		global version
+		if { [info exists version] != 1 } {
+			if { $ostype == "SunOS" } {
+				set version [string trim [exec pkginfo -l ITppptool | grep -i version ]] 
+			} elseif { $ostype == "Linux" } {
+				set version [string trim [exec rpm -q ITppptool ]] 
+			}
+		}
+		tk_messageBox -default "ok" -message \
+		"IT PPP Tool\n$version" \
+		-title "About PPP Tool"
+	}
+	$Help add command -label "PPP Tool Help" -command  help 
+
+	frame .mid -bg lightGray
+
+	label .acct_label -text "Active Account: No Account loaded" -relief groove -bg lightGray
+	pack .acct_label -in .mid -fill x 
+	#label .color -text "Color" -bg white 
+	#pack .color -in .mid
+
+
+	# account window display
+	#set no_acct_txt "No Account loaded"
+	set no_acct_txt ""
+	set acct_width 60
+	set pad_val 3 
+	set descr_bg lightGreen
+        set label_width 15
+
+	### name ###
+        ############
+ 	frame .namef  -bg lightGray
+ 	label .namef.name_l -text "Account:" -bg $descr_bg -relief groove -width $label_width -justify right
+ 	label .namef.name_r -text $no_acct_txt -bg lightBlue -width $acct_width -relief groove 
+ 	pack .namef.name_l .namef.name_r -pady [expr $pad_val * 2] -side left 
+ 	.namef.name_r configure -anchor w
+ 	# uid #
+        ############
+ 	frame .uidf -bg lightGray
+ 	label .uidf.uid_l -text "User ID:"  -bg $descr_bg -relief groove -width $label_width -justify right
+ 	entry .uidf.uid_r -text $no_acct_txt -bg lightYellow -width $acct_width  -relief groove 
+ 	pack .uidf.uid_l .uidf.uid_r -pady $pad_val -side left
+
+	# passwd #
+        ############
+	frame .passwdf -bg lightGray
+	label .passwdf.passwd_l -text "Password:" -bg $descr_bg -relief groove -width $label_width -justify right
+	entry .passwdf.passwd_r -text $no_acct_txt -bg lightYellow -width $acct_width  \
+	-relief groove  -show *
+	pack .passwdf.passwd_l .passwdf.passwd_r -pady $pad_val -side left
+
+	# number #
+        ############
+ 	frame .numberf -bg lightGray
+ 	label .numberf.number_l -text "Phone Number:" -bg $descr_bg  -relief groove -width $label_width -justify right
+ 	label .numberf.number_r -text $no_acct_txt -bg lightBlue -width $acct_width  -relief groove 
+ 	pack .numberf.number_l .numberf.number_r -side left -pady $pad_val
+	.numberf.number_r configure  -anchor w 
+
+	pack .namef -in .mid 
+	pack .uidf -in .mid 
+	pack .passwdf -in .mid 
+	pack .numberf -in .mid 
+	pack .mid 
+
+	frame .connect_frame -bg lightGray
+
+	button .connect -text "Connect" -width 20 \
+	-state normal -command connect 
+
+	if { [info exists active_account] != 1 } {
+		.connect configure -state disabled
+	}
+
+	pack .connect -in .connect_frame
+	pack .connect_frame -pady 10
+
+	frame .cframe -bg lightGray
+	canvas .cframe.can -width 220 -height 20  -bg lightGray
+
+	set x1 5 
+	set y1 5
+	set x2 15
+	set y2 15
+	foreach can_oval { 0 1 2 3 4 5 6 7 8 9 10 11 } {
+		.cframe.can create oval $x1 $y1 $x2 $y2 -fill black -width 2 -tag "bulb[set can_oval]"
+		incr x1 18 
+		set x2 [expr $x1 + 10]	
+		lappend bulblist "bulb[set can_oval]"
+		set bulbs(bulb[set can_oval],color) [lindex $bulb_colors 0]
+		#puts "set bulbs(bulb[set can_oval],color) [lindex $bulb_colors 0]"
+		#puts "bulbs(bulb[set can_oval],color) == $bulbs(bulb[set can_oval],color)" 
+	}
+	pack .cframe.can
+	pack .cframe 
+
+	frame .modembutton_text
+	foreach modem_text { HS AA CD OH RD SD TR MR RS CS SYN FAX } {
+		label .modembutton_text._$modem_text -text $modem_text -bg black -fg white -font {times 6}
+		pack .modembutton_text._$modem_text -side left
+	}
+	pack .modembutton_text 
+
+	frame .footer -bg lightGray
+	label .footer.footer_l -text "Status:" -relief groove -bg lightGray
+	label .footer.footer_r -text "No connection" -relief groove -bg lightGray
+	pack .footer.footer_l -side left 
+	pack .footer.footer_r -side left -fill x -expand 1
+	.footer.footer_r configure -anchor w -justify left	
+	pack .footer -anchor s -side bottom -fill x -expand 1 -pady 5
+
+	global menubar_widget
+	set menubar_widget .menubar 
+	global acct_widget
+	set acct_widget $Accounts
+
+	add_accounts
+	set_active
+
+
+}
+

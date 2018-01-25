@@ -1,0 +1,263 @@
+proc edit_prefs { } {
+
+  global ppp_settings ostype os_defaults
+  global ppp_settings_saved accounts active_account
+  global save_accounts_prompt
+  global modem_port
+  global flow_control
+
+  global g_modem_port
+  global g_flow_control
+
+  global port_speeds
+  global port_speed
+  puts "Modem port = $ppp_settings(modem_port)"
+
+  set default_width 25
+  set label_width 15 
+
+#  if { [winfo exists .prefs] } { 
+#     catch { wm deiconify .prefs }  
+#     catch { wm raise .prefs }
+#     catch { focus .prefs }
+#     return
+#  } 
+  toplevel .prefs
+  wm title .prefs "PPP Preferences"
+  wm resizable .prefs true false
+
+  frame .prefs.pref_frame
+
+  ## Menubutton items ##
+
+  # Set ppp_settings to current account
+  puts "Active Account: $active_account Modem Port: $accounts($active_account,modem_port)"
+
+  foreach ppp_setting { modem_port flow_control port_speed } {
+        set ppp_settings($ppp_setting) $accounts($active_account,$ppp_setting) 
+
+        set button_descr "[lindex [split $ppp_setting '_'] 0] [lindex [split $ppp_setting '_'] 1]"
+        #set ppp_settings(modem_port) /dev/term/b
+        frame .prefs.pref_frame.[set ppp_setting]_frame
+
+        if { [info exists ppp_settings($ppp_setting)] == 1 } {
+          puts "$ppp_setting = $ppp_settings($ppp_setting)"
+          set [set ppp_setting]_button_text $ppp_settings($ppp_setting)
+        } else {
+          puts "$ppp_setting = $ppp_settings($ppp_setting)"
+          set [set ppp_setting]_button_text "Select $button_descr" 
+        }
+
+        label .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -text $button_descr -width $label_width
+        pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -side left -anchor w
+
+        menubutton .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting] \
+        -text [set [set ppp_setting]_button_text] \
+        -menu .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting].menu \
+        -relief raised  -width $default_width 
+        pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting] -side left -anchor w 
+
+        #.prefs.pref_frame.[set ppp_setting]_frame.modem_port configure -anchor w  
+
+
+        pack .prefs.pref_frame.[set ppp_setting]_frame -fill x -expand 1 -pady 2
+        eval { set [set ppp_setting]_menu \
+        [menu .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting].menu -tearoff 0] }
+
+
+        if { $ppp_setting == "modem_port" } {
+
+          foreach modem_port [split $os_defaults(serial_ports,$ostype)] {
+              puts "[set ppp_setting]_menu add command -label $modem_port -command"
+              puts "ppp_settings: [array names ppp_settings]"
+
+              eval { [set [set ppp_setting]_menu] add radio -label $modem_port \
+                      -variable modem_port -value $modem_port -command {
+                        .prefs.pref_frame.modem_port_frame.modem_port configure -text $modem_port
+                      }
+              }
+          }
+
+          eval { [set [set ppp_setting]_menu] add separator } 
+
+          # add selection button
+          puts "Adding serial port selection button"
+          global modem_port_menu_widget
+          set modem_port_menu_widget [set [set ppp_setting]_menu]
+          # add special modem ports
+          set modem_port $ppp_settings(modem_port)
+          set err [ catch {  $modem_port_menu_widget index $modem_port } ]
+          if  { $err == 1 } {
+              $modem_port_menu_widget insert 0 radio \
+              -label $modem_port -variable modem_port -value $modem_port  -command { 
+                    .prefs.pref_frame.modem_port_frame.modem_port configure -text $modem_port
+              }
+              .prefs.pref_frame.modem_port_frame.modem_port configure -text $modem_port
+          }  
+
+          eval { [set [set ppp_setting]_menu] add command -label "Add serial port .." -command {
+            
+              if { [winfo exists .add_serial_port] } {
+                 catch { wm deiconify .add_serial_port}  
+                 catch { wm raise .add_serial_port}
+                 catch { focus .add_serial_port}
+                 return
+              } 
+              toplevel .add_serial_port
+              wm title .add_serial_port "Add Serial Port"
+              wm resizable .add_serial_port false false
+              center_window .add_serial_port 3 5  
+
+              #  entry field, browse filesystem button
+              label .add_serial_port.entry_label -text "Enter full path to modem port, or click \"Browse\" button to select from filesystem"
+              pack .add_serial_port.entry_label -side top -anchor n
+
+              frame .add_serial_port.entryframe
+              entry .add_serial_port.entryframe.entry -width 50 -relief sunken 
+              pack .add_serial_port.entryframe.entry -side left 
+              button .add_serial_port.entryframe.browse -text "Browse .." -command {
+                puts "Browse filesystem"
+                set filename [tk_getOpenFile -initialdir /dev ]
+                .add_serial_port.entryframe.entry delete 0 end
+                .add_serial_port.entryframe.entry insert 0 $filename
+
+              }
+              pack .add_serial_port.entryframe.browse -side right
+              pack .add_serial_port.entryframe
+
+              frame .add_serial_port.buttonframe
+              button .add_serial_port.buttonframe.ok_button -text "OK" -command {
+                global modem_port_menu_widget
+                set choice [.add_serial_port.entryframe.entry get]
+                puts "Using $choice for serial port"
+
+                # check if already there
+                set err [ catch { $modem_port_menu_widget index $choice } ]
+                if { $err == 1 } {
+                  $modem_port_menu_widget insert 0 radio \
+                  -label $choice -variable modem_port -value $choice  -command {
+                        .prefs.pref_frame.modem_port_frame.modem_port configure -text $choice
+                  }
+                }
+                  # add to label of menubutton
+                  .prefs.pref_frame.modem_port_frame.modem_port configure -text $choice
+                  # activate selection
+                  set modem_port $choice
+                  .add_serial_port.entryframe.entry delete 0 end
+                  wm withdraw .add_serial_port  
+              }
+
+
+              button .add_serial_port.buttonframe.cancel -text "Cancel" -command {
+                .add_serial_port.entryframe.entry delete 0 end
+                wm withdraw .add_serial_port  
+              }
+              pack .add_serial_port.buttonframe.ok_button -side left 
+              pack .add_serial_port.buttonframe.cancel -side right 
+              pack .add_serial_port.buttonframe -side bottom -anchor s
+
+            }
+          }
+          set modem_port $ppp_settings(modem_port)
+
+    } elseif { $ppp_setting == "flow_control" } {
+
+          foreach flow_control { hardware software none } {
+              puts "[set ppp_setting]_menu add command -label $flow_control -command"
+              puts "ppp_settings: [array names ppp_settings]"
+
+              eval { [set [set ppp_setting]_menu] add radio -label $flow_control -variable \
+                      flow_control  -value $flow_control -command {
+                        .prefs.pref_frame.flow_control_frame.flow_control \
+                        configure -text $flow_control
+                      }
+              }
+          }
+          set flow_control $ppp_settings(flow_control)
+
+    } elseif { $ppp_setting == "port_speed" } {
+
+        #port_speeds { 36600 38400 56600 57600 115200 230400 } 
+
+        foreach port_speed  $port_speeds  {
+          puts "[set ppp_setting]_menu add command -label $port_speed -command"
+          puts "ppp_settings: [array names ppp_settings]"
+
+              eval { [set [set ppp_setting]_menu] add radio -label $port_speed \
+              -variable port_speed  -value $port_speed -command {
+                        .prefs.pref_frame.port_speed_frame.port_speed \
+                        configure -text $port_speed
+                      }
+              }
+        }
+        set port_speed $ppp_settings(port_speed)
+
+    }
+  }
+
+      #### Entry items ###
+
+
+      set last_width 0 
+      foreach ppp_setting { init_string } {
+        set ppp_settings($ppp_setting) $accounts($active_account,$ppp_setting) 
+        puts "ppp_setting $ppp_setting"
+        set entry_width [string length $ppp_settings($ppp_setting)]
+        if { $entry_width < 20 } { set entry_width $default_width }
+        if { $entry_width > $last_width } { set last_width $entry_width }
+      }
+        if { $entry_width < $last_width } { set entry_width [expr $last_width + 5] }
+        .prefs.pref_frame.modem_port_frame.modem_port configure -width $entry_width
+        .prefs.pref_frame.flow_control_frame.flow_control configure -width $entry_width
+
+      foreach ppp_setting { init_string } {
+        set ppp_settings($ppp_setting) $accounts($active_account,$ppp_setting) 
+        frame .prefs.pref_frame.[set ppp_setting]_frame
+        label .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -text $ppp_setting -width $label_width
+        entry .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry -width $entry_width
+        .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry insert 0 $ppp_settings($ppp_setting)
+
+        pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label  -side left -anchor w
+        pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry -side left -expand 1 -fill x -anchor w
+        pack .prefs.pref_frame.[set ppp_setting]_frame -fill x -expand 1 -pady 2
+      }
+
+      pack .prefs.pref_frame -pady 2 -fill x -expand 1
+
+      frame .prefs.prefbuttons
+      button .prefs.prefbuttons.prefs_close -text "Close" -command {
+
+        puts "Save Prefs (Close Pref Window)" 
+		global save_accounts_prompt
+
+		global ppp_settings ppp_settings_saved modem_port flow_control
+		global g_modem_port g_flow_control port_speeds port_speed accounts active_account
+			 foreach ppp_setting { init_string } {
+			   set ppp_settings($ppp_setting) \
+			   [.prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry get]
+			   puts "saved ppp_setting $ppp_setting as \
+			   [.prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry get]"
+			   set accounts($active_account,$ppp_setting)  ppp_settings($ppp_setting)
+			 }
+	 
+			 foreach ppp_setting { modem_port flow_control port_speed } {
+			   puts "port_speed == $port_speed"
+			   puts "$ppp_setting = [set [set ppp_setting]]"
+			   set ppp_settings($ppp_setting) [set [set ppp_setting]] 
+			   puts "saved ppp_setting $ppp_setting as $ppp_settings($ppp_setting)" 
+			   #set accounts($active_account,$ppp_setting)  ppp_settings($ppp_setting)
+			 }
+
+        save_prefs
+		set save_accounts_prompt "false"
+		if { [save_accounts "save"] == 1 } { 
+			set save_accounts_prompt "false"
+		}
+        destroy .prefs
+    }
+
+    pack .prefs.prefbuttons.prefs_close -side right
+    pack .prefs.prefbuttons -side bottom -pady 5
+  
+    center_window .prefs 3 3  
+}

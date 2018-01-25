@@ -1,0 +1,12 @@
+i pkginfo
+i depend
+d none opt 0755 root sys
+d none opt/ITppptool 0755 root sys 
+f none opt/ITppptool/ppptool 0755 root sys
+f none opt/ITppptool/kill_pppd.sh 4755 root sys
+f none opt/ITppptool/copy_pppopts 4755 root sys
+f none opt/ITppptool/manage_resolv 4755 root sys
+f none opt/ITppptool/options 0644 root sys
+d none opt/local 0755 root sys
+d none opt/local/bin 0755 root sys
+s none opt/local/bin/ppptool=../../$PKGINST/ppptool root sys 0755 

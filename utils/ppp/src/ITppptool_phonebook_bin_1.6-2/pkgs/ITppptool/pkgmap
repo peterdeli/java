@@ -1,0 +1,13 @@
+: 1 224
+1 i depend 60 5219 1046668003
+1 d none opt 0755 root sys
+1 d none opt/ITppptool 0755 root sys
+1 f none opt/ITppptool/copy_pppopts 4755 root sys 7636 65400 1046845872
+1 f none opt/ITppptool/kill_pppd.sh 4755 root sys 237 19545 1046838150
+1 f none opt/ITppptool/manage_resolv 4755 root sys 8460 53586 1046908706
+1 f none opt/ITppptool/options 0644 root sys 231 20465 1046838150
+1 f none opt/ITppptool/ppptool 0755 root sys 86398 9594 1047272921
+1 d none opt/local 0755 root sys
+1 d none opt/local/bin 0755 root sys
+1 s none opt/local/bin/ppptool=../../$PKGINST/ppptool
+1 i pkginfo 251 20522 1047272943

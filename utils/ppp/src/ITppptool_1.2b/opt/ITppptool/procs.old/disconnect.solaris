@@ -1,0 +1,56 @@
+proc disconnect { reason } {
+	
+	puts "proc disconnect" 
+
+	global accounts
+	global active_account 
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global pppd_id pppd_pid tip_id
+
+	global ppp_interface serial_port ip_address
+	global connection_type
+	set connection_state "disconnecting"
+
+	# connection scripts
+	pre_disconnect
+
+	.connect configure -text "Connect" -command connect  -state disabled
+
+	log_message "Disconnecting: $reason"
+	.footer.footer_r configure -text "Disconnecting: $reason" -justify left
+	catch { destroy .des_dialog }
+
+	global backup_resolv
+	global manage_resolv
+
+	# restore resolv.conf
+	if { $accounts($active_account,resolv) == 1 } {
+		if { [info exists backup_resolv] == 1 } {
+			if { [file exists $backup_resolv] == 1 } {
+				puts "restoring file $backup_resolv"
+				exec $manage_resolv restore $backup_resolv
+			} 
+		} 
+	}
+
+	puts "Terminating connection"
+	.footer.footer_r configure -text  "Terminating connection, please wait .. "
+	puts "close_pppd"
+	close_pppd
+
+	# in case monitor_link still running
+	sleep 5 
+	.connect configure -state normal 
+
+	# connection script
+	post_disconnect
+
+	.footer.footer_r configure -text  "Connection closed"
+	puts "disconnect done"
+}
+

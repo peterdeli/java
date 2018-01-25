@@ -1,0 +1,127 @@
+#!/bin/sh
+
+echo "This is $0"
+
+if [ "$PKG_INSTALL_ROOT" = "/" ]; then
+        PKG_INSTALL_ROOT=""
+fi
+
+if test -f ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate 
+then
+  if [ "XX$PKG_INSTALL_ROOT" = "XX" ]; then 
+    /opt/iWork/bin/it_gintegrate -r -R / -d ITppptool.desktop
+  else 
+    ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate -r -R $PKG_INSTALL_ROOT -d ITppptool.desktop
+  fi
+fi
+
+# RBAC
+##   exec_attr file ##
+
+exec_attr_line="ppptool:suser:cmd:::/opt/ITppptool/ppptool.tk:uid=0"
+exec_attr_file="/etc/security/exec_attr"
+tmpfile=/etc/security/exec_attr.tmp
+
+if [ -f $tmpfile ]; then
+	rm -rf $tmpfile
+fi
+
+if [ -f $exec_attr_file ]; then
+        grep_result=`grep $exec_attr_line $exec_attr_file`
+        status=$?
+
+        if [ $status -eq 0 ]; then
+          cat $exec_attr_file | grep -v $exec_attr_line > $tmpfile 
+          if [ -f $tmpfile ]; then
+             mv $tmpfile $exec_attr_file
+          fi
+        else
+          echo "$exec_attr_line not found in $exec_attr_file"
+        fi
+else
+        echo "File $exec_attr_file not found"
+        status=1
+fi
+
+
+
+##   prof_attr file ##
+
+prof_attr_line_a="ppptool:::Start PPPTool:"
+prof_attr_line_b="ppptool"
+
+prof_attr_file="/etc/security/prof_attr"
+prof_tmpfile="/tmp/prof_attr.$$"
+
+# remove line a
+cat $prof_attr_file | grep -v "$prof_attr_line_a" > $prof_tmpfile
+mv $prof_tmpfile $prof_attr_file
+
+# remove line b
+
+basic_solaris_line=`grep 'Basic Solaris User' $prof_attr_file`
+basic_fields=`echo $basic_solaris_line | awk -F';' '{print NF}'`
+
+count=1
+while [ $count -le $basic_fields ]; do
+	profile_line=`echo $basic_solaris_line | cut -d';' -f$count | grep '^profiles='`
+	if [ ! -z "$profile_line" ]; then
+		echo "profile_line = $profile_line"
+		break
+	fi
+	count=`expr $count + 1`
+done
+
+profiles=`echo $profile_line | awk -F'=' '{print $2}'` 
+
+profile_fields=`echo $profiles | awk -F',' '{print NF}'`
+
+count=1
+if [ $profile_fields -eq $count ]; then
+	if  [ "$profiles" = "$prof_attr_line_b" ]; then
+		new_profile_line=""
+	fi
+else
+	new_profile_line="profiles="
+	while [ $count -le $profile_fields ]; do
+			line=`echo $profiles | cut -d',' -f$count`
+			if [ "$line" = "$prof_attr_line_b" ]; then
+				count=`expr $count + 1` 
+				continue	
+			else
+				if [ "$new_profile_line" = "profiles=" ]; then
+					new_profile_line="${new_profile_line}$line"
+				else
+					new_profile_line="${new_profile_line},$line"
+				fi
+			fi
+			count=`expr $count + 1` 
+	done
+fi
+
+if [ "XX$new_profile_line" != "XX" ]; then
+
+	count=1
+	while [ $count -le $basic_fields ]; do
+
+		line=`echo $basic_solaris_line | cut -d';' -f$count`
+		if [ "$line" = "$profile_line" ]; then
+			line="$new_profile_line"
+		fi
+
+		if [ -z "$new_basic_solaris_line" ]; then
+			new_basic_solaris_line="$line"
+		else
+			new_basic_solaris_line="${new_basic_solaris_line};$line"
+		fi
+		count=`expr $count + 1`
+  done
+
+  # replace the entire basic line
+  cat $prof_attr_file | grep -v 'Basic Solaris User' > $prof_tmpfile
+  #echo $new_basic_solaris_line 
+  echo $new_basic_solaris_line >> $prof_tmpfile
+  mv $prof_tmpfile $prof_attr_file
+fi
+
+echo "prof_attr restored"

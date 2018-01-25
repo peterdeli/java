@@ -1,0 +1,191 @@
+proc init { } {
+
+	global port_opened
+	set port_opened "false"
+
+	global ppp_settings
+	global env
+	global ppp_dir
+	global pkghome
+
+	#puts "Connection Script Env 'USER_ID': $env(USER_ID)"
+	#puts "Connection Script Env 'CONNECTION_TYPE': $env(CONNECTION_TYPE)"
+	set pkghome $env(PKGHOME)
+
+	
+	global start_pppd
+	set start_pppd "${pkghome}/start_pppd" 
+	
+	set copy_opts "[set pkghome]/copy_pppopts"	
+
+	global manage_resolv
+	set manage_resolv "[set pkghome]/manage_resolv"
+	#"copy"  
+	#"restore"
+	#"srcfile=s"
+	#"backup_file=s" 
+
+	set ppp_dir "$env(HOME)/.ppptool" 
+
+	global ppp_config_file
+	set ppp_config_file "$ppp_dir/ppp_settings"
+	#set ppp_config_file "$ppp_dir/ppp_config"
+
+	global ppp_options_file
+	set ppp_options_file "/etc/ppp/options"
+	set ppp_options_template "[set pkghome]/options"
+
+	#puts "Checking for $ppp_options_file file"
+	if { [file exists $ppp_options_file] != 1 } {
+
+		if { [file exists $ppp_options_template] != 1 } {
+			#puts "Options file  $ppp_options_template not found"
+			exit -1
+		}
+
+		#puts "$ppp_options_file file not found, creating .."
+		if { [file exists $copy_opts] } {
+			exec $copy_opts
+			if { [file exists $ppp_options_file] != 1 } {
+				#puts "Create of PPP options file $ppp_options_file failed!"
+				exit -1
+			}
+		} else {
+			#puts "File $copy_opts not found, cannot create $ppp_options_file file"
+			exit -1
+		}
+
+	}
+
+	# list
+	global active_account
+	global account_list
+	set account_list {}
+
+	# array (account_name,key)
+	global accounts
+
+	# connection scripts
+
+  # User configurable scripts in $HOME/.connect
+  global pre_connect_script
+  global post_connect_script
+  global pre_disconnect_script
+  global post_disconnect_script
+
+	if [file exists /etc/connect/pre-connect] {
+		set pre_connect_script /etc/connect/pre-connect
+	} else {
+		set pre_connect_script "" 
+	}
+	if [file exists /etc/connect/post-connect] {
+		set post_connect_script /etc/connect/post-connect
+	} else {
+		set post_connect_script "" 
+	}
+	if [file exists /etc/connect/pre-disconnect] {
+		set pre_disconnect_script /etc/connect/pre-disconnect
+	} else {
+		set pre_disconnect_script "" 
+	}
+	if [file exists /etc/connect/post-disconnect] {
+		set post_disconnect_script /etc/connect/post-disconnect
+	} else {
+		set post_disconnect_script "" 
+	}
+	
+	global account_keys
+	set account_keys {\
+				 name\
+				 uid\
+				 passwd\
+				 number\
+				 domain\
+				 search \
+				 ns1\
+				 ns2\
+				 authtype\
+				 defroute\
+				 resolv\
+				 status\
+				 resolv_file\
+	}
+
+	global account_strings
+	set account_strings(name) "Account Name:"
+	set account_strings(uid) "User ID:"
+	set account_strings(passwd) "Password:"
+	set account_strings(number) "Phone Number:"
+	set account_strings(domain) "DNS Domain Name:"
+	set account_strings(search) "DNS Search Domains:"
+	set account_strings(ns1) "Account Nameserver #1:"
+	set account_strings(ns2) "Account Nameserver #2:"
+	set account_strings(authtype) "Authentication Type:"
+	set account_strings(defroute) "Default Route:"
+	set account_strings(resolv) "Create /etc/resolv.conf:"
+	
+	global required_keys 
+	set required_keys { name uid number authtype }
+
+	global account_file
+	set account_file "$ppp_dir/accounts"
+	RandomInit [pid]
+
+	if { [string first "sun" [exec arch]] != -1 } { 
+		option add *font {palatino 12 bold} 
+		option add *font {sun 12 bold} 
+	}
+
+	global log_file
+	set log_file "$ppp_dir/ppp_log"
+
+	global kill_pppd
+	set kill_pppd "[set pkghome]/kill_pppd"
+
+	load_global
+	load_accts
+	build_log_win
+	build_menus
+
+	global ip_up_file
+	set ip_up_file "/etc/ppp/ip-up.out"
+	if { [file exists $ip_up_file] } { exec rm $ip_up_file }
+	global ip_down_file
+	set ip_down_file "/etc/ppp/ip-down.out"
+	if { [file exists $ip_down_file] } { exec rm $ip_down_file }
+
+		#if_name=$1
+		#tty_device=$2
+		#speed=$3
+		#local_ip=$4
+		#remote_ip=$5
+		#ipparam=$6
+		#DNS1=$DNS1
+		#DNS2=$DNS2
+	global ip_up_array
+	foreach key {
+				if_name \
+				tty_device \
+				speed \
+				local_ip \
+				remote_ip \
+				ipparam \
+				DNS1 \
+				DNS2 \
+				PPPD_PID \
+				PPPLOGNAME \
+				SPEED \
+				IPREMOTE \
+				IFNAME \
+				PATH \
+				PWD \
+				SHLVL \
+				DEVICE \
+				ORIG_UID \
+				IPLOCAL } {
+		set ip_up_array($key) ""
+	}
+
+}
+
+

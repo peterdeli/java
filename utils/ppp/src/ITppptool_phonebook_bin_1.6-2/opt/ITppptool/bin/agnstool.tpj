@@ -1,0 +1,43 @@
+format  {TclDevKit Project File}
+fmtver  2.0
+fmttool {TclDevKit Debugger} 2.6
+
+##  Saved at : Wed Aug 25 11:07:28 AM MDT 2004
+##  By       : pdel@h100
+
+########
+#####
+###
+##
+#
+
+appArg            {-phonefile  /home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/agns-numbers}
+appArgList        {{-phonefile  /home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/agns-numbers}}
+appDir            /tmp
+appDirList        /tmp
+appInterp         /usr/bin/wish8.3
+appInterpList     {/usr/bin/wish8.3 /usr/bin/wish /usr/bin/wishx /usr/bin/tclsh}
+appScript         /home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/bin/agnstool
+appScriptList     /home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/bin/agnstool
+appType           local
+autoLoad          0
+breakList         {
+	{/home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/bin/agnstool 18 enabled {}}}
+doInstrument      *
+dontInstrument    {}
+errorAction       1
+instrumentDynamic 1
+instrumentExpect  1
+instrumentIncrTcl 1
+instrumentTclx    1
+portRemote        2576
+prevViewFile      /home/pdel/RPM/ITppptool_phonebook/opt/ITppptool/bin/agnstool
+projVersion       2.0
+varTransformList  {}
+watchList         {}
+
+#
+##
+###
+#####
+########

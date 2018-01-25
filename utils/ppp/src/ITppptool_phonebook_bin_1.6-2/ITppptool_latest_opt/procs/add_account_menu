@@ -1,0 +1,20 @@
+proc add_account_menu {name index} {
+
+	global menubar_widget
+	global acct_widget
+	global active_account
+	global accounts
+
+	if { $index != "END" } {
+		$acct_widget insert $index radio  -variable active_account \
+		-value $name -label $accounts($name,name) -command { set_account $active_account }
+	} else {
+		$acct_widget add radio  -variable active_account \
+		-value $name -label $accounts($name,name) -command { set_account $active_account }
+	}
+	
+	# save menu position
+
+}
+
+

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+exec /usr/sbin/pppd connect 'chat -v ABORT "NO DIALTONE" ABORT BUSY \
+ABORT "NO CARRIER" ABORT "PROTOCOL: NONE" "" ATZ OK ATDT3034662756 \
+CONNECT \\d\\c TIMEOUT 40 name: pd33162 word: \\n  SAY "Enter Challenge\n" \
+esponse? @/root/chatpipe' /dev/ttyS0 38400 debug defaultroute updetach 

@@ -1,0 +1,60 @@
+i pkginfo
+i depend
+d none opt 0755 root sys
+d none opt/ITppptool 0755 root other 
+f none opt/ITppptool/ppptool 0755 root other
+f none opt/ITppptool/ppptool.tk 0755 root other
+f none opt/ITppptool/manage_resolv 0755 root other
+f none opt/ITppptool/options 0644 root other
+d none opt/iWork 0755 root other
+d none opt/iWork/Gnome 0755 root other
+d none opt/iWork/Gnome/icons 0755 root other
+f none opt/iWork/Gnome/icons/ppptool.png 0444 root other
+d none opt/iWork/Gnome/applications 0755 root other
+f none opt/iWork/Gnome/applications/ITppptool.desktop 0644 root other
+d none opt/local 0755 root other
+d none opt/local/bin 0755 root other
+s none opt/local/bin/ppptool=../../$PKGINST/ppptool root other 0755 
+d none opt/ITppptool/doc 0755 root other
+f none opt/ITppptool/doc/index.html 0644 root other
+f none opt/ITppptool/doc/ppptool_doc 0644 root other
+f none opt/ITppptool/doc/ppp1 0644 root other
+f none opt/ITppptool/doc/ppp20 0644 root other
+f none opt/ITppptool/doc/ppp2 0644 root other
+f none opt/ITppptool/doc/ppp15 0644 root other
+f none opt/ITppptool/doc/ppp18 0644 root other
+f none opt/ITppptool/doc/ppp3 0644 root other
+f none opt/ITppptool/doc/ppp5 0644 root other
+f none opt/ITppptool/doc/ppp4 0644 root other
+f none opt/ITppptool/doc/ppp8 0644 root other
+f none opt/ITppptool/doc/ppp9 0644 root other
+f none opt/ITppptool/doc/ppp10 0644 root other
+f none opt/ITppptool/doc/save_account 0644 root other
+f none opt/ITppptool/doc/ppp12 0644 root other
+f none opt/ITppptool/doc/ppp_save_changes 0644 root other
+f none opt/ITppptool/doc/delete_account 0644 root other
+f none opt/ITppptool/doc/delete_prompt 0644 root other
+f none opt/ITppptool/doc/modempool_connected 0644 root other
+f none opt/ITppptool/doc/ppp13 0644 root other
+f none opt/ITppptool/doc/ppp16 0644 root other
+f none opt/ITppptool/doc/ppp17 0644 root other
+f none opt/ITppptool/doc/ppp22 0644 root other
+f none opt/ITppptool/doc/ppp23 0644 root other
+f none opt/ITppptool/doc/ppp24 0644 root other
+f none opt/ITppptool/doc/ppp30 0644 root other
+f none opt/ITppptool/doc/ppp31 0644 root other
+f none opt/ITppptool/doc/ppp25 0644 root other
+f none opt/ITppptool/doc/ppp26 0644 root other
+f none opt/ITppptool/doc/ppp28 0644 root other
+f none opt/ITppptool/doc/ppp27 0644 root other
+f none opt/ITppptool/doc/ppp29 0644 root other
+f none opt/ITppptool/doc/ppp32 0644 root other
+f none opt/ITppptool/doc/ppp33 0644 root other
+f none opt/ITppptool/doc/ppp35 0644 root other
+
+! search install
+i postinstall
+i postremove
+i preinstall
+i preremove
+

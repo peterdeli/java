@@ -1,0 +1,16 @@
+proc clear_accts { } {
+	# list
+	global account_list
+	global saved_account_list
+	set saved_account_list {}
+	set account_list {}
+
+	# array (account_name,key)
+	global accounts
+	global saved_accounts
+	# account file names
+	global account_file
+	global account_keys
+	global active_account
+}
+

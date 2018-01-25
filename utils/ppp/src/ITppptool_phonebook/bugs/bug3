@@ -1,0 +1,46 @@
+From - Tue May 27 10:00:29 2003
+Received: from mailhost.aus.sun.com (ausmail.Aus.Sun.COM [129.158.80.6])
+	by bast.Central.Sun.COM (8.11.7+Sun/8.11.7/ENSMAIL,v2.2) with ESMTP id h4QCIOR10818
+	for <pdel@bast.central.sun.com>; Mon, 26 May 2003 06:18:24 -0600 (MDT)
+Received: from soms (soms [129.158.12.77])
+	by mailhost.aus.sun.com (8.12.9+Sun/8.12.5/ENSMAIL,v2.3beta) with ESMTP id h4QCIM0t010506
+	for <@ausmail.Aus.Sun.COM:Peter.Delevoryas@Sun.COM>; Mon, 26 May 2003 22:18:23 +1000 (EST)
+Received: from [10.6.18.20]
+ (vpn-129-158-76-36.Singapore.Sun.COM [129.158.76.36])
+ by soms.Aus.Sun.COM (iPlanet Messaging Server 5.2 HotFix 1.09 (built Jan  7
+ 2003)) with ESMTPA id <0HFH002XCU4RX4@soms.Aus.Sun.COM> for
+ Peter.Delevoryas@Sun.COM (ORCPT Peter.Delevoryas@Sun.COM); Mon,
+ 26 May 2003 22:17:20 +1000 (EST)
+Date: Mon, 26 May 2003 22:18:16 +1000
+From: tony shepherd <tony.shepherd@sun.com>
+Subject: ppptool bugs
+To: Peter Delevoryas <Peter.Delevoryas@sun.com>
+Cc: "tony.shepherd" <tony.shepherd@sun.com>
+Message-id: <120760000.1053951496@[10.6.18.20]>
+MIME-version: 1.0
+X-Mailer: Mulberry/3.0.1 (SunOS/SPARC)
+Content-type: text/plain; format=flowed; charset=us-ascii
+Content-transfer-encoding: 7bit
+Content-disposition: inline
+Content-Length: 556
+
+Hi Pete
+
+I was playing with ppptool tonight and have a couple of bugs:
+
+* How come the connect rc-scripts are run on connection?  Shouldn't this 
+only happen on direct connections to the SWAN????
+
+
+* if no password is entered before connecting, the tool hangs....  From the 
+log file:
+
+Connecting
+/usr/bin/pppd: /Users/ts74081/.ppptool/connect.script:13: unrecognized 
+option '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" 
+atdt32302100 "CONNECT"'
+/usr/bin/pppd: /Users/ts74081/.ppptool/connect.script:13: error in included 
+file
+
+
+tony

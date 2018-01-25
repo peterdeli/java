@@ -1,0 +1,5 @@
+proc set_bulb_color { bulb color } {
+	.cframe.can itemconfigure $bulb -fill $color 
+}
+
+

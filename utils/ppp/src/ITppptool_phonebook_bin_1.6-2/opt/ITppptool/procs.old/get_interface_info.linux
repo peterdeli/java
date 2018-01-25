@@ -1,0 +1,21 @@
+proc get_interface_info { ip_address } {
+	global ppp_interface \
+					serial_port \
+					ip_address \
+					remote_ip_address
+
+
+					puts "find i/f based on $ip_address"
+					set if_fd [open "|ifconfig"]
+					set save ""
+				while { [gets $if_fd line] != -1 } {
+						puts "i/f line: $line"
+						if { [string first $ip_address $line] != -1 } {
+							#puts "found $ip_address in $line"
+							#puts "looking for i/f name in: $save"
+							set ppp_interface [lindex [split $save " "] 0]
+							puts "ppp_interface: $ppp_interface"
+						}
+				}
+}
+

@@ -1,0 +1,5 @@
+proc set_all_bulbcolors { color } {
+	puts "Setting all bulbs to $color"
+	.cframe.can itemconfigure all -fill $color 
+}
+

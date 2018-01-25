@@ -1,0 +1,61 @@
+proc create_des_dialog { } {
+
+	global accounts
+	global active_account 
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global ppp_interface serial_port ip_address
+
+		if { [winfo exists .des_dialog] == 1 } { return }
+
+ 		toplevel .des_dialog -bg lightGray
+		wm title .des_dialog "TokenCard Challenge/Response"
+		wm geometry .des_dialog +300+[expr [winfo height .] + 200]
+		
+		entry .des_dialog.des_entry -width 20 -bg lightGray
+		label .des_dialog.challenge_label -text "Waiting for Challenge .." -bg lightGray
+		label .des_dialog.instruction_label -text "\n\
+					 Get your token card ready.\n\
+					 Enter your authorization number in the card.\n\
+					 Then get ready to key in the Challenge in your\n\
+					 tokencard when it appears above." -bg lightGray
+
+		label .des_dialog.time_remaining -text "Waiting for Remote Connection .." -bg lightGray
+		log_messages "Waiting for Remote Connection ..\n"
+		button .des_dialog.des_send_button -text "Send Response" \
+		-command { 
+				global des_response challenge_entered seconds_remaining
+				set des_response [.des_dialog.des_entry get]	
+				if { [string length $des_response] < 1 } { return }
+				set challenge_entered "true"
+				#wm withdraw .des_dialog
+				set seconds_remaining "null"
+				destroy .des_dialog
+		}	
+		button .des_dialog.close -text "Close" \
+		-command {
+			set seconds_remaining "null"
+			destroy .des_dialog
+			disconnect "User Disconnected"
+		}
+		pack .des_dialog.challenge_label -anchor n
+		#pack .des_dialog.des_entry -after .des_dialog.challenge_label
+		#.des_dialog.des_entry configure -state disabled
+		pack .des_dialog.instruction_label -anchor n
+		pack .des_dialog.time_remaining -anchor n
+		#pack .des_dialog.des_send_button -side left -anchor n
+		#pack .des_dialog.close -side right -anchor n 
+		bind .des_dialog <Return> {
+				global des_response challenge_entered seconds_remaining
+				set des_response [.des_dialog.des_entry get]	
+				if { [string length $des_response] < 1 } { return }
+				set challenge_entered "true"
+				set seconds_remaining "null"
+				destroy .des_dialog
+		}
+}
+

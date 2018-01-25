@@ -1,0 +1,181 @@
+proc get_helptext { } {
+
+return "\
+<b>ITppptool Help\n\
+\n\
+\n\
+PPPtool is a graphical interface for connecting to remote networks\n\
+via dialup modem.\n\
+\n\
+The Main window consists of a Menu, a display of active account \n\
+information, the 'Connect/Disconnect' Button, some mock \n\
+'status lights', and a 'status' line.\n\
+\n\
+<b>Menu Items\n\
+\n\
+The Menu bar contains four menus:\n\
+\n\
+1. 'File'\n\
+2. 'Edit',\n\
+3. 'Accounts'\n\
+4. 'Help'.\n\
+\n\
+\n\
+The 'File' menu contains three items:\n\
+\n\
+1. Save Accounts\n\
+2. View Log\n\
+3. Exit\
+\n\
+\n\
+The 'Edit' menu contains two items:\n\
+\n\
+1. Manage Accounts\n\
+2. Edit Preferences\
+\n\
+\n\
+The 'Accounts' menu is a dynamic menu and holds the names of all accounts\
+which have been created.\n\
+\n\
+\n\
+The 'Help' menu contains two items:\n\
+\n\
+1. 'About PPP Tool'\n\
+2. 'PPP Tool Help'\n\
+\n\
+\n\
+<b>Using ITppptool\n\
+\n\
+\n\
+<b>I. Creating Accounts\n\
+\n\
+To create a new account, Select 'Edit/Manage Accounts'\n\
+Click on 'New'. This will popup a small window with three\n\
+choices: AGNS_Modempool, ISP_Modempool and Sun_Modempool.\n\
+Select AGNS_Modempool and ISP_Modempool for accounts which\n\
+do not connect directly to Sun, and Sun_Modempool for accounts\n\
+which connect directly to Sun. Then click 'Continue->'\n\
+If AGNS_Modempool is selected, the AGNS Account Tool will launch.\n\
+Enter your AGNS account information, and select a phone number from\n\
+the AGNS phone database. Click on the AGNS Account Tool 'Help'\n\
+button for usage instructions.\n\
+After filling in the fields, click the 'Create Account' button,\n\
+and you will be taken to a window with the new account information.\n\ 
+The window will contain following fields:\n\
+( ** denotes a required field )\n\
+\n\
+\[ ** Account Name \]: Enter the name of the account\n\
+\[ ** User ID \]: Enter the login name or ID of the account\n\
+\[ Password \]: Enter the password of the account ( if one exists )\n\
+Note: The Password field is not used for Sun_Modempool accounts.\n\
+\[ ** Phone Number \]: Enter the Phone Number of the account\n\
+\[ ** DNS Domain Name \]: Enter the domain name of the account ( if one exists )\n\
+\[ DNS Search Domains \]: Enter any domains which DNS should search\n\
+\[ ** Account Nameserver #1 \]: Enter a primary nameserver for the account\n\
+\[ Account Nameserver #2 \]: Enter a secondary nameserver for the account\n\
+\n\
+Near the bottom of the window are the following checkbuttons:\n\
+\n\
+\[ Default Route \]: If selected, adds a 'default route' option to pppd\n\
+\[ Create /etc/resolv.conf \]: There are three buttons ( check one ): \n\ 
+\[ Do not create \] - this will not create an /etc/resolv.conf file, or overwrite an existing one.\n\
+\[ Use peer DNS \] - this will add any nameservers returned by the remote server to the /etc/resolv.conf file.\n\
+\[ Use account DNS \] - this will use the information in the account for the /etc/resolv.conf file.\n\
+\[ PPP options \]: Enter optional connection configuration options here ( see pppd man pages )\n\
+\[ Debugging \]: Enable verbose output from ppp\n\
+\n\
+\n\
+<b>II.   Saving Accounts\n\
+\n\
+To save the current account information to the account file,\n\
+select File/Save Accounts. If there have been any changes to\n\
+the accounts, a prompt will pop up to confirm the save.\n\
+Clicking 'Yes' will save the account data, clicking 'Cancel' will\n\
+not save the account data and return to PPP tool.\n\ 
+\n\
+\n\
+<b>III.  Editing Accounts\n\
+\n\
+To make changes to an account, first select Edit/Manage Accounts.\n\
+Click on an account name in the window, then click on 'Edit'\n\
+A window will appear with the account information.\n\
+Edit any fields or select/deselect any items, then click on 'Save Edits'\n\
+The window will close and the changes will be saved in the currently\n\
+running program, but will NOT be save to the accounts file.\n\
+To save the changes to the accounts file, select 'File/Save Accounts' and\n\
+click on the 'OK' button\n\.
+\n\
+\n\
+<b>IV.  Deleting Accounts\n\
+\n\
+To delete and account, first select Edit/Manage Accounts.\n\
+Click on an account name in the window, then click on 'Delete'\n\
+The account will be deleted in the currently running program, but will\n\
+NOT be saved to the accounts file.  To save the changes to the accounts\n\
+file, select 'File/Save Accounts' and click on the 'OK' button\n\.
+\n\
+\n\
+<b>V.    Making an Account Active\n\
+\n\
+To make an account active makes it available for connecting.\n\
+There are three ways to do this:
+1. Select the account from the 'Accounts' menu item in the main window.
+2. In the 'Account Manager' window, select the account and click the\n\
+'Make Active' button.\n\
+3. In the 'Account Manager' window, double-click on the account.\n\
+\n\
+\n\
+<b>VI.   Preferences\n\
+\n\
+Upon first starting ppptool, a set of default preferences will be loaded.\n\
+To make sure the correct settings are in effect, check the preferences\n\
+window by selecting 'Edit/Edit Preferences'.\n\
+The settings in the preferences are:\n\
+\n\
+Modem Port (required):  This is the port to which the modem is connected.\n\
+Flow Control:  hardware, software, or none.\n\
+Port Speed (required)\n\
+Init String: Enter any modem initialization string here.\n\
+\n\n\
+<b>VII.  Connecting with PPPtool\n\
+\n\
+To initiate a connection, follow these steps:\n\
+1. Select an account and make it active ( See V. above )\n\
+2. Make sure your modem is connected to the correct port, and that\n\
+the correct cable is connected between the modem and the computer.
+3. Verify the account information is correct, then click on the 'Connect' Button.\n\
+4. If possible, turn up the volume on the modem so that you can hear it going
+off-hook, dialing, and connecting.\n\
+5. Monitor the 'Status' line at the bottom of the main window, and the log window ( File/View Log )\n\ 
+<b>VIIa. Connecting to Sun Modempools  with a tokencard\n\  
+For Sun Modempool connections, there will be instructions during the\n\
+connection on when to key in numbers into your tokencard, as well as\n\
+when to enter to tokencard responses into the ppptool tokencard dialog.\n\
+First, click the 'Connect' button. PPPtool will initialize the modem \n\
+and then dial the modempool number. During this time, a window will \n\
+appear with some instructions to prepare your tokencard by entering \n\
+the tokencard password, and waiting for a 'challenge' \n\
+( consisting of '9' followed by four numbers. ) \n\
+If the initial authentication is successful, PPPtool will be connected\n\
+and will then receive a 'Challenge' sequence of numbers from the\n\
+ModemPool Server. This will be displayed as in the 'Tokencard Challenge/Response' window\n\
+. Enter these numbers into the tokencard and press 'E' as in the\n\
+instructions in the window. The tokencard will then respond with a\n\
+string of alpha-numeric characters. Enter the string into the \n\
+Tokencard Challenge/Response field and click 'Send Response' or press 'Enter'.\n\n\
+If the response entered into the Tokencard Challenge/Response window is correct, \
+PPPtool will be logged into Sun. If no response is entered within the \n\
+time limit, the PPPtool log window will indicate this ( File/View Log ).\n\
+\n\
+\n\
+<b>VIII. Exiting PPPtool\n\
+\n\
+To exit PPPtool, select 'File/Exit'. If there is any account information\n\
+which has not been save to the account file, a dialog will pop up asking\n\
+whether to save, cancel, or return to PPPtool. Clicking 'Yes' will save\n\
+the account settings to the file. Clicking 'No' will exit PPPtool without\n\
+saving the account changes, and clicking 'Cancel' will return to PPPtool\n\
+without saving any changes to the accounts file.\n\
+\n"
+}
+

@@ -1,0 +1,32 @@
+proc build_log_win { } {
+
+	global accounts
+	global active_account
+
+
+	toplevel .log_win 
+	wm title .log_win "PPP Log"
+	wm withdraw .log_win
+
+	frame .log_win.log_frame -relief flat
+	text .log_win.log_text -relief sunken -borderwidth 2 \
+	-yscrollcommand { .log_win.scroll_y set} \
+	-height 20 -width 65 -setgrid true
+	scrollbar .log_win.scroll_y -command ".log_win.log_text yview"
+	pack .log_win.log_text -in .log_win.log_frame -side left -pady 1m -fill both
+	pack .log_win.scroll_y -in .log_win.log_frame -side right -fill y
+
+	frame .log_win.button_frame -relief flat
+	button .log_win.close_button -text "Close" -command {\
+		wm withdraw .log_win
+	}
+
+	pack .log_win.close_button -side bottom -in .log_win.button_frame \
+	-ipadx 2 -padx 2
+
+	pack .log_win.log_frame .log_win.button_frame -side top
+
+	center_window .log_win 3 3
+
+}
+

@@ -1,0 +1,23 @@
+proc delete_account {account_name} {
+
+
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+
+		delete_account_menu $account_name
+
+}
+

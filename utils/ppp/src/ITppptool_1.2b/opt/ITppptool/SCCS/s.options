@@ -1,0 +1,22 @@
+h28211
+s 00010/00000/00000
+d D 1.1 03/03/04 21:22:30 pdel 1 0
+c date and time created 03/03/04 21:22:30 by pdel
+e
+u
+U
+f e 0
+t
+T
+I 1
+# sppp options necessary to run with a preset tip connection.  Note
+# that tip creates a UUCP lock on the port, so the usual "lock" option
+# can't be used here.
+defaultroute
+noauth
+noproxyarp
+#noipdefault
+#idle 900
+#updetach
+#lock
+E 1

@@ -1,0 +1,22 @@
+proc des_countdown { } {
+
+	global seconds_remaining
+
+	if { [winfo exists .des_dialog] != 1 } {  return } 
+
+	if { $seconds_remaining == "null" } {
+		
+
+	} elseif { $seconds_remaining == 0 } {
+		.des_dialog.time_remaining configure -text "Challenge Entry Interval Expired!"
+		#wm withdraw .des_dialog
+		#destroy .des_dialog
+		return -1
+	} else {
+		.des_dialog.time_remaining configure -text "Seconds Remaining: $seconds_remaining"
+		incr seconds_remaining -1
+		after 1000 des_countdown
+	}
+
+}
+

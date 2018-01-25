@@ -1,0 +1,7 @@
+proc backup_resolv { } {
+	global accounts
+	global active_account
+	global backup_resolv
+	set backup_resolv [exec $backup_resolv]
+}
+

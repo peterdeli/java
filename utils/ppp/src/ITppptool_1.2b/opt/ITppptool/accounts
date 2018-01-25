@@ -1,0 +1,32 @@
+name	AGNS 303 ATT
+type	ISP_ModemPool
+uid	internet.smus.MERICAA
+passwd	fredfred
+number	(303) 583-2405
+domain	attbusiness.net
+search	attbusiness.net
+ns1	165.87.194.244
+ns2	165.87.201.244
+authtype	pap
+defroute	1
+resolv	none
+status	inactive
+resolv_file	/mnt/home/pdel/.ppptool/resolv.conf.182
+ppp_opts	novj
+debug	1
+name	Sun ModemPool
+type	Sun_ModemPool
+uid	pd33162
+passwd	
+number	303 466-2756
+domain	central.sun.com
+search	central.sun.com sun.com
+ns1	129.147.62.1
+ns2	129.147.62.19
+authtype	tokencard
+defroute	0
+resolv	none
+status	active
+resolv_file	/mnt/home/pdel/.ppptool/resolv.conf.513
+ppp_opts	novj
+debug	1

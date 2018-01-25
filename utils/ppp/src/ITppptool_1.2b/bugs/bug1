@@ -1,0 +1,54 @@
+From - Tue May 27 09:59:43 2003
+Received: from mailhost.aus.sun.com (ausmail.Aus.Sun.COM [129.158.80.6])
+	by bast.Central.Sun.COM (8.11.7+Sun/8.11.7/ENSMAIL,v2.2) with ESMTP id h4R6eIR26443
+	for <pdel@bast.central.sun.com>; Tue, 27 May 2003 00:40:19 -0600 (MDT)
+Received: from soms (soms [129.158.12.77])
+	by mailhost.aus.sun.com (8.12.9+Sun/8.12.5/ENSMAIL,v2.3beta) with ESMTP id h4R6eH0t017617
+	for <@ausmail.Aus.Sun.COM:Peter.Delevoryas@Sun.COM>; Tue, 27 May 2003 16:40:17 +1000 (EST)
+Received: from [192.168.25.106]
+ (vpn-129-158-76-53.Singapore.Sun.COM [129.158.76.53])
+ by soms.Aus.Sun.COM (iPlanet Messaging Server 5.2 HotFix 1.09 (built Jan  7
+ 2003)) with ESMTPA id <0HFJ007ZH958N6@soms.Aus.Sun.COM> for
+ Peter.Delevoryas@Sun.COM (ORCPT Peter.Delevoryas@Sun.COM); Tue,
+ 27 May 2003 16:39:14 +1000 (EST)
+Date: Tue, 27 May 2003 16:40:10 +1000
+From: Craig Johnson - Sun IT Pointyhead <Craig.Johnson@Sun.COM>
+Subject: PPPtool issues
+To: Peter Delevoryas <Peter.Delevoryas@Sun.COM>
+Cc: Tony Shepherd <Tony.Shepherd@Sun.COM>
+Message-id: <14540000.1054017610@[192.168.25.106]>
+MIME-version: 1.0
+X-Mailer: Mulberry/3.0.3 (Linux/x86)
+Content-type: text/plain; format=flowed; charset=us-ascii
+Content-transfer-encoding: 7bit
+Content-disposition: inline
+Content-Length: 1102
+
+Hi Pete,
+
+I've encountered a couple more problems while trying to debug a problem 
+with the VPN3K client when using a PPP connection.
+
+The problem I have is that the VPN client kills the pppd connection. In 
+trying to debug the problem I've noticed that:
+- None of the messages in the log window get sent to the log file
+- The log file text pane doesn't get resized with the window (this is true
+  of vpntool as well)
+- ~/.ppptool/connect.script is owned by root and is world readable. It
+  contains my password.
+- We need to provide additional options to pppd via the GUI. For example,
+  novj, nocomp, plink etc. This should probably be a per-account option.
+
+Cheers,
+
+Craig
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Rev. Craig Johnson              SunIT Pointyhead
+ Sun Microsystems                Email: Craig.Johnson@Sun.COM
+ Phone: +61 2 9844 5219          Internal: x57219
+ Fax: +61 2 9844 5010
+
+"The problem with the French is they have no word for entrepreneur"
+ - George W Bush.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

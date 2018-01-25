@@ -1,0 +1,14 @@
+proc close_pppd_Linux { } {
+
+	puts "proc close_pppd_Linux" 
+	global link_disconnected connection_type connection_state port_id
+
+	catch { exec pkill pppd }
+
+	catch {	exp_send "~.\r" }
+	catch { close -i $port_id }
+
+	set connection_state "disconnected"	
+	set link_disconnected "true"
+}
+

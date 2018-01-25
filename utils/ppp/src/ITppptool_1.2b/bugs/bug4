@@ -1,0 +1,18 @@
+
+Hi Peter
+
+Here is some more ppptool stuff:
+
+- When setting up an account, defaultroute should be set by default (as per 
+spec)
+- an option to mark an account as a Sun modem pool.  If this is marked, 
+different fields will be "required" and different defaults set (like Token 
+card) and other options grayed out.  This also ties into whether the 
+connection scripts are run or not.
+- with regards to the password for the connection, the connect button 
+should not be "active" until a password is entered/available.
+- with regards to the autosave, there should be a  save button as well as a 
+close on the Account Manager screen.
+
+
+tony

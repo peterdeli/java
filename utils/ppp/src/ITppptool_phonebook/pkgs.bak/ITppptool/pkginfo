@@ -1,0 +1,11 @@
+PKG=ITppptool
+NAME=PPP Tool
+DESC=PPP Tool provides a graphical front end to connect with a modem
+ARCH=sparc
+VERSION=1.0p
+CATEGORY=application,iWork
+BASEDIR=/
+VENDOR=SunIT CCS-PS
+EMAIL=peter.delevoryas@sun.com
+PSTAMP=ultra1020030520150738
+CLASSES=none

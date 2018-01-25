@@ -1,0 +1,22 @@
+proc set_blinking_off { } {
+	puts "set_blinking_off"
+	global connection_state
+	global blinking_state
+	set blinking_state "off"
+	global bulbs
+	global bulblist
+	after 5
+	foreach bulb $bulblist {
+				if { $bulb == "bulb0" || $bulb == "bulb3" } {
+					.cframe.can itemconfigure $bulb -fill green 
+				} elseif { $bulb == "bulb1" || $bulb == "bulb2"  || \
+									  $bulb == "bulb11" } {
+					.cframe.can itemconfigure $bulb -fill black 
+				} elseif { $bulb == "bulb10"  } {
+					.cframe.can itemconfigure $bulb -fill yellow 
+				} else {
+					.cframe.can itemconfigure $bulb -fill red 
+				}
+	}
+}
+

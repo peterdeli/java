@@ -1,0 +1,45 @@
+proc choose_account { } {
+	
+	toplevel .account_chooser
+   	center_window .account_chooser 3 2 
+
+	frame .account_chooser.chooser_frame
+	label .account_chooser.chooser_frame.account_chooser_label \
+	-text "Choose an Account Type"
+
+	tk_optionMenu .account_chooser.chooser_frame.account_menu \
+	account_type "AGNS_ModemPool" "ISP_ModemPool" "Sun_ModemPool" 
+
+	button .account_chooser.chooser_frame.continue_button \
+	-text "Continue ->" -command {
+			destroy .account_chooser
+			create_account $account_type
+	}
+
+	button .account_chooser.chooser_frame.close_button \
+	-text "Close" -command {
+		destroy .account_chooser
+
+		if { [winfo exists .new_account] != 1 } {
+			.account_manager_win.new_button configure -state normal 
+		} else {
+			.account_manager_win.new_button configure -state disabled 
+		}
+	}
+
+	pack .account_chooser.chooser_frame.account_chooser_label \
+	-padx 10 -pady 10 -side top
+
+	pack .account_chooser.chooser_frame.account_menu \
+	-padx 10 -pady 10 -side top
+
+	pack .account_chooser.chooser_frame.close_button \
+	-padx 10 -pady 10 -side left -anchor s
+
+	pack .account_chooser.chooser_frame.continue_button \
+	-padx 10 -pady 10 -side right -anchor s
+	
+	pack .account_chooser.chooser_frame 
+
+}
+

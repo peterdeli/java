@@ -1,0 +1,365 @@
+proc create_account { account_type } {
+
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+
+		puts "Account type to create: $account_type"
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+		global authtypes
+
+		#global create_authtype
+		global create_defroute
+		global use_peerdns
+		global create_resolv
+		global resolv
+		set resolv "account"
+
+		set top .new_account
+		toplevel [set top] 
+		global required_keys
+		global required_keys_verify
+		global required_peer_dns
+		global required_acct_dns
+		global debug
+
+		frame [set top].required_key_frame
+		label [set top].required_key_frame.required_key -text "Required Fields indicated by '**'"
+    label [set top].required_key_frame.optional -text "( Account Nameserver not required for 'Use peer DNS' )"
+
+    pack [set top].required_key_frame.required_key
+    pack [set top].required_key_frame.optional
+		pack [set top].required_key_frame -anchor n
+
+		set field_width 55
+
+		foreach key [set account_keys] {
+
+			if { $key == "status" } { continue }
+			if { $key == "resolv_file" } { continue }
+
+			set value $account_strings($key)
+			set [set key]_frame [set top].[set key]_frame
+
+			frame [set [set key]_frame]
+
+			puts "key = $key"
+
+			## modempool acct has no passwd
+			## all account types have no 'authtype', determine
+			## from acct type
+			if { $key == "type" } {
+				wm title $top "$account_type Account"		
+				continue
+
+			} elseif { $key == "authtype" } {
+				continue
+
+				# radio buttons for
+				# pap chap challenge card
+
+				#		radiobutton [set [set key]_frame].[set key]_radio_pap -text \
+				#		"PAP" -variable create_authtype -value "pap" -width 12
+				#		pack [set [set key]_frame].[set key]_radio_pap -side right
+				#
+				#		radiobutton [set [set key]_frame].[set key]_radio_chap -text \
+				#		"CHAP" -variable create_authtype -value "chap" -width 12
+				#		pack [set [set key]_frame].[set key]_radio_chap -side right
+				#
+				#		radiobutton [set [set key]_frame].[set key]_radio_token -text \
+				#		"Token Card" -variable create_authtype -value "tokencard" -width 12
+				#		pack [set [set key]_frame].[set key]_radio_token -side right
+				# 
+				#		label [set [set key]_frame].[set key]_label -text "** $value" 
+				#		pack [set [set key]_frame].[set key]_label -side right
+
+				#set create_authtype ""
+			} elseif { $key == "passwd" } {
+		 		if { $account_type == "Sun_ModemPool" } {
+					continue
+				} else {
+					entry [set [set key]_frame].[set key]_entry -width $field_width -show *
+					pack [set [set key]_frame].[set key]_entry -side right
+
+					if { [lsearch $required_keys $key] != -1 } {
+						label [set [set key]_frame].[set key]_label -text "** $value" 
+					} else {
+						label [set [set key]_frame].[set key]_label -text $value 
+					}
+					pack [set [set key]_frame].[set key]_label -side right
+					pack [set [set key]_frame].[set key]_entry -anchor w
+				}
+
+			} elseif { $key == "defroute" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Set default route" -anchor w -onvalue "1" \
+				-offvalue "0" -variable create_defroute -width [expr $field_width -3]
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+				set create_defroute 1
+
+			} elseif { $key == "resolv" } {
+
+				radiobutton [set [set key]_frame].[set key]_radio_acct_resolv -text \
+				"Use account DNS" -variable resolv -value "account" -width [string length " Use account DNS "] 
+				pack [set [set key]_frame].[set key]_radio_acct_resolv -side right -padx 5
+
+				radiobutton [set [set key]_frame].[set key]_radio_peer_resolv -text \
+				"Use peer DNS" -variable resolv -value "peer" -width [string length "Use peer DNS"] 
+				pack [set [set key]_frame].[set key]_radio_peer_resolv -side right -padx 5
+
+				radiobutton [set [set key]_frame].[set key]_radio_no_resolv -text \
+				"Do not create" -variable resolv -value "none" -width [string length "Do not create"] 
+				pack [set [set key]_frame].[set key]_radio_no_resolv -side right -padx 5
+
+				label [set [set key]_frame].[set key]_label -text "** $value" 
+				pack [set [set key]_frame].[set key]_label -side right
+
+				set resolv "account"
+
+				#checkbutton [set [set key]_frame].[set key]_check \
+				#-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+				#-offvalue "0" -variable resolv -width 42 
+				#puts "resolv for account $edit_account_name = \
+				#			$accounts($edit_account_name,resolv)"
+				#set resolv $accounts($edit_account_name,resolv)
+				#puts "resolv == $resolv"
+				#pack [set [set key]_frame].[set key]_check -side right
+				#label [set [set key]_frame].[set key]_label -text $value 
+				#pack [set [set key]_frame].[set key]_label -side right
+
+			} elseif { $key == "type" } {
+				#checkbutton [set [set key]_frame].[set key]_check \
+				#-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+				#-offvalue "0" -variable create_resolv -width 42 
+
+				#pack [set [set key]_frame].[set key]_check -side right
+
+				#label [set [set key]_frame].[set key]_label -text $value 
+				#pack [set [set key]_frame].[set key]_label -side right
+				#set create_resolv 1
+			} elseif { $key == "debug" } {	
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Enable debugging" -anchor w -onvalue "1" \
+				-offvalue "0" -variable debug -width [expr $field_width -3]
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+				set debug 0
+
+			} else {
+				
+				entry [set [set key]_frame].[set key]_entry -width $field_width
+				pack [set [set key]_frame].[set key]_entry -side right
+
+				if { [lsearch $required_keys $key] != -1 } {
+					label [set [set key]_frame].[set key]_label -text "** $value" 
+				} else {
+					label [set [set key]_frame].[set key]_label -text $value 
+				}
+				pack [set [set key]_frame].[set key]_label -side right
+				pack [set [set key]_frame].[set key]_entry -anchor w
+			}
+
+			pack [set [set key]_frame] -fill x -expand 1 -pady 5
+		}
+
+		# set required dns if "resolv" set to "account"
+
+		frame [set top].button_frame
+
+		button [set top].button_frame.save -text "Create Account" -command {
+
+			# get all entries
+			# add to accounts array and account_list
+			global new_account
+			#global create_authtype
+			global create_defroute
+			global use_peerdns
+			global create_resolv
+			global resolv
+			global save_accounts_prompt
+			global required_acct_dns
+			global required_peer_dns
+
+			puts "Create Account"
+			
+			# check if name is already taken
+			set new_account_name [list [.new_account.name_frame.name_entry get]]
+
+			if { [lsearch $account_list $new_account_name] != -1 } {
+				tk_messageBox -type ok -icon error -title "Duplicate Account Name" \
+				-message  "Account name $new_account_name already exists"
+				return
+			} elseif { $new_account_name == "" } {
+				tk_messageBox -type ok -icon error -title "Missing Account Name" \
+				-message  "Please Enter an Account Name"
+				return
+
+			} elseif { [string length $new_account_name] < 1 } {
+				tk_messageBox -type ok -icon error -title "Missing Account Name" \
+				-message  "Please Enter an Account Name"
+				return
+
+			}
+
+
+			set account_name {}
+			foreach key [set account_keys] {
+					puts "-------> Key $key" 
+
+					if { $key == "status" } { continue }
+					if { $key == "resolv_file" } { continue }
+
+					# get checkbuttons separate from entry boxes
+					if { $key == "authtype" } {
+						
+						#if { [string length $create_authtype] < 1 } {
+						#	tk_messageBox -type ok -icon error -title \
+						#	"$account_strings($key) Required" -message  \
+						#	"Please Enter $account_strings($key)"
+						#	return
+						#} else {
+						#	set new_account($key) $create_authtype 
+						#}
+
+						set new_account($key) $authtypes($account_type)
+						
+					} elseif { $key == "type" } {
+						set new_account($key) $account_type
+					} elseif { $key == "passwd" && $account_type == "Sun_ModemPool" } {
+						set new_account($key) "" 
+					} elseif { $key == "defroute" } {
+						set new_account($key) $create_defroute
+					} elseif { $key == "resolv" } {
+						set new_account($key) $resolv
+					} elseif { $key == "debug" } {
+						set new_account($key) $debug
+					} else {
+
+								# entry boxes
+								set [set key]_frame .new_account.[set key]_frame
+								set key_value [[set [set key]_frame].[set key]_entry get]
+								puts "----> key: $key key_value: $key_value" 
+								set new_account($key) $key_value 
+
+								# required fields
+								#account_strings(name) "Account Name:"
+								#account_strings(uid) "User ID:"
+								#account_strings(passwd) "Password:"
+								#account_strings(number) "Phone Number:"
+								#account_strings(domain) "DNS Domain Name:"
+								#account_strings(ns1) "Account Nameserver #1:"
+								#account_strings(ns2) "Account Nameserver #2:"
+								#account_strings(authtype) "Authentication Type:"
+								#account_strings(defroute) "Default Route:"
+
+								if { $key == "name" } { 
+									set account_name  [list $key_value] 
+									set account_string $key_value
+								}
+
+
+								if { [lsearch $required_keys_verify $key] != -1 && [string length $key_value] < 1 } {
+										
+										tk_messageBox -type ok -icon error -title \
+										"$account_strings($key) Required" -message  \
+										"Please Enter $account_strings($key)"
+										return
+
+								}
+					}
+				}
+				# Make sure DNS info exists if 'use account dns' selected
+				foreach key $required_acct_dns {
+					if { $new_account(resolv) == "account" && [string length $new_account($key)] < 1 } {
+											tk_messageBox -type ok -icon error -title \
+											"$account_strings($key) Required" -message  \
+											"Please Enter $account_strings($key)"
+											return
+
+					}
+				}
+				foreach key $required_peer_dns {
+					if { $new_account(resolv) == "peer" && [string length $new_account($key)] < 1 } {
+											tk_messageBox -type ok -icon error -title \
+											"$account_strings($key) Required" -message  \
+											"Please Enter $account_strings($key)"
+											return
+
+					}
+				}
+
+				lappend account_list $account_name
+				
+				# add to accounts
+				puts "account name: $account_name"
+				puts "account string: $account_string"
+				set accounts($account_name,name) $account_string
+
+				foreach { key value } [array get new_account] {
+					puts "accounts($account_name,$key) = $value" 
+					set accounts($account_name,$key) $value 
+				}
+
+				# create resolv.conf name for this account
+				set resolv_name "[set ppp_dir]/resolv.conf.[RandomRange 1000]" 
+				set accounts($account_name,resolv_file) $resolv_name
+				puts "resolv.conf file is $accounts($account_name,resolv_file)"
+				# write a resolv.conf file to the file
+				write_resolv_file $accounts($account_name,name)	
+
+				# set status
+				set accounts($account_name,status) inactive 
+
+				# add to Accounts menu and acct manager
+				add_account_menu $account_name "END"
+
+				if { [winfo exists .account_manager_win] == 1 } {
+					.account_manager_win.account_list insert end "$accounts($account_name,name)"
+				}
+
+			puts "Saving new account $account_name"
+			set save_return [save_accounts "save"]
+			destroy .new_account 
+			if { [winfo exists .account_chooser] != 1 } {
+				.account_manager_win.new_button configure -state normal 
+			} else {
+				.account_manager_win.new_button configure -state disabled 
+			}
+		}
+
+		button [set top].button_frame.close -text "Cancel" -command {
+			destroy .new_account 
+			if { [winfo exists .account_chooser] != 1 } {
+				.account_manager_win.new_button configure -state normal 
+			} else {
+				.account_manager_win.new_button configure -state disabled 
+			}
+
+		}
+
+		pack .new_account.button_frame.close -side right 
+		pack .new_account.button_frame.save -side left 
+		pack .new_account.button_frame -side bottom -pady 10 
+
+}
+

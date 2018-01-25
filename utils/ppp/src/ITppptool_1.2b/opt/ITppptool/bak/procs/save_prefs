@@ -1,0 +1,48 @@
+proc save_prefs { } {
+
+	global ppp_config_file env \
+	ppp_settings ppp_settings_saved \
+  port_speeds port_speed modem_port \
+  flow_control g_modem_port g_flow_control
+
+
+	set save_needed "false"
+
+	#set ppp_config_file "$ppp_dir/ppp_settings"
+	#set ppp_settings(init_string) "atz" 
+	#set ppp_settings(connect_string) ""
+	#set ppp_settings(port_speed) 28800
+	#set ppp_settings(flow_control) hardware
+	#set ppp_settings(modem_port) /dev/term/b
+	#set ppp_settings(ppp_options) "" 
+
+	foreach { key value } [array get ppp_settings] {
+		if { [info exists ppp_settings($key)] == 1 && \
+				[info exists ppp_settings_saved($key)] == 1 } {
+		 if { $ppp_settings($key) != $ppp_settings_saved($key) } {
+				set save_needed "true"
+				break
+			}
+		}
+	}
+
+	if { $save_needed == "true" } {
+
+		set config_w [open $ppp_config_file w]
+
+		puts "Saving ppp prefs"
+		foreach { key value } [array get ppp_settings] {
+			puts "$key\t$value"
+			puts $config_w "$key\t$value"
+			set ppp_settings_saved($key) $value
+		}
+		puts "ppp Prefs Saved"
+		close $config_w
+		exec chown $env(USER_ID) $ppp_config_file
+
+	} else {
+		puts "No Save needed for PPP Prefs"
+	}
+
+}
+

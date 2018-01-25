@@ -1,0 +1,84 @@
+proc connect { } {
+
+	global accounts active_account 
+	global challenge_entered des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global ppp_interface serial_port ip_address
+	global debug ppp_resolv ostype
+
+	# pre-connection scripts
+	# if connection_type == modempool
+	if { $accounts($active_account,type) == "Sun_ModemPool" } {
+		pre_connect
+	} else {
+
+		set username [.uidf.uid_r get] 
+		set password [.passwdf.passwd_r get] 
+		if { [string length $password] < 1 } {
+			
+			tk_messageBox -default "ok" -message \
+			"No password entered"  \
+			-title "Error: No Password"
+			return -1
+		}
+
+	}
+
+	log_messages "\nConnecting"
+	set connection_state "connecting"
+	init_blinking_bulbs
+	.footer.footer_r configure -text "Connecting .."
+
+	set connection_state "connecting"
+	.connect configure -text "Disconnect" -state disabled -command {
+		disconnect "Disconnected by User\n" 
+	} 
+
+	global backup_resolv
+	set backup_resolv "" 
+	global manage_resolv
+
+	if { $accounts($active_account,resolv) != "none" } {
+
+		# create resolv.conf, backup resolv.conf
+		if { [file exists $accounts($active_account,resolv_file)] == 1 } {
+			set backup_resolv "/etc/resolv.conf.ppp"
+			# backup 'to'
+			puts "exec $manage_resolv backup $backup_resolv" 
+			exec $manage_resolv backup $backup_resolv 
+			# copy 'from'
+
+			if { $accounts($active_account,resolv)  == "account" } {
+				puts "exec $manage_resolv copy $accounts($active_account,resolv_file)"
+				exec $manage_resolv copy $accounts($active_account,resolv_file)
+			}
+
+		} else {
+			puts "file exists $accounts($active_account,resolv_file) != 1" 
+			set backup_resolv "" 
+		}
+
+	}
+
+	if { [file exists $ppp_resolv] == 1 } {
+		puts "removing old $ppp_resolv"
+		exec rm -rf $ppp_resolv
+	}
+
+
+	# kill any old pppd's
+	catch { exec pkill pppd }
+
+	if { $accounts($active_account,authtype) == "tokencard" } {
+		#create_des_dialog
+		modempool_connect_$ostype
+	} else {
+		isp_connect_$ostype
+	}
+
+
+}
+

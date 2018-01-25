@@ -1,0 +1,49 @@
+proc help { } {
+		
+	if { [winfo exists .help_win] } { 
+		 catch { wm deiconify .help_win }	
+		 catch { focus .help_win }
+		 return
+	} 
+			
+		toplevel .help_win 
+		wm title .help_win "ITppptool help"
+		frame .help_win.help_frame -relief flat
+		text .help_win.help_text -wrap word -relief sunken -borderwidth 2 \
+		-yscrollcommand { .help_win.scroll_y set} \
+		-height 20 -width 65 -setgrid true
+		scrollbar .help_win.scroll_y -command ".help_win.help_text yview"
+		pack .help_win.help_text -in .help_win.help_frame -side left -pady 1m -fill both -expand 1
+		pack .help_win.scroll_y -in .help_win.help_frame -side right -fill y
+
+		frame .help_win.button_frame -relief flat
+		button .help_win.close_button -text "Close" -command {\
+			destroy .help_win
+		}
+		pack .help_win.close_button -side bottom -in .help_win.button_frame \
+		-ipadx 2 -padx 2
+
+		pack .help_win.help_frame -side top -fill both -expand 1
+    pack .help_win.button_frame -fill x -side bottom
+
+		.help_win.help_text tag configure bold \
+		 -font  -*-times-bold-r-normal--*-160-* 
+
+		.help_win.help_text tag configure normal \
+		-font -*-times-medium-r-normal--*-160-*
+
+		set helptext [split [get_helptext] "\n"]
+		foreach line $helptext {
+
+			if { [string first "<b>" $line] != -1 } {
+				regsub -all "<b>" $line "" newline
+				.help_win.help_text insert end $newline bold 
+				#.help_win.help_text insert end "\n" 
+			} else {
+				.help_win.help_text insert end $line normal
+				.help_win.help_text insert end "\n" 
+			}
+		}
+	center_window .help_win 3 3
+}
+

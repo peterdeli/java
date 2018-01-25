@@ -1,0 +1,5 @@
+proc center_window { window width_ratio height_ratio } {
+    if { [info exists width_ratio] == 0 } { set ratio 3 }
+    if { [info exists height_ratio] == 0 } { set ratio 3 }
+    wm geometry $window +[expr [winfo screenwidth $window] / $width_ratio ]+[expr [winfo screenheight $window] / $height_ratio] 
+}

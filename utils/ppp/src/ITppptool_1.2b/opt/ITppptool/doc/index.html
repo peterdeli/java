@@ -1,0 +1,369 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.79C-CCK-MCD  [en] (X11; U; SunOS 5.9 sun4u) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#CCCCCC" link="#0000FF" vlink="#990066" alink="#FF0000">
+
+<center>
+<h1>
+<font size=+4>ITppptool for Solaris</font></h1></center>
+
+<h1>
+
+<hr ALIGN=LEFT SIZE=4 WIDTH="100%"></h1>
+
+<h1>
+Introduction</h1>
+
+<p><br><font size=+2>PPPtool is a graphical interface for connecting to
+remote networks via dialup modem.</font>
+<p><font size=+1>The Main window consists of a Menu, a display of active
+account information,</font>
+<br><font size=+1>the 'Connect/Disconnect' Button, some mock 'status lights',
+and a 'status' field.</font>
+<p><font size=+1>Upon first launching PPPtool, the following window will
+appear :</font>
+<p><img SRC="ppp1" height=328 width=501>
+<br>&nbsp;
+<p><font size=+1>The Menu bar contains four menus:</font>
+<p><font size=+1><b>1.</b> 'File'</font>
+<br><font size=+1><b>2.</b> 'Edit',</font>
+<br><font size=+1><b>3.</b> 'Accounts'</font>
+<br><font size=+1><b>4.</b> 'Help'.</font>
+<p><font size=+1>The 'File' menu contains three items:</font>
+<p><font size=+1><b>1. </b>Save Accounts</font>
+<br><font size=+1><b>2.</b> View Log</font>
+<br><font size=+1><b>3.</b> Quit</font>
+<p><img SRC="ppp20" height=328 width=501>
+<p><font size=+1>The 'Edit' menu contains two items:</font>
+<p><font size=+1><b>1.</b> Manage Accounts</font>
+<br><font size=+1><b>2. </b>Edit Preferences</font>
+<p><img SRC="ppp2" height=328 width=501>
+<br>&nbsp;
+<p><font size=+1>The 'Accounts' menu is a dynamic menu and holds the names
+of all</font>
+<br><font size=+1>&nbsp;accounts which have been created:</font>
+<p><img SRC="ppp15" height=328 width=501>
+<br>&nbsp;
+<p><font size=+1>The 'Help' menu contains two items:</font>
+<br><font size=+1><b>1.</b> 'About PPP Tool'</font>
+<br><font size=+1><b>2.</b> 'PPP Tool Help'</font>
+<p><img SRC="ppp18" height=328 width=501>
+<p>
+<hr WIDTH="100%">
+<p><font size=+3>ITppptool Configuration</font>
+<br>&nbsp;
+<br>&nbsp;
+<p><b><font size=+1>I. Creating Accounts</font></b>
+<p><font size=+1>To create a new account, Select 'Edit/Manage Accounts,
+then click on 'New' ( see below ):</font>
+<p><img SRC="ppp2" height=328 width=501>
+<br>&nbsp;
+<p><img SRC="ppp3" height=590 width=505>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>A small window will appear with a pop-down menu with two
+choices</font>
+<p><font size=+1>ISP_ModemPool</font>
+<br><font size=+1>Sun_ModemPool</font>
+<p><img SRC="ppp5" height=179 width=256>
+<p><font size=+1>The ISP_ModemPool selection is for all accounts which
+do not connect directly to Sun.</font>
+<br><font size=+1>The Sun_ModemPool selection is for a Sun modempool account
+which connects directly to Sun.</font>
+<br>&nbsp;
+<p><font size=+1>Make your choice and click the 'Continue->' button</font>
+<p><img SRC="ppp4" height=468 width=402>
+<br>&nbsp;
+<p><font size=+1>A window will appear with the following fields: ( ** denotes
+a required field )</font>
+<p><font size=+1>[ ** Account Name ]: Enter the name of the account</font>
+<br><font size=+1>[ ** User ID ]: Enter the login name or ID of the account</font>
+<br><font size=+1>[ Password ]: Enter the password of the account ( if
+one exists )</font>
+<br><font size=+1>[ ** Phone Number ]: Enter the Phone Number of the account</font>
+<br><font size=+1>[ ** DNS Domain Name ]: Enter the domain name of the
+account ( if one exists )</font>
+<br><font size=+1>[ DNS Search Domains ]: Enter any domains which DNS should
+search</font>
+<br><font size=+1>[ ** Account Nameserver #1 ]: Enter a primary nameserver
+for the account</font>
+<br><font size=+1>[ Account Nameserver #2 ]: Enter a secondary nameserver
+for the account</font>
+<p><font size=+1>Near the bottom of the window are the following checkbuttons:</font>
+<p><font size=+1>[ Default Route ]: If selected, adds a 'default route'
+option to pppd</font>
+<br><font size=+1>[ ** Create /etc/resolv.conf ]: Click on one of the buttons:</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; [ Do not create ] - this will not
+create an /etc/resolv.conf file, or overwrite an existing one.</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; [ Use peer DNS ] - this will add any
+nameservers returned by the remote server to the /etc/resolv.conf file.</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; [ Use account DNS ] - this will use
+the information in the account for the /etc/resolv.conf file.</font>
+<p><font size=+1>The entry box 'PPP options' is for special configuration
+of the ppp connection.</font>
+<br><font size=+1>See the pppd man pages for details. Examples options
+are novj, nopcomp.</font>
+<p><font size=+1>The 'Debugging' checkbox will enable more verbose output
+to the log window</font>
+<br><font size=+1>during the startup of the ppp connection.</font>
+<br>&nbsp;
+<p><img SRC="ppp8" height=537 width=641>
+<br>&nbsp;
+<p><font size=+1>The figure below shows some account information added
+to the New Account window :</font>
+<br><img SRC="ppp9" height=537 width=641>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>After all the fields have been filled in, click the 'Create
+Account' button. If any required fields have not been filled in,</font>
+<br><font size=+1>a pop-up dialog will appear indicating this.</font>
+<p><font size=+1>After the 'Create Account' button has been clicked, the
+account will be created and the Account Name will be</font>
+<br><font size=+1>seen in the 'Manage Accounts' window</font>
+<p><img SRC="ppp10" height=251 width=374>
+<br>&nbsp;
+<br>&nbsp;
+<p><b><font size=+1>II. Saving Accounts</font></b>
+<p><font size=+1>To save the current account information to the account
+file, select File/Save Accounts.</font>
+<br><font size=+1>If there have been any changes to the accounts, a prompt
+will pop up to confirm the save.</font>
+<p><img SRC="save_account" height=328 width=501>
+<br>&nbsp;
+<p><font size=+1>Clicking 'Yes' will save the account data,</font>
+<br><font size=+1>clicking 'Cancel' will not save the account data and
+return to PPP tool.</font>
+<p><b><font size=+1>III. Editing Accounts</font></b>
+<p><font size=+1>To make changes to an account, first select Edit/Manage
+Accounts</font>
+<br><font size=+1>Click on an account name in the window, then click on
+'Edit'</font>
+<br><font size=+1>A window will appear with the account information:</font>
+<p><img SRC="ppp12" height=570 width=641>
+<p><font size=+1>Edit any fields or select/deselect any items, then click
+on 'Save Edits'</font>
+<br><font size=+1>The window will close and the changes will be saved in
+the currently running program,</font>
+<br><font size=+1>but will NOT be saved to the accounts file. To save the
+changes to the accounts file, select</font>
+<br><font size=+1>'File/Save Accounts' and click on the 'OK' button if
+the 'Save' dialog pops up.</font>
+<br><font size=+1>If the Save dialog does not pop up, there are no changes
+to save.</font>
+<p><img SRC="ppp20" height=328 width=501>
+<p><font size=+1>By not saving changes to disk when invoking 'Save Edits',&nbsp;
+it is possible</font>
+<br><font size=+1>to recover from inadvertent edits to your account.</font>
+<br><font size=+1>To recover from an error during an edit, select File/Quit,
+and click</font>
+<br><font size=+1>'No' when asked to save changes. Then restart PPPtool
+and the original</font>
+<br><font size=+1>configuration will be restored.</font>
+<p><img SRC="ppp_save_changes" height=349 width=534>
+<br>&nbsp;
+<p><b><font size=+1>IV. Deleting Accounts</font></b>
+<p><font size=+1>To delete an account, first select Edit/Manage Accounts.</font>
+<br><font size=+1>Click on an account name in the window, then click on
+'Delete'.</font>
+<p><img SRC="delete_account" height=251 width=374>
+<p><font size=+1>After clicking the 'Delete' button, a prompt will appear
+asking</font>
+<br><font size=+1>to confirm the request. Click 'Yes' to delete the account,</font>
+<br><font size=+1>or 'No' to cancel.</font>
+<p><img SRC="delete_prompt" height=504 width=457>
+<p><font size=+1>The account will be deleted in the currently running program,
+but will NOT</font>
+<br><font size=+1>be saved to the accounts file on the local disk.</font>
+<br><font size=+1>To save the changes permantently, select 'File/Save Accounts'
+and</font>
+<br><font size=+1>click on the 'OK' button of the window which appears.</font>
+<p><img SRC="save_account" height=328 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>If you have accidentally deleted an account, immediately
+select 'File/Quit',</font>
+<br><font size=+1>and click 'No' when asked to save changes. This will
+cause the changes not</font>
+<br><font size=+1>to be saved permanently. Restarting PPPtool will restore
+the deleted account.</font>
+<br>&nbsp;
+<p><img SRC="ppp_save_changes" height=349 width=534>
+<br>&nbsp;
+<p><b><font size=+1>V. Making an&nbsp; Account Active</font></b>
+<p><font size=+1>To make an account active makes it available for connecting.</font>
+<br><font size=+1>There are three ways to do this:</font>
+<p><font size=+1>1. Select the account from the 'Accounts' menu item in
+the main window.</font>
+<p><img SRC="ppp15" height=328 width=501>
+<p><font size=+1>2. In the 'Account Manager' window, select the account
+and click the 'Make Active' button.</font>
+<br><font size=+1>3. In the 'Account Manager' window,&nbsp; double-click
+on the account.</font>
+<p><img SRC="ppp13" height=603 width=521>
+<p><b><font size=+1>VI. Preferences</font></b>
+<p><font size=+1>Upon first starting ppptool, a set of default preferences
+will be loaded.</font>
+<br><font size=+1>To make sure the correct settings are in effect, check
+the preferences window by selecting <i>'Edit/Edit Preferences'</i>.</font>
+<p><img SRC="ppp16" height=328 width=501>
+<p><font size=+1>The settings in the preferences are:</font>
+<p><font size=+1><b>Modem Port: </b>(required): This is the port to which
+the modem is connected.</font>
+<br><font size=+1><b>Flow Control</b>: hardware, software, or none.</font>
+<br><font size=+1><b>Port Speed</b> (required)</font>
+<br><font size=+1><b>Init String</b>: Enter any modem initialization string
+here.</font>
+<br><font size=+1></font>&nbsp;
+<p><img SRC="ppp17" height=255 width=377>
+<p>
+<hr WIDTH="100%">
+<br>&nbsp;
+<h1>
+<b><font size=+4>Connecting with PPPtool</font></b></h1>
+
+<p><br><font size=+2>To initiate a&nbsp; ppp connection, follow these steps:</font>
+<p><font size=+1><b>1.</b> Select an account and make it active ( See V.
+above )</font>
+<br><font size=+1><b>2.</b> Make sure your modem is connected to the correct
+port,</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; and that the correct cable is connected
+between the modem and the computer.</font>
+<br><font size=+1><b>3. </b>Verify the account information is correct,
+then click on the 'Connect' Button.</font>
+<p><img SRC="ppp22" height=328 width=501>
+<p><font size=+1><b>4.</b> If possible, turn up the volume on the modem
+so that you can hear it</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; going off-hook, dialing, and connecting.</font>
+<br><font size=+1><b>5.</b> Monitor the 'Status' line at the bottom of
+the main window, and the</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; log window as well ( File/View Log
+).</font>
+<p><font size=+1>The order of execution to connect is:</font>
+<p><font size=+1>1) Initialize modem</font>
+<br><font size=+1>2) Dial phone number and connect</font>
+<br><font size=+1>3) Start the ppp service</font>
+<p><img SRC="ppp23" height=328 width=501>
+<p><img SRC="ppp24" height=328 width=501>
+<p><img SRC="ppp30" height=328 width=501>
+<p><img SRC="ppp31" height=369 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<h2>
+&nbsp;Connecting to Sun Modempools&nbsp; with a tokencard</h2>
+
+<p><br><font size=+1>For Sun Modempool connections, there will be instructions
+during the</font>
+<br><font size=+1>connection on when to key in numbers into your tokencard,
+as well as</font>
+<br><font size=+1>when to enter to tokencard responses into the ppptool
+tokencard dialog.</font>
+<p><font size=+1>First, click the 'Connect' button. PPPtool will initialize
+the modem and</font>
+<br><font size=+1>then dial the modempool number. During this time, a window
+will appear</font>
+<br><font size=+1>with some instructions to prepare your tokencard by entering
+the tokencard</font>
+<br><font size=+1>password, and waiting for a 'challenge' ( consisting
+of '9' followed by four numbers. )</font>
+<br>&nbsp;
+<p><img SRC="ppp25" height=543 width=541>
+<br>&nbsp;
+<p><font size=+1>If the initial authentication is successful, PPPtool will
+be connected</font>
+<br><font size=+1>and will then receive a 'Challenge' sequence of numbers
+from the</font>
+<br><font size=+1>ModemPool Server. This will be displayed as in the 'TokenCard
+Challenge/Response' window</font>
+<br><font size=+1>below. Enter these numbers into the tokencard and press
+'E' as in the</font>
+<br><font size=+1>instructions in the window. The tokencard will then respond
+with a string</font>
+<br><font size=+1>of alpha-numeric characters. Enter the string into the
+TokenCard Challenge/Response field and</font>
+<br><font size=+1>click 'Send Response' or press 'Enter'.</font>
+<p><img SRC="ppp26" height=590 width=552>
+<br>&nbsp;
+<p><font size=+1>If the response entered into the TokenCard Challenge/Response
+window is correct,</font>
+<br><font size=+1>PPPtool will be logged into Sun:</font>
+<p><img SRC="modempool_connected" height=411 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>If no response is entered within the time limit, the PPPtool
+log window will indicate this:</font>
+<p><img SRC="ppp28" height=383 width=626>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>To end the connection, click on the 'Disconnect' button.
+PPPtool will then terminate the connection.</font>
+<p><img SRC="ppp27" height=328 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+
+<hr WIDTH="100%"></h2>
+
+<h2>
+More on ISP Modempool connections</h2>
+
+<p><br><font size=+1>For ISP Modempool connections, you may choose not
+to include your password in your</font>
+<br><font size=+1>account information for security purposes. When you are
+ready to connect, you can enter</font>
+<br><font size=+1>your password in the main PPPtool window in the 'Password'
+field, and then click 'Connect'.</font>
+<br><font size=+1>If you click connect before entering the password, the
+dialog below will appear:</font>
+<p><img SRC="ppp29" height=450 width=520>
+<br>&nbsp;
+<p><font size=+1>During the connection, the 'Status' field at the bottome
+of the window will display</font>
+<br><font size=+1>information about the connection.</font>
+<p><img SRC="ppp30" height=328 width=501>
+<p><img SRC="ppp31" height=369 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1><b>6.</b> When you are successfully connected, the status
+line will expand with</font>
+<br><font size=+1>&nbsp;&nbsp; information about the connection, such as:</font>
+<p><font size=+1>&nbsp;&nbsp;&nbsp; * The IP address assigned to your host</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; * The name of the ppp interface</font>
+<br>&nbsp;
+<br>&nbsp;
+<p><img SRC="ppp32" height=411 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+1>To end the connection, click the 'Disconnect' button,
+and wait for</font>
+<br><font size=+1>PPPtool to terminate the connection:</font>
+<p><img SRC="ppp33" height=328 width=501>
+<br>&nbsp;
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<br><b><font size=+3>Exiting PPPtool</font></b>
+<p><font size=+2>To exit PPPtool, select <i>'File/Quit'</i>.</font>
+<br>&nbsp;
+<p><img SRC="ppp35" height=328 width=501>
+<p><font size=+1>If there is any account information which has not been
+save to the account file,</font>
+<br><font size=+1>a dialog will pop up asking whether to save and exit,
+exit without saving,</font>
+<br><font size=+1>or cancel the exit and&nbsp; return to PPPtool.</font>
+<p><img SRC="ppp_save_changes" height=349 width=534>
+<p><font size=+1>Clicking <i>'Yes'</i> will save the account settings to
+the file.</font>
+<p><font size=+1>Clicking <i>'No' </i>will exit PPPtool without saving
+the account changes, and</font>
+<br><font size=+1>clicking <i>'Cancel'</i> will return to PPPtool without
+saving any changes to the</font>
+<br><font size=+1>accounts file.</font>
+<p>
+<hr WIDTH="100%">
+</body>
+</html>

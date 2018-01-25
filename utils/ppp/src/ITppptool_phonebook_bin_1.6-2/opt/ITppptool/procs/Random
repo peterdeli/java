@@ -1,0 +1,5 @@
+proc Random {} {
+        global randomSeed
+        set randomSeed [expr ($randomSeed*9301 + 49297) % 233280]
+        return [expr $randomSeed/double(233280)]
+}

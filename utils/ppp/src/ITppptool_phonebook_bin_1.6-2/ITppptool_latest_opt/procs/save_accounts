@@ -1,0 +1,230 @@
+proc save_accounts {prompt_type} {
+
+	#puts "proc save_accounts"
+	global save_accounts_prompt env \
+	env accounts saved_accounts ppp_settings \
+	ppp_dir
+	#set ppp_dir "$env(HOME)/.ppptool" 
+	global ppp_config_file
+	#set ppp_config_file "$ppp_dir/ppp_settings"
+	# list
+	global active_account \
+	account_list saved_account_list \
+	account_keys account_file 
+
+	set save_needed false
+	set return_status 1
+
+	# compare account_list to saved_account_list
+	if { [llength $account_list] != [llength $saved_account_list] } {
+		# something changed
+		# write out accounts array
+		#puts "llength account_list != llength saved_account_list"
+		set save_needed true
+
+	}
+
+		# number of accounts equal, but may have different names
+		#puts "account_list == saved_account_list"
+
+	if { $save_needed == "false" } {
+		foreach account $account_list {
+			if { [lsearch $saved_account_list $account] == -1 } {
+				#puts "lsearch saved_account_list $account == -1"
+				set save_needed true
+				break
+			} else {
+				#puts "lsearch saved_account_list $account != -1"
+				continue
+			}
+		}
+	}
+	
+
+	if { $save_needed == "false" } {
+		puts "save_needed == false"
+		foreach { key value } [array get accounts] {
+			if { [lindex [split $key, ","] 1] == "passwd" } {
+				puts "Key=$key, value=****"
+			} else {
+				puts "Key=$key, value=$value"
+			}
+			# we should find a match for each
+			# if not, something was deleted
+			#puts "info exists saved_accounts($key) :?"
+			#puts "saved_accounts($key) == $value :?"
+			if { [info exists saved_accounts($key)] != 1 } {
+				puts "save_needed: info exists saved_accounts($key) != 1"
+				set save_needed true
+				break
+			} elseif { $saved_accounts($key) != $value } {
+				# don't flag 'status'
+				if {  [lindex [split $key  ","] 1] == "status" } {
+						set acct_value [string compare  $value "active"]
+						puts "acct_value = $acct_value" 
+						set saved_key	 [string compare $saved_accounts($key) "active"]
+						puts "saved_key	== $saved_key" 
+					if { $acct_value == 0 ||  $saved_key == 0 } {
+						puts "key $key, $value $value 489"
+						#save it and continue without flagging 'save needed'
+						# set saved_account to inactive
+						#puts "Account list changed, Saving account info .."
+						set account_w [open $account_file w] 
+						puts "writing to $account_file:"
+						foreach account_name $account_list  {
+							foreach key [set account_keys] {
+								if { [info exists accounts($account_name,$key)] } {
+									#puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) $accounts($account_name,$key)
+								} else {
+									set accounts($account_name,$key) ""
+									#puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) "" 
+
+								}
+							}
+						}
+						# set save_account list to current values
+						set saved_account_list $account_list
+						puts "Wrote account file $account_file"
+						close $account_w
+						exec /bin/chown $env(USER_ID) $account_file
+						exec /bin/chmod 600 $account_file
+
+						# clean up any resolv.conf files
+						cleanup_resolv
+
+						# write prefs
+						save_prefs
+						set save_needed "false"
+           set return_status 1
+					}
+
+				} else {
+					#puts "save_needed: saved_accounts($key) != $value"
+					set save_needed true
+					#break
+				}
+			}
+		}
+
+		foreach { key value } [array get saved_accounts] {
+			if { [lindex [split $key, ","] 1] == "passwd" } {
+				puts "Key=$key, value=****"
+			} else { 
+				puts "Key=$key, value=$value"
+			}
+			# we should find a match for each
+			# if not, something was added
+			puts "info exists accounts($key) ?"
+			if { [string first "passwd" $key] < 0 } {
+				puts "accounts($key) = $value ?"
+			} else {
+				puts "accounts($key) = **** ?"
+			}
+			if { [info exists accounts($key)] != 1 } {
+				puts "save_needed: info exists accounts($key) != 1"
+				set save_needed true
+				break
+			} elseif { $accounts($key) != $value } {
+					if { $key != "passwd" } {
+						puts "save_needed: $accounts($key) != $value"
+					} else {
+						puts "save_needed: accounts($key) != ****"
+					}
+					set save_needed true
+					break
+			}
+				#puts "save_needed: accounts($key) != $value"
+				#puts "accounts($key) != $value"
+				#set save_needed true
+				#break
+		}
+
+	}
+
+	if { $save_needed == "true" } {
+
+	   set warning_return "yes"
+
+		if {  $save_accounts_prompt == "true" } {
+			if { $prompt_type == "exit" } {
+	       set warning_return [tk_messageBox -default yes \
+           -type yesnocancel -icon warning \
+           -message "To save your changes:\n\n\
+                     Click YES to save then exit\n\
+                     Click NO to exit without saving\n\
+                     Click CANCEL to return to PPP Tool\n" \
+           -title "Unsaved Changes"]
+			} elseif { $prompt_type == "save" } {
+
+	       set warning_return [tk_messageBox -default ok \
+           -type okcancel -icon warning \
+           -message "Click 'OK' save your changes or CANCEL to return to PPP Tool\n" \
+           -title "Save Account"]
+
+			}
+		}
+
+        if {"$warning_return" == "yes" || "$warning_return" == "ok"} {
+
+						puts "Account list changed, Saving account info .."
+						set account_w [open $account_file w] 
+						puts "writing to $account_file:"
+						foreach account_name $account_list  {
+							foreach key [set account_keys] {
+								if { [info exists accounts($account_name,$key)] } {
+									#puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) $accounts($account_name,$key)
+
+								} else {
+									set accounts($account_name,$key) ""
+									#puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) "" 
+
+								}
+							}
+						}
+						# set save_account list to current values
+						set saved_account_list $account_list
+
+						puts "Wrote account file $account_file"
+						close $account_w
+						exec /bin/chown $env(USER_ID) $account_file
+						exec /bin/chmod 600 $account_file
+
+						# clean up any resolv.conf files
+						cleanup_resolv
+
+						# write prefs
+						save_prefs
+						set save_needed "false"
+           set return_status 1
+
+        } elseif {"$warning_return" == "no"} {
+           set return_status 1
+        } elseif {"$warning_return" == "cancel"} {
+           set return_status 0
+        }
+	
+
+	} else {
+		puts "No save needed"
+		set save_needed "false"
+	}
+
+	return $return_status
+
+}
+

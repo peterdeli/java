@@ -1,0 +1,102 @@
+proc load_accts { } {
+	global env
+	global ppp_dir
+	# list
+	global account_list
+	global saved_account_list
+	set saved_account_list {}
+	# array (account_name,key)
+	global accounts
+	global saved_accounts
+	# account file names
+	global account_file
+	global account_keys
+
+	global active_account
+
+	set account_name ""
+	set previous_name ""
+
+	if { [file exists $account_file] } {
+
+		set account_fd [open $account_file r]
+
+				# parse into acct_array
+				for { set i 0 } { [gets $account_fd line] != -1 } {incr i} {
+
+					if { [string length $line] < 1 } { continue }
+					set field [split $line "\t"]
+					set key [lindex $field 0]
+					string trim $key
+					puts "Key=$key"
+					set value [lindex $field 1]
+					if { $key == "passwd" } {
+						puts "Value=****"
+					} else {
+						puts "Value=$value"
+					}
+
+					# check key
+					if { [lsearch $account_keys $key] == -1 } {
+						puts "Invalid key $key found in account file accounts"
+						continue
+					}
+
+					# make sure account name is same as file prefix
+					if { $key == "name" } {
+						# New account
+						# first check last account
+						puts "Account $value"
+						set account_name [list $value]
+						set previous_name $account_name 
+						puts "Adding account name $account_name to account_list"
+						lappend account_list $account_name
+						puts "Adding account name $account_name to saved_account_list"
+						lappend saved_account_list $account_name
+							puts "Adding key '$key' value '$value' to accounts"
+							set accounts($account_name,$key) $value
+							puts "Adding key '$key' value '$value' to saved_accounts"
+							set saved_accounts($account_name,$key) $value
+					} else {
+					
+						if { $key == "passwd" } {
+							puts "Adding key '$key' value '****' to accounts"
+							puts "Adding key '$key' value '****' to saved_accounts"
+						} else {
+							puts "Adding key '$key' value '$value' to accounts"
+							puts "Adding key '$key' value '$value' to saved_accounts"
+						}
+							set accounts($account_name,$key) $value
+							set saved_accounts($account_name,$key) $value
+					}
+				}
+				close $account_fd
+
+				# verify
+				puts "verifying accounts"
+				foreach account $account_list {
+							foreach key $account_keys {
+								puts "key $key"
+								puts "account $account"
+								if { [info exists accounts($account,$key)] == 0 } {
+										puts "key $key not found in accounts file"
+										puts "set accounts($account,$key)"
+										set accounts($account,$key) ""
+								}
+								if { $key == "resolv_file" } {
+									# check for resolv_file entries?
+									if { [file exists $accounts($account,$key)] != 1 } {
+										set resolv_name "[set ppp_dir]/resolv.conf.[RandomRange 1000]" 
+										set accounts($account,resolv_file) $resolv_name
+										write_resolv_file $accounts($account,name)
+									}
+								}
+							}
+				}
+
+	} 
+			# done
+			puts "Loaded accounts"
+
+}
+

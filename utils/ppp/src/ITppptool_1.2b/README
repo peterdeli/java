@@ -1,0 +1,4 @@
+check steps.txt for how to create package
+Use bug ID 6191954 to check in files
+Current release is ppptool/src/ITppptool_1.2b
+Use that directory to build current ppptool

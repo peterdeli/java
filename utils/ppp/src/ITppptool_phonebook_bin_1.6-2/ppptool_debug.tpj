@@ -1,0 +1,42 @@
+format  {TclDevKit Project File}
+fmtver  2.0
+fmttool {TclDevKit Debugger} 2.5
+
+##  Saved at : Wed Jan 26 06:09:00 PM MST 2005
+##  By       : pdel@h100
+
+########
+#####
+###
+##
+#
+
+appArg            {}
+appArgList        {}
+appDir            {}
+appDirList        {}
+appInterp         /usr/bin/wish8.4
+appInterpList     {/usr/bin/wish8.4 /usr/bin/wish /usr/bin/wishx /usr/bin/tclsh /usr/bin/tclsh8.4 /home/pdel/ActiveTcl/bin/wish8.4 /home/pdel/ActiveTcl/bin/wish /home/pdel/ActiveTcl/bin/tclsh8.4 /home/pdel/ActiveTcl/bin/tclsh}
+appScript         {}
+appScriptList     {}
+appType           remote
+autoLoad          0
+breakList         {}
+doInstrument      *
+dontInstrument    {}
+errorAction       1
+instrumentDynamic 1
+instrumentExpect  1
+instrumentIncrTcl 1
+instrumentTclx    1
+portRemote        2576
+prevViewFile      /opt/ITppptool/procs/edit_prefs
+projVersion       2.0
+varTransformList  {}
+watchList         {}
+
+#
+##
+###
+#####
+########

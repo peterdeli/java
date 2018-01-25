@@ -1,0 +1,3 @@
+#!/bin/pfsh
+
+exec /opt/ITppptool/ppptool.tk 

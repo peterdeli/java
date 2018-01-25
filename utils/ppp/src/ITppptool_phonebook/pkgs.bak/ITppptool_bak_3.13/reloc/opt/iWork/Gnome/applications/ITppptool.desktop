@@ -1,0 +1,13 @@
+[Desktop Entry]
+
+Name=ITppptool
+
+Comment=ITpptool graphical interface for connecting to remote hosts via dialup 
+
+Exec=/opt/ITppptool/ppptool
+
+Terminal=0
+
+Type=Application
+
+Categories=Application;iWork

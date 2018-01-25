@@ -1,0 +1,64 @@
+From - Tue May 27 10:00:19 2003
+Received: from mailhost.aus.sun.com (ausmail.Aus.Sun.COM [129.158.80.6])
+	by bast.Central.Sun.COM (8.11.7+Sun/8.11.7/ENSMAIL,v2.2) with ESMTP id h4QNgbR09122
+	for <pdel@bast.central.sun.com>; Mon, 26 May 2003 17:42:38 -0600 (MDT)
+Received: from soms (soms [129.158.12.77])
+	by mailhost.aus.sun.com (8.12.9+Sun/8.12.5/ENSMAIL,v2.3beta) with ESMTP id h4QNga0t008048
+	for <@ausmail.Aus.Sun.COM:Peter.Delevoryas@Sun.COM>; Tue, 27 May 2003 09:42:36 +1000 (EST)
+Received: from [192.168.25.106]
+ (vpn-129-158-76-53.Singapore.Sun.COM [129.158.76.53])
+ by soms.Aus.Sun.COM (iPlanet Messaging Server 5.2 HotFix 1.09 (built Jan  7
+ 2003)) with ESMTPA id <0HFI002CLPT8X4@soms.Aus.Sun.COM> for
+ Peter.Delevoryas@Sun.COM (ORCPT Peter.Delevoryas@Sun.COM); Tue,
+ 27 May 2003 09:41:34 +1000 (EST)
+Date: Tue, 27 May 2003 09:42:34 +1000
+From: Craig Johnson - Sun IT Pointyhead <Craig.Johnson@Sun.COM>
+Subject: PPPTool problems
+To: Peter Delevoryas <Peter.Delevoryas@Sun.COM>
+Cc: Tony Shepherd <Tony.Shepherd@Sun.COM>
+Message-id: <6520000.1053992554@[192.168.25.106]>
+MIME-version: 1.0
+X-Mailer: Mulberry/3.0.3 (Linux/x86)
+Content-type: multipart/mixed; boundary="==========853450887=========="
+Content-Length: 1368
+
+--==========853450887==========
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+Hi Pete,
+
+Found some problems when running ppptool.
+- ppptool blew away for no obvious reason shortly after connecting. It was
+  running iPatch as a post-connect at the time. Log file is attached.
+
+- When ppptool blew away it took all my account info with it. Shouldn't
+  that info be saved when you exit the Account Manager window?
+
+- When I restarted ppptool, re-entered my account info and clicked connect
+  (with a connection still open) I got an untrapped expect error saying
+  spawn_id exp9 wasn't found.
+
+Cheers,
+
+Craig
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Rev. Craig Johnson              SunIT Pointyhead
+ Sun Microsystems                Email: Craig.Johnson@Sun.COM
+ Phone: +61 2 9844 5219          Internal: x57219
+ Fax: +61 2 9844 5010
+
+"The problem with the French is they have no word for entrepreneur"
+ - George W Bush.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--==========853450887==========
+Content-Type: application/octet-stream; name=ppp_log
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=ppp_log; size=36
+
+Q29ubmVjdGluZwoKQ29ubmVjdGluZwoKQ29ubmVjdGluZwoK
+
+--==========853450887==========--
+

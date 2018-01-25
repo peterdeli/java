@@ -1,0 +1,10 @@
+# sppp options necessary to run with a preset tip connection.  Note
+# that tip creates a UUCP lock on the port, so the usual "lock" option
+# can't be used here.
+defaultroute
+noauth
+noproxyarp
+#noipdefault
+#idle 900
+#updetach
+#lock

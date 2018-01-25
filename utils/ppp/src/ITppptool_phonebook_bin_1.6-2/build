@@ -1,0 +1,2 @@
+tar czf /home/pdel/dev/RPM/SOURCES/ITppptool.tar.gz `cat files`
+rpmbuild -bb ../SPECS/ITppptool_phonebook_bin.spec 

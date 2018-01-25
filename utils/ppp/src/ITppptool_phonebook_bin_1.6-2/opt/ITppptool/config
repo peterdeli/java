@@ -1,0 +1,13 @@
+#!/bin/sh
+
+	if [ -f ppptool.tk ]; then
+		rm ppptool.tk
+	fi
+
+if [ $1 = "prod" ]; then
+	cp ppptool.tk_production ppptool.tk
+elif [ $1 = "debug" ]; then
+	ln -s ppptool.tk_debug ppptool.tk
+elif [ $1 = "nodebug" ]; then
+	ln -s ppptool.tk_nodebug ppptool.tk
+fi

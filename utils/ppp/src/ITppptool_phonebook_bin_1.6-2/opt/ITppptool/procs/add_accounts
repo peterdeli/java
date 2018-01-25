@@ -1,0 +1,13 @@
+proc add_accounts { } {
+
+	global menubar_widget
+	global acct_widget
+	global color_array
+	global account_list
+	global accounts
+
+	foreach account $account_list {
+		add_account_menu $account "END"
+	}
+}
+

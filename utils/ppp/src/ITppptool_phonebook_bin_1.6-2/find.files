@@ -1,0 +1,2 @@
+find opt -type f -print |grep -v bak |grep -v SCCS |grep -v RCS |grep -v C_source |grep -v '/\.'
+find opt/local/bin -type l 

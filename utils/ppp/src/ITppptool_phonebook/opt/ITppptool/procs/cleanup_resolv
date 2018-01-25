@@ -1,0 +1,26 @@
+proc cleanup_resolv { } {
+
+	global ppp_dir
+	global accounts account_list
+	set active_resolv "false"
+
+	foreach f [exec ls $ppp_dir] {
+		if { [string first "resolv.conf" $f] != -1 } {
+			# check if it is in the account file
+			foreach account [set account_list] {
+				puts "Comparing $ppp_dir/$f to $accounts($account,resolv_file)"
+				if { $accounts($account,resolv_file) ==  "$ppp_dir/$f" } {
+					set active_resolv "true"
+					break
+				}	
+			}
+			if { $active_resolv == "false" } {
+				exec /bin/rm "$ppp_dir/$f"
+			} else {
+				set active_resolv "false"
+			}
+		}
+	}
+
+}
+

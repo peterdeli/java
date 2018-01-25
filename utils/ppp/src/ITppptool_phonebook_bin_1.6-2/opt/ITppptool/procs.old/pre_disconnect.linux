@@ -1,0 +1,11 @@
+proc pre_disconnect { } {
+
+	global pre_disconnect_script 
+
+	if { [file exists $pre_disconnect_script] } {
+	 #puts "exec $pre_disconnect_script"
+	  exec $pre_disconnect_script & 
+	}
+
+	return
+}

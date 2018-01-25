@@ -1,0 +1,5 @@
+proc init_modem { } {
+		puts "init_modem"
+		global ostype
+		source init_modem_$ostype
+}

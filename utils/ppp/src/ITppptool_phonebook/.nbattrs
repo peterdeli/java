@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE attributes PUBLIC "-//NetBeans//DTD DefaultAttributes 1.0//EN" "http://www.netbeans.org/dtds/attributes-1_0.dtd">
+<attributes version="1.0">
+    <fileobject name="make">
+        <attr name="org.netbeans.modules.cpp.ElfLoader.KNOWN_ELFFILE_TYPE" stringvalue="application/x-executable+elf"/>
+    </fileobject>
+    <fileobject name="makefile">
+        <attr name="MAKEFILE_TYPE" serialvalue="aced0005737200326f72672e6f70656e6964652e66696c6573797374656d732e416273747261637446696c654f626a656374245265706c616365896fa1bce4b5219f0200024c000866696c654e616d657400124c6a6176612f6c616e672f537472696e673b4c000666734e616d6571007e0001787074002d69776f726b2f706b67732f4954707070746f6f6c2f4954707070746f6f6c5f312e3031622f6d616b6566696c6574000e2f6d6e742f686f6d652f7064656c"/>
+    </fileobject>
+</attributes>

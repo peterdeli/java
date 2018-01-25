@@ -1,0 +1,13 @@
+proc post_connect { } {
+
+	global post_connect_script
+
+	if { [file exists $post_connect_script] } {
+	  puts "exec $post_connect_script"
+	  exec $post_connect_script & 
+	} 
+
+	return
+}
+
+

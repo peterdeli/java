@@ -1,0 +1,16 @@
+#!/usr/bin/expect
+
+set port [lindex $argv 0]
+#spawn -noecho -open [ open /dev/ttyS0 "RDWR NONBLOCK"]
+#interact
+
+system "stty -F /dev/ttyS0 -echoe -echo raw 38400"
+if {  [catch { [spawn -noecho -open \
+        [ open $modem_port "RDWR NONBLOCK" ]] } err]  != 1 } {
+        puts "Error initializing modem: $err"
+        return -1
+} else {
+	interact
+}
+
+

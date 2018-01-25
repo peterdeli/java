@@ -1,0 +1,265 @@
+proc isp_connect_Linux { } {
+	#puts "proc isp_connect { } "
+
+	global 	accounts account_list active_account baud_rate  \
+	env flow_control init_string ip_enabled  \
+	log_file log_messages message modem_port \
+	nat_transparency_mode network_interface  \
+	password phone_number \
+	port port_speed spawn_id tokencard_response username \
+	baud_rate pppd_config_file username \
+	spawn_list ip_up_file footer_font \
+	connection_state port_id pppd_pid \
+	ppp_interface serial_port ip_address remote_ip_address \
+	link_disconnected  ostype os_defaults \
+
+	set link_disconnected "true" 
+	set remote_ip_address "0.0.0.0"
+	#set connection_state "connecting"
+
+	# remote ip_up_file
+	#puts "removing $ip_up_file"
+	catch { exec rm $ip_up_file }
+
+	.passwdf.passwd_r configure -state normal
+
+	global phone_number port baud_rate pppd pppd_config_file env username
+	global tip_id
+	global connection_type
+	set connection_type "pppd"
+	global ppp_settings
+
+	#set phone_number $accounts($active_account,number)
+
+	# strip out non-numeric
+	regsub -all "\[^0-9\]" $accounts($active_account,number) "" phone_number 
+
+	set baud_rate $ppp_settings(port_speed) 
+	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+	set port $ppp_settings(modem_port)
+	set pppd /usr/sbin/pppd
+	set pppd_cmd "$pppd file $pppd_config_file"
+
+	.footer.footer_r config -text "Connect: Creating chat script"
+
+	set fd [open $pppd_config_file w]
+
+	set username [.uidf.uid_r get] 
+	set password [.passwdf.passwd_r get] 
+
+	if { $username != $accounts($active_account,uid) } {
+		set accounts($active_account,uid) $username
+	}
+	if { $password != $accounts($active_account,passwd) } {
+		set accounts($active_account,passwd) $password
+	}
+	#puts "$phone_number $port $baud_rate $pppd_config_file $username $password"
+
+	puts $fd $port
+	puts $fd $baud_rate
+	puts $fd debug
+	puts $fd lock
+	puts $fd noproxyarp
+	puts $fd updetach
+	puts $fd usepeerdns
+
+	# flow control
+	switch  $ppp_settings(flow_control) {
+		"hardware" {puts $fd crtscts }
+		"software" {puts $fd xonxoff }
+		"none" {puts $fd  nocrtscts }
+	}
+
+	if { $accounts($active_account,defroute) == 1 } {
+		puts $fd "defaultroute"
+	} else {
+		puts $fd "nodefaultroute"
+	}
+	puts $fd "noipdefault"
+	puts $fd "user $username"
+	puts $fd "password $password"
+
+	puts $fd "connect '/usr/sbin/chat -v REPORT CONNECT ABORT BUSY ABORT \"NO CARRIER\" \"\" atdt$phone_number \"CONNECT\"'"
+
+	close $fd
+	set pppd_cmd "$pppd file $pppd_config_file"
+	puts "$pppd_cmd"
+
+
+	# initialize modem
+	if { [init_modem_$ostype] != 0 } { 
+		puts "init_modem returned non-zero"
+		.footer.footer_r configure -text "Error Initializing Modem" 
+		.connect configure -text "Connect" -command connect -state normal
+		disconnect "Error Initializing Modem"
+		return
+	} else {
+		puts "init_modem returned 0"
+		.footer.footer_r configure -text "Modem Initialized" 
+	}
+
+	.footer.footer_r config -text "Connecting with Chat script"
+	set timeout -1
+	spawn /bin/sh
+	set pppd_id $spawn_id
+	expect "#"
+	exp_send "PS1=\"# \"\r"
+	expect "# "
+	exp_send "$pppd_cmd\r"
+	log_user 0
+	
+
+	.connect configure -text "Disconnect" -state disabled -command  {
+		close_pppd_$ostype
+		init_modem_$ostype
+		.connect configure -text "Connect" -command connect 
+	}
+	#init_blinking_bulbs
+	set connection_state "connecting"
+	.footer.footer_r config -text "Starting pppd process" -font $footer_font -justify left
+
+	log_user 0
+
+	after 5000 { .connect configure -state normal }
+
+	expect_background -i $pppd_id -re  "\[^\r]*\r\n"  {
+
+			if { [string first "failed" $expect_out(0,string)] != -1 } {
+					set err [string trim $expect_out(0,string)]	
+					.footer.footer_r configure -text "Error: $err"
+					.connect configure -state normal -text "Connect" -command connect
+			}
+
+			if { [string first "Hangup" $expect_out(0,string)] != -1 } {
+					.footer.footer_r configure -text "Hangup from Modem"
+					##set connection_state "disconnected"
+					.connect configure -state normal
+
+			}
+			if { [string first "(SIGHUP)" $expect_out(0,string)] != -1 } {
+					.footer.footer_r configure -text "Hangup from Modem"
+					.connect configure -state normal
+			}
+
+			if { [string first "is locked by pid" $expect_out(0,string)] != -1 } {
+				#Device /dev/term/b is locked by pid 6482
+				#pppd exp6: Device /dev/term/b is locked by pid 6482
+
+				set split_line [split $expect_out(0,string) "\[ \t]*"]
+				set lock_pid [lindex $split_line [expr [llength $split_line] -1]] 
+				#puts "Found locking pid $lock_pid, looking for /var/run/ files with pid"
+				# look for file in /var/run containing pid
+				foreach f [exec ls /var/run] {
+					if { [regexp "pid$" $f] == 1 } {
+						# check if file contains pid
+						if { [exec cat "/var/run/$f"] == $lock_pid } {
+							#send file name to close_pppd
+							set ppp_interface [lindex [split $f "."] 0]
+							#puts "Setting ppp_interface file name to $ppp_interface"
+							#puts "Running close_pppd"
+							close_pppd 	
+							break
+						}
+					}
+				}
+			}
+
+			# look for connection success
+			# Connect: sppp0 <--> /dev/term/b
+			if { [string first "Connect" $expect_out(0,string)] != -1  &&
+						[string first "failed" $expect_out(0,string)] == -1 } {
+					set ppp_interface \
+					[lindex [split $expect_out(0,string) " \t"] 1]
+
+					set serial_port \
+					[lindex [split $expect_out(0,string) " \t"] 3]
+					puts "\nPPP Interface: $ppp_interface\n"
+					puts "\nSerial port: $serial_port\n"
+			}
+
+			if {	[string first "local" $expect_out(0,string)] != -1 && \
+						[string first "IP address" $expect_out(0,string)] != -1 } {
+
+					set ip_address \
+					[string trim [lindex [split $expect_out(0,string) "\[ ]*"] 4]]
+					puts "\nIP address for interface: $ip_address\n"
+					.footer.footer_r configure \
+					-text "PPP Connected.\nNetwork Interface: $ppp_interface\nIP address: $ip_address" -anchor w -justify left
+						.connect configure -state normal -text "Disconnect" -command {
+							disconnect "Disconnected by User" 
+							set link_disconnected "true" 
+						}	
+						set connection_state "connecting"
+			}
+
+			if {	[string first "remote" $expect_out(0,string)] != -1 && \
+						[string first "IP address" $expect_out(0,string)] != -1 } {
+					#remote IP address 32.97.116.34
+					set remote_ip_address \
+					[string trim [lindex [split $expect_out(0,string) "\[ ]*"] 3]]
+					puts "\nRemote IP address for interface: $remote_ip_address\n"
+					.footer.footer_r configure \
+					-text "PPP Connected.\nNetwork Interface: $ppp_interface\nIP address: $ip_address\nRemote IP address: $remote_ip_address" -anchor w -justify left
+						.connect configure -state normal -text "Disconnect" -command {
+							disconnect "Disconnected by User" 
+							set link_disconnected "true" 
+						}
+
+						set connection_state "connected"
+	 					set link_disconnected "false" 
+						set_blinking_off
+						read_ip_up_$ostype
+						if { $accounts($active_account,resolv) == "peer" } {
+							write_ppp_resolv 
+						}
+						after 10000 monitor_link_$ostype
+
+						# remove connection script
+						if { [info exists pppd_config_file] == 1 } {
+							if { [file exists $pppd_config_file] == 1 } {
+								exec rm $pppd_config_file 
+							}
+						}
+
+
+			}
+			# rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+			# local  IP address 32.100.234.63
+			# remote IP address 204.146.246.229
+			# pppd exp6: rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+			# local  IP address 32.100.234.63
+			# remote IP address 204.146.246.229
+
+			# get pid 
+			if { [string first "CONNECT" $expect_out(0,string)] != -1 && \
+					[string first "started" $expect_out(0,string)] != -1 } {
+
+					#puts "pppd $spawn_id"
+					# the pid of the pppd 
+					set pid_line [split $expect_out(0,string) "\[ \t]*"] 
+					#puts "pid_line: $pid_line"
+
+					# get last string of line
+					set pid_string [lindex $pid_line end] 
+					#puts "pid_string: $pid_string"
+
+					set pppd_pid [string trimright [lindex [split $pid_string] 0] ")"]
+					#puts "pppd_pid: $pppd_pid"
+					.connect configure -state normal
+
+			}
+
+			#puts "pppd $spawn_id: $expect_out(0,string)"
+
+			if { [string first "script failed" $expect_out(0,string)] != -1 } {
+				disconnect "User disconnected or $expect_out(0,string)"
+			}
+			if { [string first "Terminating" $expect_out(0,string)] != -1 } {
+				disconnect $expect_out(0,string)
+			}
+			log_message $expect_out(0,string)
+		}
+		log_user 1
+		#post_connect
+}
+

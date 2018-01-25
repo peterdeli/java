@@ -1,0 +1,5 @@
+proc create_ip_up { } {
+	global accounts
+	set ip_up_file "/etc/ppp/ip-up"
+}
+

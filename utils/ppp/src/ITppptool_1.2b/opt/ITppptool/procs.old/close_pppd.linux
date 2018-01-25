@@ -1,0 +1,42 @@
+proc close_pppd { } {
+
+	#puts "proc close_pppd" 
+	global ppp_interface serial_port  port_id 
+	global connection_type ip_address spawn_id tip_id
+	global pppd_pid pppd_id
+	global kill_pppd
+
+	if { [info exists connection_type] != 1 } { return }
+
+	if { [info exists ppp_interface] != 1  || \
+			[string length $ppp_interface] < 1 } {
+
+		#puts "no ppp_interface found, trying to close spawn_id"
+
+		if { $connection_type == "pppd" } {
+			catch {
+				exec pkill pppd
+				exp_send ""
+				#puts "kill -TERM $pppd_pid"
+				catch { exec kill -TERM $pppd_pid }
+				set kill_pid [exp_pid -i $spawn_id] 
+				#puts "Sending kill to pid $kill_pid"
+				exec kill -TERM $kill_pid
+				#puts "pppd_pid == $pppd_pid"
+			}
+		
+		} else {
+			catch { [exp_send "~.\r"] }
+		}
+	} else {
+		#puts "Looking for /var/run/[set ppp_interface].pid"
+		set pppd_pid_file "/var/run/[set ppp_interface].pid"
+		if { [file exists $pppd_pid_file] == 1 } {
+			#puts "Executing $kill_pppd $pppd_pid_file"
+			exec $kill_pppd $pppd_pid_file
+		}
+	}
+	#puts "close_pppd done"
+
+}
+

@@ -1,0 +1,30 @@
+#!/bin/sh
+#    /etc/ppp/ip-up
+#    A program or script that is executed when the link  is
+#    available  for  sending and receiving IP packets (that
+#    is, IPCP has come up).  It is executed with the param-
+#     eter Iinterface-name tty-device speed local-IP-address
+#     remote-IP-address ipparam.
+
+if_name=$1
+tty_device=$2
+speed=$3
+local_ip=$4
+remote_ip=$5
+ipparam=$6
+
+cat<<EOF > /etc/ppp/ip-up.out
+if_name=$1
+tty_device=$2
+speed=$3
+local_ip=$4
+remote_ip=$5
+ipparam=$6
+DNS1=$DNS1
+DNS2=$DNS2
+EOF
+
+for env in `env`; do
+echo $env >> /etc/ppp/ip-up.out
+done
+

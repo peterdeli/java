@@ -1,0 +1,21 @@
+: 1 250
+1 i depend 60 5219 1046668003
+1 d none opt 0755 root sys
+1 d none opt/ITppptool 0755 root sys
+1 f none opt/ITppptool/copy_pppopts 4755 root sys 7636 65400 1046845872
+1 f none opt/ITppptool/kill_pppd.sh 4755 root sys 849 4050 1047281340
+1 f none opt/ITppptool/manage_resolv 4755 root sys 8460 53586 1046908706
+1 f none opt/ITppptool/options 0644 root sys 231 20465 1046838150
+1 f none opt/ITppptool/ppptool 0755 root sys 90966 47141 1048268071
+1 d none opt/iWork 0755 root sys
+1 d none opt/iWork/Gnome 0755 root sys
+1 d none opt/iWork/Gnome/applications 0755 root sys
+1 f none opt/iWork/Gnome/applications/ITppptool.desktop 0644 root sys 202 18617 1047499442
+1 d none opt/local 0755 root sys
+1 d none opt/local/bin 0755 root sys
+1 s none opt/local/bin/ppptool=../../$PKGINST/ppptool
+1 i pkginfo 251 20648 1048270313
+1 i postinstall 387 29667 1047499638
+1 i postremove 387 29685 1047499648
+1 i preinstall 30 2025 1047499611
+1 i preremove 30 2025 1047499611

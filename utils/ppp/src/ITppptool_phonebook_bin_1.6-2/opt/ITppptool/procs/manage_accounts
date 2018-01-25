@@ -1,0 +1,166 @@
+proc manage_accounts { } {
+
+    global accounts account_list active_account edit_account_name
+    # create win
+    # add r/l frames
+    # add text & scroll on left
+    # add buttons on right
+    # add account names to scroll text
+    # map buttons to commands
+    # create account window w/entry widgets,
+    # label/entry for each acct field
+
+  if { [winfo exists .account_manager_win] } { 
+     catch { wm deiconify .account_manager_win }  
+     catch { wm raise .account_manager_win }
+     catch { focus .account_manager_win }
+     return
+  }
+
+   toplevel .account_manager_win
+   wm title .account_manager_win "Account Manager"
+
+   # Two frames, one for a scrolling list of accounts, the other for the buttons
+
+   frame .account_manager_win.account_frame 
+   pack .account_manager_win.account_frame -side left -padx 1m -pady 1m -fill both -expand 1
+
+   listbox .account_manager_win.account_list -yscrollcommand \
+      ".account_manager_win.yscroll_bar set" -xscrollcommand \
+      ".account_manager_win.xscroll_bar set"
+   .account_manager_win.account_list configure -height 10 -width 50
+
+   scrollbar .account_manager_win.yscroll_bar -command \
+      ".account_manager_win.account_list yview" -relief sunken
+   .account_manager_win.yscroll_bar set 5 5 0 4
+
+   scrollbar .account_manager_win.xscroll_bar -command \
+      ".account_manager_win.account_list xview" -relief sunken \
+      -orient horizontal
+   .account_manager_win.xscroll_bar set 5 5 0 4
+
+   pack .account_manager_win.yscroll_bar -in .account_manager_win.account_frame \
+      -side right -fill y
+   pack .account_manager_win.xscroll_bar -in .account_manager_win.account_frame \
+      -side bottom -fill x
+   pack .account_manager_win.account_list \
+      -in .account_manager_win.account_frame -side left -fill both -expand 1
+
+   bind .account_manager_win.account_list <ButtonRelease-1> {
+      if { [string length \
+            [.account_manager_win.account_list curselection]] > 0 } {
+          set selected_account [list [selection get]]
+          puts "selected_account = $selected_account"
+          .account_manager_win.delete_button configure -state normal
+           
+          if { [winfo exists .edit_account] == 1 } {
+            if { $edit_account_name == $selected_account } {
+              .account_manager_win.delete_button configure -state disabled
+            } else {
+              .account_manager_win.delete_button configure -state normal
+            }
+
+            .account_manager_win.edit_button configure -state disabled  
+          } else {
+            .account_manager_win.edit_button configure -state normal  
+          }
+          .account_manager_win.select_button configure -state normal
+      } else {
+          .account_manager_win.delete_button configure -state disabled
+          .account_manager_win.edit_button configure -state disabled
+          .account_manager_win.select_button configure -state disabled
+      }
+   }
+
+   bind .account_manager_win.account_list <Double-ButtonPress-1> {
+      set active_account $selected_account
+      set_account $active_account
+      #.account_frame.account_button configure -text $active_account
+      destroy .account_manager_win
+   }
+
+   foreach account [set account_list] {
+    if { $accounts($account,status) != "DELETED" } {
+      .account_manager_win.account_list insert end "$accounts($account,name)"
+    }
+   }
+
+  frame .account_manager_win.button_frame
+  pack .account_manager_win.button_frame -padx 1m -pady 1m
+
+  button .account_manager_win.select_button -text "Make Active" \
+      -state disabled -command {
+         puts "selected_account = $selected_account"
+         set active_account $selected_account
+         #.account_frame.account_button configure -text $active_account
+         # check if swan or not - if not, enable password
+         set_account $active_account
+         #destroy .account_manager_win
+      }
+  button .account_manager_win.new_button -text New \
+      -command {
+        .account_manager_win.new_button configure -state disabled
+        puts "Create New Account"
+	# add new window to choose manual or automatic account creation
+        set choice [choose_account]
+        #create_account $choice
+      }
+  button .account_manager_win.edit_button -text Edit -state disabled \
+      -command {
+      puts "Edit Account $selected_account"
+      edit_account $selected_account
+      #.account_manager_win.edit_button configure -state disabled  
+    }
+  button .account_manager_win.delete_button -text Delete -state disabled \
+      -command {
+
+      puts "Delete Account"
+      set current_sel [.account_manager_win.account_list curselection]
+      puts "current selection: $current_sel: len: [string length $current_sel]"
+
+       set delete_acct_response [tk_messageBox -default no \
+           -type yesno -icon warning \
+           -message "Do you really want to delete the account \
+                    '$accounts($selected_account,name)' ?\n\n\
+                     Click YES to delete\n\
+                     Click NO to cancel\n" \
+           -title "Delete Account"]
+
+      if {"$delete_acct_response" == "no" } { return } 
+
+
+      if { [string length $current_sel] != 0  } {
+
+        .account_manager_win.account_list delete \
+        [.account_manager_win.account_list curselection]
+
+        #.account_manager_win.account_list delete \
+        #[.account_manager_win.account_list index $selected_account]
+
+        delete_account_menu $selected_account 
+          # if account is active, adjust front panel values
+          puts "Comparing selected account $selected_account to\
+          active account $active_account"
+          if { $selected_account == $active_account } {
+            set active_account ""
+            set_account $active_account
+          } 
+      } 
+
+      .account_manager_win.edit_button configure -state disabled
+      .account_manager_win.select_button configure -state disabled
+      .account_manager_win.delete_button configure -state disabled      
+  }
+   button .account_manager_win.close_button -text Close \
+      -command {destroy .account_manager_win}
+   pack .account_manager_win.select_button .account_manager_win.new_button \
+      .account_manager_win.edit_button .account_manager_win.delete_button \
+      .account_manager_win.close_button -in .account_manager_win.button_frame \
+      -ipadx 2 -ipady 2 -padx 2 -pady 2 -fill x
+
+	
+   center_window .account_manager_win 3 3
+}
+
+
+

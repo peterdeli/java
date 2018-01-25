@@ -1,0 +1,43 @@
+proc delete_account_menu {name} {
+
+	global menubar_widget
+	global acct_widget
+	global active_account
+	global accounts
+	global account_list
+	global account_keys
+	global saved_accounts
+
+
+	# find where it is
+	# number of indexes should correspond to llength $account_list
+	puts "Looking for menu entry $name"
+	set index [$acct_widget index $accounts($name,name)]
+
+	# delete accounts entry
+	foreach key $account_keys {
+		set accounts($name,$key) DELETED 
+		set saved_accounts($name,$key) DELETED 
+	}
+
+	# delete account_list entry
+	set account_list [lreplace $account_list \
+	[lsearch $account_list $name] \
+	[lsearch $account_list $name]]
+
+	puts "Deleting index $name at index $index"
+	$acct_widget delete $index
+
+	puts "account_list now contains: $account_list"
+	puts "accounts now contains:"
+	puts [array get accounts]
+
+	set saved_account_list $account_list
+	
+	# save menu position
+	# return index
+	return $index
+
+}
+
+# load global settings

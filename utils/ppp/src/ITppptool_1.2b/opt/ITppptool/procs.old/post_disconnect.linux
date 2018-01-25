@@ -1,0 +1,12 @@
+proc post_disconnect { } {
+
+	global post_disconnect_script 
+
+	if { [file exists $post_disconnect_script] } {
+	 #puts "exec $post_disconnect_script"
+	  exec $post_disconnect_script & 
+	}
+
+	return
+}
+

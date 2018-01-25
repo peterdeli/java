@@ -1,0 +1,15 @@
+[Desktop Entry]
+
+Name=Solaris PPP Dialup Tool
+
+Comment=ITpptool graphical interface for connecting to remote hosts via dialup 
+
+Exec=/opt/ITppptool/ppptool
+
+Terminal=0
+
+Type=Application
+
+Icon=/opt/iWork/Gnome/icons/ppptool.png
+
+Categories=Application;iWork

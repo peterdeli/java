@@ -1,0 +1,5 @@
+proc create_ip_down { } {
+	global accounts
+	set ip_down_file "/etc/ppp/ip-down"
+}
+

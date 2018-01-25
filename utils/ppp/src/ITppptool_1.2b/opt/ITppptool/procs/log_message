@@ -1,0 +1,7 @@
+proc log_message { message } {
+
+	catch { [.log_win.log_text insert end "$message\n"] }
+	catch { [.log_win.log_text yview end] }
+
+}
+

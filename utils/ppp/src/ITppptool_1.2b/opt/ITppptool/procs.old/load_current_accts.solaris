@@ -1,0 +1,58 @@
+proc load_current_accts { } {
+
+	global env
+	global ppp_dir
+
+	# list
+	global saved_account_list
+
+	# array (saved_account_name,key)
+	global saved_accounts
+
+	# account file names
+	global saved_account_file
+
+	global account_keys
+
+	set saved_account_name ""
+
+	if { [file exists $account_file] } {
+
+		set saved_account_fd [open $account_file r]
+
+				# parse into acct_array
+				for { set i 0 } { [gets $saved_account_fd line] != -1 } {incr i} {
+
+					if { [string length $line] < 1 } { continue }
+					set field [split $line "\t"]
+					set key [lindex $field 0]
+					string trim $key
+					puts "Key=$key"
+					set value [lindex $field 1]
+					puts "Value=$value"
+
+					# check key
+					if { [lsearch $saved_account_keys $key] == -1 } {
+						puts "Invalid key $key found in account file $acct"
+						continue
+					}
+
+					# make sure account name is same as file prefix
+					if { $key == "name" } {
+						# New account
+						puts "Account $value"
+						set saved_account_name $value
+						lappend saved_account_list $value
+					}
+					puts "Adding key '$key' value '$value' to saved_accounts"
+					set saved_accounts($saved_account_name,$key) $value
+				}
+
+				close $saved_account_fd
+	} 
+			# done
+			puts "Loaded saved_accounts"
+
+}
+
+

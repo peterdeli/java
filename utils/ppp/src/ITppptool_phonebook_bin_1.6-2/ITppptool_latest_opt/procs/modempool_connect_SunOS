@@ -1,0 +1,353 @@
+proc modempool_connect_SunOS { } {
+
+	puts "proc modempool_connect { } "
+
+	global ppp_interface serial_port ip_address
+
+	global connection_type
+	global connection_state 
+	global debug
+
+	global 	accounts account_list active_account baud_rate \
+	env flow_control init_string ip_enabled \
+	log_file log_messages message modem_port \
+	nat_transparency_mode network_interface \
+	password phone_number \
+	port port_speed spawn_id tokencard_response username \
+	baud_rate pppd_config_file username \
+	tip_id pkghome ppp_settings challenge_entered \
+	des_response seconds_remaining link_disconnected \
+	port_id start_pppd remote_ip_address mtu ip_up_file \
+	ostype os_defaults modem_port_fh footer_font
+
+
+	# initialize modem
+	if { [init_modem_$ostype] != 0 } { 
+		.footer.footer_r configure -text "Error Initializing Modem" 
+		.connect configure -text "Connect" -command connect -state normal
+		disconnect "Error Initializing Modem"
+		return
+	} else {
+		.footer.footer_r configure -text "Modem Initialized" 
+	}
+
+	
+  set connection_type "tip"
+	set pppd_started "false"
+	set link_disconnected "false" 
+	set mtu 0
+	set remote_ip_address "0.0.0.0"
+
+	# remote ip_up_file
+	#puts "removing $ip_up_file"
+
+	catch { exec rm $ip_up_file }
+
+	#set ppp_settings(init_string) "atz" 
+	#set ppp_settings(connect_string) ""
+	#set ppp_settings(port_speed) 38400
+	#set ppp_settings(flow_control) hardware
+	#set ppp_settings(modem_port) /dev/term/b
+	#set ppp_settings(ppp_options) "" 
+
+	set phone_number $accounts($active_account,number)
+	set baud_rate $ppp_settings(port_speed) 
+	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+	set port $ppp_settings(modem_port) 
+
+	# get ppp_options
+	puts "ppp_opts = $accounts($active_account,ppp_opts)"
+	set ppp_opts $accounts($active_account,ppp_opts)
+
+	# flow control
+	set flow_control ""
+	switch  $ppp_settings(flow_control) {
+		"hardware" { set flow_control crtscts }
+		"software" { set flow_control xonxoff }
+		"none" { set flow_control nocrtscts }
+	}
+	
+
+	#set username $accounts($active_account,uid) 
+	set username [.uidf.uid_r get] 
+	if { $username != $accounts($active_account,uid) } {
+		set accounts($active_account,uid) $username
+	}
+
+	# don't need passwd field
+
+	.passwdf.passwd_r configure -state disabled
+	.connect configure -state normal
+
+	puts "$phone_number $port $baud_rate $pppd_config_file $username"
+	log_messages "$phone_number $port $baud_rate $pppd_config_file $username"
+
+	set timeout 60
+	# close any tip_id's in case
+	catch { [exec pkill tip] }
+
+	### TIP over the modem ###
+
+	catch { spawn tip "-$baud_rate" $port }
+	log_messages "spawn tip -$baud_rate $port" 
+	#set tip_id $spawn_id
+
+	expect {
+
+				"BUSY" {
+					log_message "Line Busy\n"
+					disconnect "Line Busy"
+				}
+				"NO CARRIER" {
+					set  connection_state "disconnected"
+					sleep 5	
+					log_message $expect_out(buffer)
+					.connect configure -state normal -command connect
+					puts "Modem connection dropped" 
+				}
+				"EOT" {
+					puts "Received: $expect_out(buffer)"
+					.connect configure -state normal -command connect
+					#puts "Modem disconnected"
+					exp_continue
+				}
+				"all ports busy" { 
+					.footer.footer_r configure -text "all ports busy"
+					log_messages $expect_out(buffer)
+					exp_send "~.\r"
+					catch { exec pkill tip }
+				}	
+				"NO DIAL TONE" { 
+					log_messages $expect_out(buffer)
+					.connect configure -state normal -command connect
+					puts "NO DIAL TONE"
+				}
+				"connected" {
+					log_messages $expect_out(buffer)
+					puts "connection_state = $connection_state "
+					if { $connection_state != "connecting" } { 
+							 return
+					}
+					# dial
+					puts "Sending $phone_number"
+					puts "******************************\n"
+					puts "  Get your token card ready"
+					puts "  Enter your authorization #"
+					puts "  Then get read to key in the challenge"
+					puts "  Then enter the 'response' from the tokencard"
+					puts "  into the popup window"
+					puts "******************************"
+					.footer.footer_r configure -text "Dialing $phone_number"
+					exp_send "atdt $phone_number\r"
+					create_des_dialog
+				}
+		}
+
+		set timeout 120 
+		expect {
+
+				"NO CARRIER" {
+					log_messages $expect_out(buffer)
+					disconnect "NO CARRIER"
+					catch { destroy .des_dialog }
+					return
+				}
+
+				Username: { 
+					log_messages $expect_out(buffer)
+					exp_send "$username\r" 
+					exp_continue
+				}
+				password: { 
+					log_messages $expect_out(buffer)
+					exp_send "\r" 
+					expect {
+						"Authentication failed." {
+							puts "Authentication failed (1)"
+							log_message $expect_out(buffer)
+							log_message "Authentication failed (1)"
+							.footer.footer_r configure -text \
+							"Authentication failed." -anchor w -justify left
+							catch { destroy .des_dialog }
+							disconnect "Authentication failed."
+							return
+						}
+						# des card challenge/response
+						Challenge {
+							puts "Challenge (1)"
+							log_messages $expect_out(buffer)
+						}
+					}
+					exp_continue
+				}
+
+				"Authentication failed." {
+
+							puts "Authentication failed (2)"
+							log_message $expect_out(buffer)
+							log_message "Authentication failed (2)"
+							.footer.footer_r configure -text \
+							"Authentication failed." -anchor w -justify left
+							create_des_dialog	
+							exp_continue
+				}
+
+						# des card challenge/response
+						Challenge {
+							puts "Challenge (2)"
+							log_messages $expect_out(buffer)
+							exp_continue	
+						}
+
+						esponse?  {
+								log_message $expect_out(buffer)
+								#puts "expect_out(0,string) = $expect_out(0,string)"
+								#puts "expect_out(buffer) = $expect_out(buffer)"
+
+								# pop up entry, display challenge
+								#Challenge: 9 6024 Response? 0f68pc72
+
+								if { [winfo exists .des_dialog] != 1 } {  return } 
+
+								set host_challenge [lindex [split $expect_out(buffer)] 1]
+								set secret [lindex [split $expect_out(buffer)] 2]
+
+								.des_dialog.challenge_label configure -text \
+								"Challenge: $host_challenge $secret"
+
+								puts "\nhost_challenge=$host_challenge"
+								puts "secret=$secret"
+
+								pack .des_dialog.des_entry -after .des_dialog.challenge_label
+								.des_dialog.des_entry configure -state normal
+								focus .des_dialog.des_entry
+								pack .des_dialog.des_send_button -side left -anchor n
+								pack .des_dialog.close -side right -anchor n 
+								.des_dialog.instruction_label configure -text "\n\
+								Enter the challenge string above into your token card.\n\
+								Press 'E' on the token card and wait for the \n\
+								response string, and enter the 'response' from your \n\
+								token card into the entry box above." 
+
+								.footer.footer_r configure -text "Waiting for challenge response"
+								des_countdown
+
+								tkwait variable challenge_entered
+								if { [info exists des_response] == 1 } {
+									puts "Challenge: $des_response"
+									exp_send "$des_response\r" 
+									set timeout -1
+									exp_continue
+								} else {
+									puts "No challenge entered"
+									log_message "Disconnected: No challenge entered"
+									log_message "Challenge entry interval expired!" 
+
+									#.footer.footer_r configure -text "Challenge entry interval expired!" 
+									catch { exec pkill tip }
+									sleep 2
+									.connect configure -state normal -text "Connect" -command connect 
+									set_blinking_off
+									return
+								}
+							}
+						
+
+						"Local command?" {
+
+              if { [string first "Your IP address is" $expect_out(buffer)] != -1 } {
+                  puts "\n**** Found IP: $expect_out(buffer) ****\n"
+                  foreach line [split $expect_out(buffer) "\r\n"] {
+                    puts "PPPD: $line"
+                    if { [string first "Your IP" $line] != -1 } {
+											set ip_address [lindex [split $line " 	"] 4]	
+											set ip_address [string trimright $ip_address "."]
+											puts "IP address: $ip_address"
+											set mtu [lindex [split $line "  "] 7]
+											puts "MTU: $mtu"
+											.footer.footer_r configure -text "PPP Connected: $line" -font $footer_font -justify left
+                      break
+                    }
+                  }
+              }
+
+								log_message $expect_out(buffer)
+
+								# start pppd with account options
+								#  $flow_control
+
+								set pppd_params  "lock noipdefault"
+								if {  $accounts($active_account,debug) == "1"  } {
+									set pppd_params	"$pppd_params debug" 
+								}
+								if { [string length \
+											$accounts($active_account,ppp_opts)]  > 0 } {
+									set pppd_params	"$pppd_params $accounts($active_account,ppp_opts)" 
+								}
+								if {  $accounts($active_account,defroute) == "1" } {
+									set pppd_params	"$pppd_params defaultroute" 
+								}
+								if {  $accounts($active_account,resolv) == "peer" } {
+									set pppd_params	"$pppd_params usepeerdns" 
+								}
+										
+
+								#puts "exp_send /usr/bin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+								#exp_send "/usr/bin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+								puts "exp_send /usr/bin/pppd $pppd_params" 
+								exp_send "/usr/bin/pppd $pppd_params\n" 
+
+							.connect configure -text "Disconnect" -command {
+								catch { exec pkill pppd }
+								disconnect "User disconnected"
+								.footer.footer_r configure -text "User Disconnected"
+							} 
+							#puts "Reading ip-up output file"
+							if { [read_ip_up] != 0 } {
+								set port_speed "N/A"
+							}
+
+							if { $accounts($active_account,resolv) == "peer" } {
+								write_ppp_resolv 
+							}
+
+							#ppp_interface serial_port ip_address remote_ip_address port_speed mtu
+							.footer.footer_r configure -text \
+							"\nConnected:\n\
+							IP address: $ip_address\n\
+							MTU: $mtu\n\
+							Port Speed: $port_speed\n\
+							Remote IP address: $remote_ip_address\n" \
+							-font $footer_font -justify left
+							set connection_state "connected"
+							set_blinking_off
+							post_connect
+							monitor_link_$ostype
+							#exp_continue
+				}
+
+				">" {
+							log_messages $expect_out(buffer)
+								exp_send "ppp\r" 
+								sleep 1
+								exp_send "~C"
+								exp_continue
+
+				}
+
+				timeout { 
+					log_messages $expect_out(buffer)
+					puts "timeout: try again"
+					#sleep 2
+					#modempool_connect	
+				}
+
+				eof {
+					log_messages $expect_out(buffer)
+					puts "eof: Modem connection closed"
+				}
+
+			}
+	}
+
+

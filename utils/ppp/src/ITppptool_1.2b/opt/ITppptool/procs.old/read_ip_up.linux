@@ -1,0 +1,60 @@
+proc read_ip_up { } {
+
+	#puts "read_ip_up"
+	global ip_up_file	\
+			ppp_interface \
+			serial_port \
+			ip_address \
+			remote_ip_address
+
+		#if_name=$1
+		#tty_device=$2
+		#speed=$3
+		#local_ip=$4
+		#remote_ip=$5
+		#ipparam=$6
+		#DNS1=$DNS1
+		#DNS2=$DNS2
+
+		for { set i 0 } { $i < 12 } { incr i } {
+			#puts "Checking for $ip_up_file"
+			if { [file exists $ip_up_file] != 1 } {
+				sleep 5
+			} else {
+				break
+			}
+		}
+
+		if { [file exists $ip_up_file] != 1 } {
+			#puts "file $ip_up_file not found"
+			return -1
+		}
+
+			#puts "opening file $ip_up_file"
+			set ip_fd [open $ip_up_file r]
+			while { [gets $ip_fd line] != -1 } {
+				#puts $line
+				set ip_up_array([lindex [split $line "="] 0]) [lindex [split $line "="] 1]
+			}
+			close $ip_fd
+
+			#puts "remote_ip_address $ip_up_array(remote_ip)"
+			#puts "ip_address $ip_up_array(local_ip)"
+			#puts "ppp_interface $ip_up_array(if_name)"
+			#puts "serial_port $ip_up_array(tty_device)"
+
+			set remote_ip_address $ip_up_array(remote_ip)
+			set ip_address $ip_up_array(local_ip)
+			set ppp_interface $ip_up_array(if_name)
+			set serial_port $ip_up_array(tty_device)
+
+			# get mtu
+			catch { set ifconf [exec ifconfig $ppp_interface] }
+			if { [info exists ifconf] == 1 } {
+				set ifconf_split [split $ifconf " "] 
+				set mtu [lindex $ifconf_split [expr [lsearch $ifconf_split MTU] + 1]]
+				set ip_up_array(mtu) $mtu
+			}
+			return 0
+}
+

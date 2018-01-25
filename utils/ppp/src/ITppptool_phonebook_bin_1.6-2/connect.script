@@ -1,0 +1,12 @@
+/dev/ttyS0
+38400
+debug
+noproxyarp
+updetach
+usepeerdns
+nocrtscts
+nodefaultroute
+noipdefault
+user internet.smus.MERICAA
+password fredfred
+connect '/usr/sbin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"'

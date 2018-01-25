@@ -1,0 +1,84 @@
+proc init_modem_Linux { } {
+		global connection_state baud_rate ppp_settings spawn_list port_id
+		#puts "init_modem"
+
+		global ppp_settings
+		set init_string "AT &F1"
+
+		if { [info exists ppp_settings(init_string)] && \
+				 [string length $ppp_settings(init_string)] > 2 } {
+
+				set init_string $ppp_settings(init_string)
+		} 
+		puts "set error catch  system stty -F $ppp_settings(modem_port) -echoe -echo raw $ppp_settings(port_speed) err"
+		set error [catch { [system "stty -F $ppp_settings(modem_port) -echoe -echo raw $ppp_settings(port_speed)"] } err]
+		if { $error != 1 } {
+			#puts "Error setting baud rate for modem on port $ppp_settings(modem_port)"
+			return -1
+		}
+####################11111111111111111111####################
+#	if 	[spawn -noecho -open [ open $ppp_settings(modem_port) "RDWR NONBLOCK"]] != 0 
+####################11111111111111111111####################
+	set timeout 5
+	puts "open modem"
+
+	catch { close -i $port_id }
+
+		puts "spawn -noecho -open \[ open $ppp_settings(modem_port) RDWR NONBLOCK\]\]" 
+		if {	[spawn -noecho -open [ open $ppp_settings(modem_port) "RDWR NONBLOCK"]] != 0 } {
+			#set connection_state "unconnected"
+			puts "error initializing modem"
+			return -1
+		}   else {
+			lappend spawn_list $spawn_id
+			puts "set port_id $spawn_id"
+			set port_id $spawn_id
+			puts "exp_send -i $port_id ATZ"
+			exp_send -i $port_id "ATZ\r"
+			expect {
+				-i $port_id "OK" {
+						#puts "Sending init string $init_string"
+					 exp_send -i $port_id "$init_string\r" 
+				}
+				-i $port_id "NO CARRIER" {
+				puts "NO CARRIER detected, initializing with $init_string"
+				sleep 2
+				exp_send -i $port_id "$init_string\r" 
+				catch { close -i $port_id }
+				set connection_state "unconnected"
+				return 0 
+				}
+				-i $port_id timeout {
+					set connection_state "unconnected"
+					puts "Timeout waiting for OK from AT command"
+					.footer.footer_r configure -text "Modem not responding, check connections\n"
+					puts "closing $port_id"
+					catch { close -i $port_id }
+					.connect configure -text "Connect" -command connect 
+					return -1
+				}
+			}
+			expect { 
+				-i $port_id "NO CARRIER" {
+					catch { close -i $port_id }
+					#set connection_state "connecting"
+					return 0 
+				}
+				-i $port_id "OK" {
+					#puts "init_modem successful"
+					#set connection_state "connecting"
+					catch { close -i $port_id }
+					return 0
+			}
+				-i $port_id timeout {
+					#set connection_state "unconnected"
+					puts "timeout waiting for OK from AT command"
+					.footer.footer_r configure -text "Modem not responding, check connections\n"
+					catch { close -i $port_id }
+					.connect configure -text "Connect" -command connect 
+					return -1
+			}
+		}
+	 }
+	return 0
+}

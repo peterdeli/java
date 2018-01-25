@@ -1,0 +1,51 @@
+- hangs if no password entered ( I'm assuming AGNS accounts )
+
+- connections scripts run on non-SWAN connection
+
+- ~/.ppptool/connect.script is owned by root and is world readable.
+
+- We need to provide additional options to pppd via the GUI. For example,
+  novj, nocomp, plink etc. This should probably be a per-account option.
+
+- ppptool blows away for no obvious reason shortly after connecting.
+
+
+RFE
+
+- auto-save option ( on by default )
+
+- better logging ( and document '-debug' option )
+
+- Don't allow vpn client to kill pppd
+
+- When setting up an account, defaultroute should be set by default (as per spec)
+- an option to mark an account as a Sun modem pool.  If this is marked, 
+different fields will be "required" and different defaults set (like Token 
+card) and other options grayed out.  This also ties into whether the 
+connection scripts are run or not.
+
+- with regards to the password for the connection, the connect button 
+should not be "active" until a password is entered/available.
+
+- with regards to the autosave, there should be a  save button as well as a close on the Account Manager screen.
+
+
+> - We need to provide additional options to pppd via the GUI. For > example, >   novj, nocomp, plink etc. This should probably be a per-account option.
+>
+
+* default port speed should not be 9600.  I would set it to 57600 which 
+works with 28.8 modems.  115200 works with 56K modems in my testing.
+
+* RFE: fix up root requirements; only do what you have to as root.  You 
+should not need ro be root to call pppd if you have set up the 
+/etc/ppp/options file correctly as part of the pkg.   This is listed in the 
+Spec.  To refresh your memory :)
+http://cssit.central.sun.com/ccs/ps/iWork/solaris/v7/doc/sync_ppptool_braindump.txt
+
+If pppd is not being run as root, user's have much more control over it.
+
+* RFE: remove blinking lights.  It gives the impression of activity even if 
+there is none.  I would only have them blinking during the initial 
+connection.
+
+* User's password is in cleartext in the Edit Account screen. 

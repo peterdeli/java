@@ -1,0 +1,50 @@
+proc create_des_dialog { } {
+
+	global accounts
+	global active_account 
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global ppp_interface serial_port ip_address
+
+ 		toplevel .des_dialog -bg lightGray
+		entry .des_dialog.des_entry -width 20 -bg lightGray
+		label .des_dialog.challenge_label -text "Host:  Challenge:" -bg lightGray
+		label .des_dialog.instruction_label -text "\n\
+					 Get your DES card ready\n\
+					 Enter your authorization number\n\
+					 Then get ready to key in the Host Number\n\
+					 and Challenge when they appear above\n\n\
+					 Then press 'E' and wait for the response string,\n\
+					 and enter the 'response' from your DES card\n\
+					 into the entry box above" -bg lightGray
+
+		label .des_dialog.time_remaining -text "Waiting for Remote Connection" -bg lightGray
+		log_messages "Waiting for Remote Connection"
+		button .des_dialog.des_send_button -text "Send Response" \
+		-command { 
+				global des_response challenge_entered seconds_remaining
+				set des_response [.des_dialog.des_entry get]	
+				set challenge_entered "true"
+				#wm withdraw .des_dialog
+				set seconds_remaining "null"
+				destroy .des_dialog
+		}	
+		button .des_dialog.close -text "Close" \
+		-command {
+
+			#wm iconify .des_dialog
+			set seconds_remaining "null"
+			destroy .des_dialog
+		}
+		pack .des_dialog.challenge_label -anchor n
+		pack .des_dialog.des_entry -after .des_dialog.challenge_label
+		pack .des_dialog.instruction_label -anchor n
+		pack .des_dialog.time_remaining -anchor n
+		pack .des_dialog.des_send_button -side left -anchor n
+		pack .des_dialog.close -side right -anchor n 
+}
+

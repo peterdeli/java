@@ -1,0 +1,3778 @@
+h42652
+s 00016/00006/03126
+d D 1.12 03/03/07 10:21:13 pdel 12 11
+c 
+e
+s 00063/00023/03069
+d D 1.11 03/03/07 03:12:45 pdel 11 10
+c wow - setting to create /etc/resolv.conf
+e
+s 00023/00001/03069
+d D 1.10 03/03/07 02:25:40 pdel 10 9
+c OK, next change is add option to copy resolv to /etc or not
+e
+s 00003/00001/03067
+d D 1.9 03/03/07 01:48:19 pdel 9 8
+c OK - next version adds search field for dns
+e
+s 00011/00002/03057
+d D 1.8 03/03/07 01:38:01 pdel 8 7
+c OK
+e
+s 00076/00010/02983
+d D 1.7 03/03/06 14:12:58 pdel 7 6
+c more fixes
+e
+s 00015/00004/02978
+d D 1.6 03/03/06 12:57:59 pdel 6 5
+c 
+e
+s 00062/00010/02920
+d D 1.5 03/03/06 12:42:41 pdel 5 4
+c OK
+e
+s 00262/00064/02668
+d D 1.4 03/03/06 00:56:35 pdel 4 3
+c OK
+e
+s 00016/00006/02716
+d D 1.3 03/03/04 23:41:01 pdel 3 2
+c version before changing port_speed to menu entries
+e
+s 00059/00001/02663
+d D 1.2 03/03/04 22:22:48 pdel 2 1
+c 
+e
+s 02664/00000/00000
+d D 1.1 03/03/04 21:22:30 pdel 1 0
+c date and time created 03/03/04 21:22:30 by pdel
+e
+u
+U
+f e 0
+t
+T
+I 1
+#!/bin/sh
+
+#\
+D 12
+PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/local/bin:/opt/sfw/bin:/usr/ucb:/opt/local/exe:/opt/local/pkgs/tk:/opt/ITTOtcltk/bin
+E 12
+I 12
+PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/local/bin:/opt/sfw/bin:/usr/ucb:/opt/local/exe:/opt/local/pkgs/tk:/opt/ITTOtcltk/bin:/usr/openwin/bin:/usr/X11R6/bin
+E 12
+#\
+export PATH
+
+#\
+umask 022
+
+#\
+if [ -z "$DISPLAY" ]; then
+#\
+	echo "`date`: ERROR: DISPLAY environment not set"
+#\
+	exit 1
+#\
+fi
+
+# Look for wish/expectk. Use the following order for the search:
+# 1. Check for $EXPECTDIR, $TCLDIR
+# 2. Look for our standard location (/opt/ITTOtcl for Solaris,
+#    /usr/local/ITTOtcl for Linux)
+# 3. Look in the "standard" locations (/opt/local/bin, /usr/local/bin) and
+#    check the version of anything we find.
+
+#\
+if [ ${EXPECTDIR:-UNSET} != UNSET ]; then
+#\
+   BINDIR=${EXPECTDIR}
+#\
+elif [ ${TCLDIR:-UNSET} != UNSET ]; then
+#\
+   BINDIR=${TCLDIR}
+#\
+elif [ -d /opt/ITTOtcltk/bin/expectk ]; then
+#\
+   BINDIR=/opt/ITTOtcltk/bin
+#\
+elif [ -d /opt/sfw/bin ]; then
+#\
+   BINDIR=/opt/sfw/bin
+#\
+elif [ -f /opt/local/bin/expectk ]; then
+#\
+   BINDIR=/opt/local/bin
+#\
+elif [ -f /usr/local/bin/expectk ]; then
+#\
+   BINDIR=/usr/local/bin
+#\
+elif [ -f /usr/bin/expectk ]; then
+#\
+   BINDIR=/usr/bin
+#\
+fi
+
+# Should have found expectk. Check $BINDIR to make sure.
+
+#\
+if [ "${BINDIR}-" = "-" ]; then
+#\
+	echo  "`date`:"
+#\
+	echo "Error: Tcl/tk binary not found. To remedy this you can either:"
+#\
+	echo "-Install Tcl/Tk and Expect"
+#\
+	echo " -Set \$TCLDIR to the directory containing expectk"
+#\
+	exit 1
+#\
+fi
+
+#\
+OS=`uname -s`
+
+#\
+umask 022
+
+#\
+if [ $OS = "SunOS" ]; then
+#\
+  if [ -f "/usr/ucb/whoami" ]; then
+#\
+    USER_ID=`/usr/ucb/whoami`
+#\
+  else
+#\
+    USER_ID=`/bin/who am i | awk '{print $1}'`
+#\
+  fi
+#\
+elif [ $OS = "Linux" ]; then
+#\
+  USER_ID=`whoami`
+#\
+fi
+#\
+export USER_ID
+
+#\
+CONNECTION_TYPE="ppp"
+#\
+export CONNECTION_TYPE
+
+#\
+PPP_HOME=$HOME/.ppptool
+#\
+export PPP_HOME
+
+#\
+if [ ! -d $PPP_HOME ]; then
+#\
+  mkdir $PPP_HOME >> /tmp/ppp.err.$$ 2>&1 
+#\
+  if [ $? -ne 0 ]; then
+#\
+    echo "`date`: Error creating $PPP_HOME" 
+#\
+    exit
+#\
+  fi
+#\
+else
+#\
+  chmod 755 $PPP_HOME # just in case
+#\
+fi
+
+
+#\
+EXPECTK="$BINDIR/expectk"
+#\
+export EXPECTK
+
+# exec link target
+#\
+if [ -h $0 ]; then
+#\
+  cd `dirname $0`
+#\
+  link_target=`ls -l $0 | awk '{print $NF}'`
+#\
+  target=`basename $link_target`
+#\
+  cd `dirname $link_target`
+#\
+	echo "pppdir = `pwd`"
+#\
+	PKGHOME=`pwd`
+#\
+	export PKGHOME
+#\
+#exit
+#\
+  exec $EXPECTK $target  "$@" 
+#\
+else
+#\
+echo "pppdir = `pwd`"
+#\
+	PKGHOME=`pwd`
+#\
+	export PKGHOME
+#\
+#exit
+#\
+  exec $EXPECTK $0 "$@" 
+#\
+fi
+
+
+proc RandomInit { seed } {
+        global randomSeed
+        set randomSeed $seed
+}
+proc Random {} {
+        global randomSeed
+        set randomSeed [expr ($randomSeed*9301 + 49297) % 233280]
+        return [expr $randomSeed/double(233280)]
+}
+proc RandomRange { range } {
+D 4
+        expr int([Random]*$range)
+E 4
+I 4
+        return [expr int([Random]*$range)]
+E 4
+}
+
+proc build_menus { } {
+
+	##############################
+	# Create GUI
+	##############################
+
+	. configure -bg lightGray
+	menu .menubar -bg lightGray
+
+	# attach it to the main window
+	. config -menu .menubar
+	global active_account
+	global accounts
+	global connection_state
+	global bulblist
+	global bulbs
+	global on_color
+	global off_color
+	global bulb_colors
+	global acct_width 30
+
+	#set bulb_colors { yellow red green blue orange violet pink }
+	#set bulb_colors { yellow red lightGreen black }
+	#set bulb_colors { black green red #000000 }
+	set bulb_colors { black red #000000 }
+
+	set on_color [lindex $bulb_colors 0]
+	set off_color [lindex $bulb_colors 1] 
+
+	global save_accounts_prompt
+	set save_accounts_prompt "false"
+
+	set connection_state "connecting"
+
+	###############################
+	# Create more cascade menus
+	##############################
+	foreach m {File Edit Accounts Help} {
+
+		# same as 'set File [ menu .. ]'
+		set $m [menu .menubar.m$m]
+
+		if { $m == "Help" } {
+			# figure out how to put on the right side
+			#.menubar add cascade -label "     " -menu .menubar.mFill 
+			.menubar add cascade -label $m -menu .menubar.m$m 
+		} else {
+			.menubar add cascade -label $m -menu .menubar.m$m
+		}
+	}
+	##############################
+	# Add Menu Items
+	##############################
+	#puts "\$File = $File"
+D 4
+	$File add command -label "Save Settings" -command { 
+E 4
+I 4
+	$File add command -label "Save Accounts" -command { 
+E 4
+		puts "Save Settings" 
+		set save_accounts_prompt "true"
+		if { [save_accounts "save"] == 1 } { 
+			set save_accounts_prompt "false"
+		}
+		set save_accounts_prompt "false"
+	}
+	$File add command -label "View Log" -command { 
+
+			view_log
+	
+	} 
+	$File add command -label Quit -command {
+
+		puts "Quit"
+		puts "close_pppd"
+		close_pppd
+		global save_accounts_prompt
+		# Check if files need saving
+		set save_accounts_prompt "true"
+		if { [save_accounts "exit"] == 1 } { 
+			set save_accounts_prompt "false"
+			exit 
+		}
+		set save_accounts_prompt "false"
+		
+	}
+
+	$Edit add command  -label "Manage Accounts" -command { 
+		puts "Manage Accounts" 
+		manage_accounts
+	}
+	$Edit add command -label "Edit Preferences" -command { 
+		puts "Edit Preferences" 
+		edit_prefs
+	}
+
+	$Help add command -label "About PPP Tool" -command { puts "About PPP Tool" }
+	$Help add command -label "PPP Tool Help" -command { puts "PPP Tool Help" }
+
+	frame .mid -bg lightGray
+
+	label .acct_label -text "Active Account: No Account loaded" -relief groove -bg lightGray
+	pack .acct_label -in .mid -fill x
+	#label .color -text "Color" -bg white 
+	#pack .color -in .mid
+
+	pack .mid  -fill x
+
+	# account window display
+	#set no_acct_txt "No Account loaded"
+	set no_acct_txt ""
+	set acct_width 30
+	set pad_val 3 
+	set descr_bg lightGreen
+	#	 name
+	frame .namef  -bg lightGray
+	label .namef.name_l -text "Account:" -bg $descr_bg -relief groove 
+	label .namef.name_r -text $no_acct_txt -bg lightBlue -width $acct_width -relief groove 
+	pack .namef.name_r -side right -pady [expr $pad_val * 2]
+	pack .namef.name_l -side right -pady $pad_val
+	.namef.name_r configure -anchor w
+	#	 uid
+	frame .uidf -bg lightGray
+	label .uidf.uid_l -text "User ID:"  -bg $descr_bg -relief groove 
+	entry .uidf.uid_r -text $no_acct_txt -bg lightYellow -width $acct_width  -relief groove 
+	pack .uidf.uid_r -side right -pady $pad_val
+	pack .uidf.uid_l -side right -pady $pad_val
+	#.uidf.uid_r configure  -anchor w 
+
+
+	#	 passwd
+	frame .passwdf -bg lightGray
+	label .passwdf.passwd_l -text "Password: "  -bg $descr_bg -relief groove 
+	entry .passwdf.passwd_r -text $no_acct_txt -bg lightYellow -width $acct_width  \
+	-relief groove  -show *
+	pack .passwdf.passwd_r -side right -pady $pad_val
+	pack .passwdf.passwd_l -side right -pady $pad_val
+	#.passwdf.passwd_r configure  -anchor w 
+
+	#	 number
+	frame .numberf -bg lightGray
+	label .numberf.number_l -text "Phone Number:" -bg $descr_bg  -relief groove 
+	label .numberf.number_r -text $no_acct_txt -bg lightBlue -width $acct_width  -relief groove 
+	pack .numberf.number_r -side right -pady $pad_val
+	pack .numberf.number_l -side right -pady $pad_val
+	.numberf.number_r configure  -anchor w 
+	#	 domain
+	#	 ns1
+	#	 ns2
+	#	 authtype
+	frame .authtypef -bg lightGray
+	label .authtypef.authtype_l -text "Authentication Type: "  -bg $descr_bg -relief groove 
+	label .authtypef.authtype_r -text $no_acct_txt  -bg lightBlue -width $acct_width  -relief groove 
+	pack .authtypef.authtype_r -side right -pady $pad_val
+	pack .authtypef.authtype_l -side right -pady [expr $pad_val * 2]
+	.authtypef.authtype_r configure  -anchor w 
+
+
+	pack .namef -in .mid -anchor w -fill x
+	pack .uidf -in .mid -anchor w -fill x
+	pack .passwdf -in .mid -anchor w -fill x
+	pack .numberf -in .mid -anchor w -fill x
+	pack .authtypef -in .mid -anchor w -fill x
+
+	frame .connect_frame -bg lightGray
+
+	button .connect -text "Connect" -width 20 \
+	-state normal -command connect 
+
+	if { [info exists active_account] != 1 } {
+		.connect configure -state disabled
+	}
+
+	pack .connect -in .connect_frame
+	pack .connect_frame -pady 10
+
+	frame .cframe -bg lightGray
+	canvas .cframe.can -width 220 -height 20  -bg lightGray
+
+	set x1 5 
+	set y1 5
+	set x2 15
+	set y2 15
+	foreach can_oval { 0 1 2 3 4 5 6 7 8 9 10 11 } {
+		.cframe.can create oval $x1 $y1 $x2 $y2 -fill red -width 2 -tag "bulb[set can_oval]"
+		incr x1 18 
+		set x2 [expr $x1 + 10]	
+		lappend bulblist "bulb[set can_oval]"
+		set bulbs(bulb[set can_oval],color) [lindex $bulb_colors 0]
+		#puts "set bulbs(bulb[set can_oval],color) [lindex $bulb_colors 0]"
+		#puts "bulbs(bulb[set can_oval],color) == $bulbs(bulb[set can_oval],color)" 
+	}
+	pack .cframe.can
+	pack .cframe 
+
+	frame .modembutton_text
+	foreach modem_text { HS AA CD OH RD SD TR MR RS CS SYN FAX } {
+		label .modembutton_text._$modem_text -text $modem_text -bg black -fg white -font {times 6}
+		pack .modembutton_text._$modem_text -side left
+	}
+	pack .modembutton_text 
+
+	frame .footer -bg lightGray
+	label .footer.footer_l -text "Status:" -relief groove -bg lightGray
+	label .footer.footer_r -text "No connection" -relief groove -bg lightGray
+	pack .footer.footer_l -side left 
+	pack .footer.footer_r -side left -fill x -expand 1
+	.footer.footer_r configure -anchor w -justify left	
+	pack .footer -anchor s -side bottom -fill x -expand 1 -pady 5
+
+	global menubar_widget
+	set menubar_widget .menubar 
+	global acct_widget
+	set acct_widget $Accounts
+
+	add_accounts
+	set_active
+
+
+}
+
+proc save_prefs { } {
+
+	global ppp_config_file
+	global ppp_settings
+I 4
+	global ppp_settings_saved
+E 4
+
+I 4
+	set save_needed "false"
+
+E 4
+	#set ppp_config_file "$ppp_dir/ppp_config"
+	#set ppp_settings(init_string) "atz" 
+	#set ppp_settings(connect_string) ""
+	#set ppp_settings(port_speed) 38400
+	#set ppp_settings(flow_control) hardware
+	#set ppp_settings(modem_port) /dev/term/b
+	#set ppp_settings(ppp_options) "" 
+
+D 4
+	set config_w [open $ppp_config_file w]
+
+	puts "Saving ppp prefs"
+E 4
+	foreach { key value } [array get ppp_settings] {
+D 4
+		puts "$key\t$value"
+		puts $config_w "$key\t$value"
+E 4
+I 4
+		if { $ppp_settings($key) != $ppp_settings_saved($key) } {
+			set save_needed "true"
+			break
+		}
+E 4
+	}
+
+D 4
+	puts "ppp Prefs Saved"
+	close $config_w
+E 4
+I 4
+	if { $save_needed == "true" } {
+E 4
+
+I 4
+		set config_w [open $ppp_config_file w]
+
+		puts "Saving ppp prefs"
+		foreach { key value } [array get ppp_settings] {
+			puts "$key\t$value"
+			puts $config_w "$key\t$value"
+			set ppp_settings_saved($key) $value
+		}
+		puts "ppp Prefs Saved"
+		close $config_w
+
+	} else {
+		puts "No Save needed for PPP Prefs"
+	}
+
+E 4
+}
+
+proc save_accounts {prompt_type} {
+
+I 4
+
+E 4
+	puts "proc save_accounts"
+	global save_accounts_prompt
+	
+	global env
+
+	global accounts
+
+	global saved_accounts
+
+	global ppp_settings
+
+	global ppp_dir
+	#set ppp_dir "$env(HOME)/.ppptool" 
+
+	global ppp_config_file
+	#set ppp_config_file "$ppp_dir/ppp_settings"
+
+	# list
+	global active_account
+
+	global account_list
+	global saved_account_list
+
+	global account_keys
+	global account_file
+
+	set save_needed false
+	set return_status 1
+
+	# compare account_list to saved_account_list
+	if { [llength $account_list] != [llength $saved_account_list] } {
+		# something changed
+		# write out accounts array
+		puts "llength account_list != llength saved_account_list"
+		set save_needed true
+
+	} else {
+
+		# number of accounts equal, but may have different names
+		puts "account_list == saved_account_list"
+		foreach account $account_list {
+			if { [lsearch $saved_account_list $account] == -1 } {
+				puts "lsearch saved_account_list $account == -1"
+				set save_needed true
+				break
+			} else {
+				puts "lsearch saved_account_list $account != -1"
+			}
+		}
+	}
+
+	if { $save_needed == "false" } {	
+
+		foreach { key value } [array get accounts] {
+			puts "Key=$key, value=$value"
+			# we should find a match for each
+			# if not, something was deleted
+			puts "info exists saved_accounts($key) :?"
+			puts "saved_accounts($key) == $value :?"
+			if { [info exists saved_accounts($key)] != 1 } {
+				puts "save_needed: info exists saved_accounts($key) != 1"
+				set save_needed true
+				break
+			} elseif { $saved_accounts($key) != $value } {
+				puts "save_needed: saved_accounts($key) != $value"
+				set save_needed true
+				break
+			}
+		}
+
+		foreach { key value } [array get saved_accounts] {
+			puts "Key=$key, value=$value"
+			# we should find a match for each
+			# if not, something was added
+			puts "info exists accounts($key) :?"
+			puts "accounts($key) = $value :?"
+			if { [info exists accounts($key)] != 1 } {
+				puts "save_needed: info exists accounts($key) != 1"
+				set save_needed true
+				break
+			} elseif { $accounts($key) != $value } {
+				puts "save_needed: accounts($key) != $value"
+				puts "accounts($key) != $value"
+				set save_needed true
+				break
+			}
+		}
+
+	}
+
+	if { $save_needed == "true" } {
+
+		if {  $save_accounts_prompt == "true" } {
+
+			if { $prompt_type == "exit" } {
+	       set warning_return [tk_messageBox -default yes \
+           -type yesnocancel -icon warning \
+D 4
+           -message "Would you like to save your changes first? \n\n\
+                     YES to save then exit\n\
+                     NO to exit without saving\n\
+                     CANCEL to return to PPP Tool\n" \
+E 4
+I 4
+           -message "To save your changes:\n\n\
+                     Click YES to save then exit\n\
+                     Click NO to exit without saving\n\
+                     Click CANCEL to return to PPP Tool\n" \
+E 4
+           -title "Unsaved Changes"]
+			} elseif { $prompt_type == "save" } {
+
+	       set warning_return [tk_messageBox -default ok \
+           -type okcancel -icon warning \
+           -message "Would you like to save your changes? \n\n\
+                     OK to save\n\
+                     CANCEL to return to PPP Tool\n" \
+           -title "Unsaved Changes"]
+
+			}
+
+        if {"$warning_return" == "yes" || "$warning_return" == "ok"} {
+
+						puts "Account list changed, Saving account info .."
+						set account_w [open $account_file w] 
+						puts "writing to $account_file:"
+						foreach account_name $account_list  {
+							foreach key [set account_keys] {
+								if { [info exists accounts($account_name,$key)] } {
+									puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) $accounts($account_name,$key)
+
+								} else {
+									set accounts($account_name,$key) ""
+									puts "$key\t$accounts($account_name,$key)"
+									puts $account_w "$key\t$accounts($account_name,$key)"
+
+									# set save_accounts to current values
+									set saved_accounts($account_name,$key) "" 
+
+								}
+							}
+						}
+						# set save_account list to current values
+						set saved_account_list $account_list
+
+						puts "Wrote account file $account_file"
+						close $account_w
+I 4
+
+						# write prefs
+						save_prefs
+E 4
+						set save_needed "false"
+           set return_status 1
+
+        } elseif {"$warning_return" == "no"} {
+           set return_status 1
+        } elseif {"$warning_return" == "cancel"} {
+           set return_status 0
+        }
+	
+		}
+
+} else {
+		puts "No save needed"
+	set save_needed "false"
+}
+
+	return $return_status
+
+}
+
+proc manage_accounts { } {
+
+		global accounts account_list active_account
+		# create win
+		# add r/l frames
+		# add text & scroll on left
+		# add buttons on right
+		# add account names to scroll text
+		# map buttons to commands
+		# create account window w/entry widgets,
+		# label/entry for each acct field
+
+	if { [winfo exists .account_manager_win] } { 
+		 catch { wm deiconify .account_manager_win }	
+		 catch { wm raise .account_manager_win }
+		 return
+	}
+
+   toplevel .account_manager_win
+   wm title .account_manager_win "Account Manager"
+
+   # Two frames, one for a scrolling list of accounts, the other for the buttons
+
+   frame .account_manager_win.account_frame
+   pack .account_manager_win.account_frame -side left -padx 1m -pady 1m
+
+   listbox .account_manager_win.account_list -yscrollcommand \
+      ".account_manager_win.yscroll_bar set" -xscrollcommand \
+			".account_manager_win.xscroll_bar set"
+   .account_manager_win.account_list configure -height 10
+
+   scrollbar .account_manager_win.yscroll_bar -command \
+      ".account_manager_win.account_list yview" -relief sunken
+   .account_manager_win.yscroll_bar set 5 5 0 4
+
+   scrollbar .account_manager_win.xscroll_bar -command \
+      ".account_manager_win.account_list xview" -relief sunken \
+			-orient horizontal
+   .account_manager_win.xscroll_bar set 5 5 0 4
+
+   pack .account_manager_win.yscroll_bar -in .account_manager_win.account_frame \
+      -side left -fill y
+   pack .account_manager_win.xscroll_bar -in .account_manager_win.account_frame \
+      -side bottom -fill x
+   pack .account_manager_win.account_list \
+      -in .account_manager_win.account_frame -side left 
+
+   bind .account_manager_win.account_list <ButtonRelease-1> {
+D 5
+      set selected_account [list [selection get]]
+			puts "selected_account = $selected_account"
+I 4
+			.account_manager_win.delete_button configure -state normal
+			.account_manager_win.edit_button configure -state normal	
+E 5
+I 5
+			if { [string length \
+						[.account_manager_win.account_list curselection]] > 0 } {
+					set selected_account [list [selection get]]
+					puts "selected_account = $selected_account"
+					.account_manager_win.delete_button configure -state normal
+					.account_manager_win.edit_button configure -state normal	
+					.account_manager_win.select_button configure -state normal
+			} else {
+					.account_manager_win.delete_button configure -state disabled
+					.account_manager_win.edit_button configure -state disabled
+					.account_manager_win.select_button configure -state disabled
+			}
+E 5
+E 4
+   }
+
+   bind .account_manager_win.account_list <Double-ButtonPress-1> {
+      set active_account $selected_account
+			set_account $active_account
+      #.account_frame.account_button configure -text $active_account
+      destroy .account_manager_win
+   }
+
+   foreach account [set account_list] {
+I 8
+		if { $accounts($account,status) != "DELETED" } {
+E 8
+      .account_manager_win.account_list insert end "$accounts($account,name)"
+I 8
+		}
+E 8
+   }
+
+  frame .account_manager_win.button_frame
+  pack .account_manager_win.button_frame -padx 1m -pady 1m
+
+  button .account_manager_win.select_button -text "Make Active" \
+D 5
+      -command {
+E 5
+I 5
+      -state disabled -command {
+E 5
+				 puts "selected_account = $selected_account"
+         set active_account $selected_account
+         #.account_frame.account_button configure -text $active_account
+				 # check if swan or not - if not, enable password
+				 set_account $active_account
+         #destroy .account_manager_win
+      }
+  button .account_manager_win.new_button -text New \
+      -command {
+				puts "Create New Account"
+				create_account
+			}
+D 4
+  button .account_manager_win.edit_button -text Edit \
+E 4
+I 4
+  button .account_manager_win.edit_button -text Edit -state disabled \
+E 4
+      -command {
+			puts "Edit Account $selected_account"
+			edit_account $selected_account
+I 4
+D 8
+			.account_manager_win.edit_button configure -state disabled	
+E 8
+I 8
+			#.account_manager_win.edit_button configure -state disabled	
+E 8
+E 4
+		}
+D 4
+  button .account_manager_win.delete_button -text Delete \
+E 4
+I 4
+  button .account_manager_win.delete_button -text Delete -state disabled \
+E 4
+      -command {
+
+			puts "Delete Account"
+			set current_sel [.account_manager_win.account_list curselection]
+D 4
+			puts "current selection: $current_sel"
+E 4
+I 4
+			puts "current selection: $current_sel: len: [string length $current_sel]"
+E 4
+
+D 4
+      .account_manager_win.account_list delete \
+			[.account_manager_win.account_list curselection]
+E 4
+I 4
+			if { [string length $current_sel] != 0  } {
+E 4
+
+D 4
+      #.account_manager_win.account_list delete \
+			#[.account_manager_win.account_list index $selected_account]
+E 4
+I 4
+				.account_manager_win.account_list delete \
+				[.account_manager_win.account_list curselection]
+E 4
+
+D 4
+			delete_account_menu $selected_account 
+				# if account is active, adjust front panel values
+				puts "Comparing selected account $selected_account to\
+				active account $active_account"
+				if { $selected_account == $active_account } {
+					set active_account ""
+					set_account $active_account
+				}
+				
+E 4
+I 4
+				#.account_manager_win.account_list delete \
+				#[.account_manager_win.account_list index $selected_account]
+
+				delete_account_menu $selected_account 
+					# if account is active, adjust front panel values
+					puts "Comparing selected account $selected_account to\
+					active account $active_account"
+					if { $selected_account == $active_account } {
+						set active_account ""
+						set_account $active_account
+D 7
+					}
+E 7
+I 7
+					} 
+E 7
+D 5
+			}
+E 5
+I 5
+			} 
+
+			.account_manager_win.edit_button configure -state disabled
+			.account_manager_win.select_button configure -state disabled
+E 5
+			.account_manager_win.delete_button configure -state disabled			
+E 4
+	}
+   button .account_manager_win.close_button -text Close \
+      -command {destroy .account_manager_win}
+   pack .account_manager_win.select_button .account_manager_win.new_button \
+      .account_manager_win.edit_button .account_manager_win.delete_button \
+      .account_manager_win.close_button -in .account_manager_win.button_frame \
+      -ipadx 2 -ipady 2 -padx 2 -pady 2 -fill x
+}
+
+
+
+proc delete_account {account_name} {
+
+
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+
+		delete_account_menu $account_name
+
+}
+
+proc edit_account {edited_account_name} {
+
+I 7
+
+		puts "edit_account"
+E 7
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+		global edit_account_name
+		set edit_account_name $edited_account_name
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+		global authtype
+		global defroute
+I 11
+		global resolv
+E 11
+		global active_account
+I 7
+		global required_keys
+E 7
+
+I 8
+		#.account_manager_win.account_list selection clear 0 end
+		.account_manager_win.edit_button configure -state disabled	
+D 9
+
+E 9
+I 9
+		.account_manager_win.delete_button configure -state disabled
+E 9
+E 8
+		set top .edit_account
+		toplevel [set top] 
+
+I 7
+    frame [set top].required_key_frame
+    label [set top].required_key_frame.required_key -text "Required Fields indicated by '**'"
+    pack [set top].required_key_frame.required_key
+    pack [set top].required_key_frame -anchor n
+	
+
+E 7
+		foreach key [set account_keys] {
+
+			if { $key == "status" } { continue }
+I 4
+			if { $key == "resolv_file" } { continue }
+
+E 4
+			set value $account_strings($key)
+			set [set key]_frame [set top].[set key]_frame
+
+			frame [set [set key]_frame]
+
+			puts "key = $key"
+			if { $key == "authtype" } {
+				# radio buttons for
+				# pap chap challenge card
+
+				radiobutton [set [set key]_frame].[set key]_radio_pap -text \
+				"PAP" -variable authtype -value "pap" -width 11
+
+				pack [set [set key]_frame].[set key]_radio_pap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_chap -text \
+				"CHAP" -variable authtype -value "chap" -width 11
+				pack [set [set key]_frame].[set key]_radio_chap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_token -text \
+				"Token Card" -variable authtype -value "tokencard" -width 11
+				pack [set [set key]_frame].[set key]_radio_token -side right
+
+D 7
+				label [set [set key]_frame].[set key]_label -text $value 
+E 7
+I 7
+				label [set [set key]_frame].[set key]_label -text "** $value" 
+E 7
+				pack [set [set key]_frame].[set key]_label -side right
+
+				set authtype $accounts($edit_account_name,authtype)
+
+			} elseif { $key == "defroute" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Set default route" -anchor w -onvalue "1" \
+				-offvalue "0" -variable defroute -width 42 
+
+				set defroute $accounts($edit_account_name,defroute)
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+I 11
+			} elseif { $key == "resolv" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+				-offvalue "0" -variable resolv -width 42 
+
+				puts "resolv for account $edit_account_name = \
+							$accounts($edit_account_name,resolv)"
+				set resolv $accounts($edit_account_name,resolv)
+
+				puts "resolv == $resolv"
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+E 11
+			} else {
+				entry [set [set key]_frame].[set key]_entry -width 45
+
+				eval [set [set key]_frame].[set key]_entry insert 0 \
+				\"$accounts($edit_account_name,$key)\"
+
+				pack [set [set key]_frame].[set key]_entry -side right
+D 7
+				label [set [set key]_frame].[set key]_label -text $value 
+E 7
+I 7
+
+        if { [lsearch $required_keys $key] != -1 } {
+          label [set [set key]_frame].[set key]_label -text "** $value"
+        } else {
+          label [set [set key]_frame].[set key]_label -text $value
+        }
+
+E 7
+				pack [set [set key]_frame].[set key]_label -side right
+				pack [set [set key]_frame].[set key]_entry -anchor w
+			}
+
+			pack [set [set key]_frame] -fill x -expand 1 -pady 5
+		}
+
+		frame [set top].button_frame
+		button [set top].button_frame.save -text "Save Edits" -command {
+I 7
+
+			puts "Save Edits"
+E 7
+			# get all entries
+			# Check if 'name' has been changed
+			# if so, lreplace old account name from account_list
+			# add new account name
+			# add to accounts array and account_list
+			global edit_account
+			global edit_account_name
+			global authtype
+			global defroute
+I 11
+			global resolv
+E 11
+			global active_account
+
+D 7
+			set new_account_name {}
+E 7
+I 7
+      # check if name is already taken
+      set new_account_name [list [.edit_account.name_frame.name_entry get]]
+
+      if { $new_account_name == "" } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+      } elseif { [string length $new_account_name] < 1 } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+
+      }
+
+			#set new_account_name {}
+E 7
+			set delete_account_flag "true"
+			foreach key [set account_keys] {
+D 7
+				
+E 7
+					# popup for required fields
+D 7
+
+E 7
+					if { $key == "status" } { continue }
+I 4
+					if { $key == "resolv_file" } { continue	}
+E 4
+D 7
+
+E 7
+					if { $key == "authtype" } {
+D 7
+						set edit_account($key) $authtype 
+E 7
+I 7
+            if { [string length $authtype] < 1 } {
+              tk_messageBox -type ok -icon error -title \
+              "$account_strings($key) Required" -message  \
+              "Please Enter $account_strings($key)"
+              return
+            } else {
+              set edit_account($key) $authtype
+            }
+E 7
+					} elseif { $key == "defroute" } {
+						set edit_account($key) $defroute
+I 11
+					} elseif { $key == "resolv" } {
+						set edit_account($key) $resolv
+E 11
+					} else {
+								set [set key]_frame .edit_account.[set key]_frame
+								set key_value [[set [set key]_frame].[set key]_entry get]
+I 7
+								puts "924"
+                if { [lsearch $required_keys $key] != -1 && \
+															[string length $key_value] < 1 } {
+                    tk_messageBox -type ok -icon error -title \
+                    "$account_strings($key) Required" -message  \
+                    "Please Enter $account_strings($key)"
+                    return
+								}
+E 7
+								puts "$key: $key_value" 
+								set edit_account($key) $key_value 
+D 7
+
+E 7
+								if { $key == "name" } { 
+									set new_account_name  [list $key_value] 
+									set new_account_string $key_value
+									set old_account_string $accounts($edit_account_name,name) 
+									set replace_index [lsearch $account_list $edit_account_name]
+D 7
+
+E 7
+									# Check if name has changed
+									if { $edit_account_name != $new_account_name } {
+										puts "replacing $edit_account_name with $new_account_name\
+										at index $replace_index"
+										set account_list [lreplace $account_list $replace_index \
+										$replace_index  $new_account_name]
+										puts "account_list == $account_list"
+I 4
+
+										# save resolv_file name from old account
+										set edit_account(resolv_file) \
+										$accounts($edit_account_name,resolv_file)
+I 8
+										set edit_account(status) \
+										$accounts($edit_account_name,status)
+E 8
+
+E 4
+									} else {
+										# name has not changed, don't delete from accounts
+										# in delete_account_menu
+										set delete_account_flag "false"
+									}
+								}
+I 7
+
+
+E 7
+					}
+						
+			}
+
+I 7
+
+
+
+E 7
+			if { $delete_account_flag == "false" } {
+
+				foreach { key value } [array get edit_account] {
+					puts "accounts($new_account_name,$key) = $value" 
+					set accounts($new_account_name,$key) $value 
+				}
+D 8
+
+E 8
+				set_account $new_account_name
+
+I 4
+				# write resolv file in case changed
+				write_resolv_file $accounts($new_account_name,name)	
+
+E 4
+			} else {
+					
+				# add to accounts
+				puts "account name: $new_account_name"
+				puts "account string: $new_account_string"
+				set accounts($new_account_name,name) $new_account_string
+
+				foreach { key value } [array get edit_account] {
+					puts "accounts($new_account_name,$key) = $value" 
+					set accounts($new_account_name,$key) $value 
+				}
+I 4
+				# write resolv file in case changed
+				write_resolv_file $accounts($new_account_name,name)	
+
+E 4
+				# delete old account	
+				set deleted_index [delete_account_menu $edit_account_name] 
+				# add to Accounts menu and acct manager
+				add_account_menu $new_account_name $deleted_index
+
+				# remove from account list
+				set account_box_items [.account_manager_win.account_list get 0 end]
+				foreach item $account_box_items {
+					if { $item == $old_account_string } {
+						puts "deleting $item from account list at index \
+						[lsearch $account_box_items $item]"
+						.account_manager_win.account_list delete \
+						[lsearch $account_box_items $item]
+					}
+				}
+				
+				.account_manager_win.account_list insert $replace_index "$accounts($new_account_name,name)"
+
+				# if account is active, adjust front panel values
+				puts "Comparing edited account $edit_account_name to\
+				active account $active_account"
+				if { $edit_account_name == $active_account } {
+					set active_account $new_account_name
+					set_account $new_account_name
+				}
+				set edit_account_name $new_account_name
+			}
+
+I 8
+				.account_manager_win.edit_button configure -state normal	
+I 9
+				.account_manager_win.delete_button configure -state normal
+E 9
+E 8
+I 4
+				destroy .edit_account 
+E 4
+		}
+
+		button [set top].button_frame.close -text "Close" -command {
+I 8
+				.account_manager_win.edit_button configure -state normal	
+I 9
+				.account_manager_win.delete_button configure -state normal
+E 9
+E 8
+				destroy .edit_account 
+		}
+
+		pack .edit_account.button_frame.close -side right 
+		pack .edit_account.button_frame.save -side left 
+		pack .edit_account.button_frame -side bottom -pady 10 
+
+}
+
+proc create_account { } {
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+D 11
+		global authtype
+		global defroute
+E 11
+I 11
+		global create_authtype
+		global create_defroute
+		global create_resolv
+E 11
+
+		set top .new_account
+		toplevel [set top] 
+I 6
+		global required_keys
+E 6
+
+I 6
+		frame [set top].required_key_frame
+		label [set top].required_key_frame.required_key -text "Required Fields indicated by '**'"
+		pack [set top].required_key_frame.required_key
+		pack [set top].required_key_frame -anchor n
+
+E 6
+		foreach key [set account_keys] {
+
+			if { $key == "status" } { continue }
+I 4
+			if { $key == "resolv_file" } { continue }
+
+E 4
+			set value $account_strings($key)
+			set [set key]_frame [set top].[set key]_frame
+
+			frame [set [set key]_frame]
+
+			puts "key = $key"
+			if { $key == "authtype" } {
+				# radio buttons for
+				# pap chap challenge card
+
+				radiobutton [set [set key]_frame].[set key]_radio_pap -text \
+D 11
+				"PAP" -variable authtype -value "pap" -width 11
+E 11
+I 11
+				"PAP" -variable create_authtype -value "pap" -width 12
+E 11
+
+				pack [set [set key]_frame].[set key]_radio_pap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_chap -text \
+D 11
+				"CHAP" -variable authtype -value "chap" -width 11
+E 11
+I 11
+				"CHAP" -variable create_authtype -value "chap" -width 12
+E 11
+				pack [set [set key]_frame].[set key]_radio_chap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_token -text \
+D 11
+				"Token Card" -variable authtype -value "tokencard" -width 11
+E 11
+I 11
+				"Token Card" -variable create_authtype -value "tokencard" -width 12
+E 11
+				pack [set [set key]_frame].[set key]_radio_token -side right
+
+D 6
+				label [set [set key]_frame].[set key]_label -text $value 
+E 6
+I 6
+				label [set [set key]_frame].[set key]_label -text "** $value" 
+E 6
+				pack [set [set key]_frame].[set key]_label -side right
+I 8
+D 11
+				set authtype ""
+E 11
+I 11
+				set create_authtype ""
+E 11
+E 8
+
+			} elseif { $key == "defroute" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Set default route" -anchor w -onvalue "1" \
+D 11
+				-offvalue "0" -variable defroute -width 42 
+E 11
+I 11
+				-offvalue "0" -variable create_defroute -width 42 
+E 11
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+I 11
+			} elseif { $key == "resolv" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+				-offvalue "0" -variable create_resolv -width 42 
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+E 11
+			} else {
+				entry [set [set key]_frame].[set key]_entry -width 45
+				pack [set [set key]_frame].[set key]_entry -side right
+D 6
+				label [set [set key]_frame].[set key]_label -text $value 
+E 6
+I 6
+				if { [lsearch $required_keys $key] != -1 } {
+					label [set [set key]_frame].[set key]_label -text "** $value" 
+				} else {
+					label [set [set key]_frame].[set key]_label -text $value 
+				}
+E 6
+				pack [set [set key]_frame].[set key]_label -side right
+				pack [set [set key]_frame].[set key]_entry -anchor w
+			}
+
+			pack [set [set key]_frame] -fill x -expand 1 -pady 5
+		}
+
+		frame [set top].button_frame
+I 4
+
+E 4
+		button [set top].button_frame.save -text "Create Account" -command {
+I 4
+
+E 4
+			# get all entries
+			# add to accounts array and account_list
+			global new_account
+			global authtype
+			global defroute
+I 11
+			global create_resolv
+E 11
+D 5
+
+E 5
+I 5
+			
+E 5
+D 4
+					set account_name {}
+					foreach key [set account_keys] {
+E 4
+I 4
+			# check if name is already taken
+			set new_account_name [list [.new_account.name_frame.name_entry get]]
+E 4
+
+D 4
+							if { $key == "status" } { continue }
+							if { $key == "authtype" } {
+								set new_account($key) $authtype 
+							} elseif { $key == "defroute" } {
+								set new_account($key) $defroute
+							} else {
+										set [set key]_frame .new_account.[set key]_frame
+										set key_value [[set [set key]_frame].[set key]_entry get]
+										puts "$key: $key_value" 
+										set new_account($key) $key_value 
+E 4
+I 4
+			if { [lsearch $account_list $new_account_name] != -1 } {
+				tk_messageBox -type ok -icon error -title "Duplicate Account Name" \
+				-message  "Account name $new_account_name already exists"
+				return
+			} elseif { $new_account_name == "" } {
+				tk_messageBox -type ok -icon error -title "Missing Account Name" \
+				-message  "Please Enter an Account Name"
+				return
+E 4
+
+I 5
+			} elseif { [string length $new_account_name] < 1 } {
+				tk_messageBox -type ok -icon error -title "Missing Account Name" \
+				-message  "Please Enter an Account Name"
+				return
+
+E 5
+D 4
+										if { $key == "name" } { 
+											set account_name  [list $key_value] 
+											set account_string $key_value
+											lappend account_list $account_name
+										}
+							}
+						
+E 4
+I 4
+			}
+
+
+			set account_name {}
+			foreach key [set account_keys] {
+
+I 5
+
+E 5
+					if { $key == "status" } { continue }
+					if { $key == "resolv_file" } { continue }
+
+					# get checkbuttons separate from entry boxes
+					if { $key == "authtype" } {
+D 5
+						set new_account($key) $authtype 
+E 5
+I 5
+						
+D 11
+						if { [string length $authtype] < 1 } {
+E 11
+I 11
+						if { [string length $create_authtype] < 1 } {
+E 11
+							tk_messageBox -type ok -icon error -title \
+							"$account_strings($key) Required" -message  \
+							"Please Enter $account_strings($key)"
+							return
+						} else {
+D 11
+							set new_account($key) $authtype 
+E 11
+I 11
+							set new_account($key) $create_authtype 
+E 11
+						}
+
+E 5
+D 11
+					} elseif { $key == "defroute" } {
+I 5
+
+E 5
+						set new_account($key) $defroute
+I 5
+
+E 11
+I 11
+					} elseif { $key == "create_defroute" } {
+						set new_account($key) $create_defroute
+					} elseif { $key == "create_resolv" } {
+						set new_account($key) $create_resolv
+E 11
+E 5
+					} else {
+
+								# entry boxes
+								set [set key]_frame .new_account.[set key]_frame
+								set key_value [[set [set key]_frame].[set key]_entry get]
+D 5
+								puts "$key: $key_value" 
+E 5
+I 5
+								puts "key: $key key_value: $key_value" 
+E 5
+								set new_account($key) $key_value 
+
+I 5
+								# required fields
+								#account_strings(name) "Account Name:"
+								#account_strings(uid) "User ID:"
+								#account_strings(passwd) "Password:"
+								#account_strings(number) "Phone Number:"
+								#account_strings(domain) "DNS Domain Name:"
+								#account_strings(ns1) "Account Nameserver #1:"
+								#account_strings(ns2) "Account Nameserver #2:"
+								#account_strings(authtype) "Authentication Type:"
+								#account_strings(defroute) "Default Route:"
+
+E 5
+								if { $key == "name" } { 
+									set account_name  [list $key_value] 
+									set account_string $key_value
+D 5
+									lappend account_list $account_name
+E 5
+								}
+I 5
+
+D 6
+								set required_keys { name uid number authtype }
+E 6
+
+								if { [lsearch $required_keys $key] != -1 && [string length $key_value] < 1 } {
+										
+										tk_messageBox -type ok -icon error -title \
+										"$account_strings($key) Required" -message  \
+										"Please Enter $account_strings($key)"
+										return
+
+								}
+
+								
+E 5
+E 4
+					}
+I 4
+						
+			}
+I 5
+					lappend account_list $account_name
+E 5
+E 4
+					
+					# add to accounts
+					puts "account name: $account_name"
+					puts "account string: $account_string"
+					set accounts($account_name,name) $account_string
+
+					foreach { key value } [array get new_account] {
+						puts "accounts($account_name,$key) = $value" 
+						set accounts($account_name,$key) $value 
+					}
+
+I 4
+					# create resolv.conf name for this account
+					set resolv_name "[set ppp_dir]/resolv.conf.[RandomRange 1000]" 
+					set accounts($account_name,resolv_file) $resolv_name
+					puts "resolv.conf file is $accounts($account_name,resolv_file)"
+					# write a resolv.conf file to the file
+					write_resolv_file $accounts($account_name,name)	
+
+I 7
+					# set status
+					set accounts($account_name,status) inactive 
+
+E 7
+E 4
+					# add to Accounts menu and acct manager
+					add_account_menu $account_name "END"
+					.account_manager_win.account_list insert end "$accounts($account_name,name)"
+
+I 4
+				destroy .new_account 
+E 4
+		}
+
+		button [set top].button_frame.close -text "Close" -command {
+				destroy .new_account 
+		}
+
+		pack .new_account.button_frame.close -side right 
+		pack .new_account.button_frame.save -side left 
+		pack .new_account.button_frame -side bottom -pady 10 
+
+}
+
+I 4
+proc write_resolv_file { account_name } {
+E 4
+
+I 4
+	puts "write_resolv_file"
+	global accounts	
+	# get account	
+	set list_name [list $account_name]
+	set resolv_file $accounts($list_name,resolv_file)
+	set domain $accounts($list_name,domain)
+I 10
+	set search $accounts($list_name,search)
+E 10
+	set ns1 $accounts($list_name,ns1)
+	set ns2 $accounts($list_name,ns2)
+
+	puts "Opening resolv_file $resolv_file"
+	if { [catch { set resolv_fd [open $resolv_file w] } err] != 0 } {
+		puts "Unable to create $resolv_file: $err"
+		return -1
+	}
+	puts $resolv_fd "# resolv.conf file generated by ppptool"
+	puts $resolv_fd "domain $domain"
+D 10
+	puts $resolv_fd "search $domain"
+E 10
+I 10
+D 12
+	puts $resolv_fd "search $search"
+E 12
+I 12
+	if { [string length $search < 1] } {
+		if { [string length $doman > 0 } {
+			puts $resolv_fd "search $domain"
+		}
+	} else {
+		puts $resolv_fd "search $search"
+	}
+E 12
+E 10
+	puts $resolv_fd "nameserver $ns1"
+	puts $resolv_fd "nameserver $ns2"
+	close $resolv_fd
+	puts "Created resolv_file $resolv_file"
+
+	return 0
+
+}
+
+
+E 4
+proc blink_single {bulb } {
+
+	global connection_state
+	global incr_value
+	global bulblist
+	global on_color
+	global off_color
+	global bulb_colors 
+	global after_interval
+	global bulbs
+
+		set after_interval [RandomRange 500 ] 
+
+
+		if { [lsearch $bulb_colors $bulbs($bulb,color)] == [expr [llength $bulb_colors] - 1] } {
+			set bulbs($bulb,color) [lindex $bulb_colors 0]
+		} else {
+			set bulbs($bulb,color) [lindex $bulb_colors [expr [lsearch $bulb_colors $bulbs($bulb,color)]  + 1]]
+		}
+
+		if { $after_interval > 250 } {
+			.cframe.can itemconfigure $bulb -fill $bulbs($bulb,color) 
+		}
+
+		if { $connection_state != "connecting" } {
+			.cframe.can itemconfigure all -fill black 
+		} else {
+			after $after_interval blink_single $bulb
+		}
+	
+
+}
+
+
+proc init_blinking_bulbs { } {
+
+	global connection_state
+	global incr_value
+	global bulblist
+	global bulbs
+	global on_color
+	global off_color
+	global bulb_colors 
+	global after_interval
+
+	# set different intervals
+
+	foreach bulb $bulblist {
+
+		#puts "bulb $bulb"
+		set after_interval [RandomRange 1000] 
+
+		if { [lsearch $bulb_colors $bulbs($bulb,color)] == [expr [llength $bulb_colors] - 1] } {
+			#puts "bulbs($bulb,color) = $bulbs($bulb,color)"
+			set bulbs($bulb,color) [lindex $bulb_colors 0]
+		} else {
+			set bulbs($bulb,color) [lindex $bulb_colors [expr [lsearch $bulb_colors $on_color]  + 1]]
+		}
+
+			if { $bulb != "bulb0" && $bulb != "bulb3" && $bulb != "bulb10"  } {	
+				#puts "init_blinking: .cframe.can itemconfigure $bulb -fill $bulbs($bulb,color)" 
+				.cframe.can itemconfigure $bulb -fill $bulbs($bulb,color) 
+				#after $after_interval blink_single $bulb
+				blink_single $bulb
+			} else {
+				#puts "Constant: .cframe.can itemconfigure $bulb -fill green" 
+				if { $bulb == "bulb0" || $bulb == "bulb3" } {
+					.cframe.can itemconfigure $bulb -fill green 
+				} else {
+					.cframe.can itemconfigure $bulb -fill yellow 
+				}
+			}
+	}
+}
+
+
+proc edit_prefs { } {
+
+	global ppp_settings
+I 4
+	global ppp_settings_saved
+E 4
+	global modem_port
+	global flow_control
+
+	global g_modem_port
+	global g_flow_control
+
+I 4
+	global port_speeds
+E 4
+	puts "Modem port = $ppp_settings(modem_port)"
+
+	if { [winfo exists .prefs] } { 
+		 catch { wm deiconify .prefs }	
+		 catch { wm raise .prefs }
+		 return
+	} 
+		toplevel .prefs
+
+		frame .prefs.pref_frame
+
+
+			## Menubutton items ##
+
+D 4
+			foreach ppp_setting { modem_port flow_control } {
+E 4
+I 4
+		foreach ppp_setting { modem_port flow_control port_speed } {
+E 4
+
+				set button_descr "[lindex [split $ppp_setting '_'] 0] [lindex [split $ppp_setting '_'] 1]"
+				#set ppp_settings(modem_port) /dev/term/b
+				frame .prefs.pref_frame.[set ppp_setting]_frame
+
+				if { [info exists ppp_settings($ppp_setting)] == 1 } {
+					puts "$ppp_setting = $ppp_settings($ppp_setting)"
+					set [set ppp_setting]_button_text $ppp_settings($ppp_setting)
+				} else {
+					puts "$ppp_setting = $ppp_settings($ppp_setting)"
+					set [set ppp_setting]_button_text "Select $button_descr" 
+				}
+				menubutton .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting] \
+				-text [set [set ppp_setting]_button_text] \
+D 4
+				-menu .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting].menu -relief raised 
+E 4
+I 4
+				-menu .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting].menu \
+				-relief raised  -width 25 
+E 4
+
+				pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting] -side right 
+				label .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -text $button_descr
+				pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -side right
+				#.prefs.pref_frame.[set ppp_setting]_frame.modem_port configure -anchor w	
+
+
+				pack .prefs.pref_frame.[set ppp_setting]_frame -fill x -expand 1 -pady 2
+				eval { set [set ppp_setting]_menu \
+				[menu .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting].menu -tearoff 0] }
+
+				if { $ppp_setting == "modem_port" } {
+					foreach modem_port [exec ls /dev/term] {
+							set modem_port "/dev/term/[set modem_port]"
+							puts "[set ppp_setting]_menu add command -label $modem_port -command"
+							puts "ppp_settings: [array names ppp_settings]"
+
+							eval { [set [set ppp_setting]_menu] add radio -label $modem_port -variable modem_port \
+											-value $modem_port -command {
+												.prefs.pref_frame.modem_port_frame.modem_port configure -text $modem_port
+											}
+							}
+					}
+					set modem_port $ppp_settings(modem_port)
+				} elseif { $ppp_setting == "flow_control" } {
+
+D 3
+					foreach flow_control { hardware software } {
+E 3
+I 3
+					foreach flow_control { hardware software none } {
+E 3
+							puts "[set ppp_setting]_menu add command -label $flow_control -command"
+							puts "ppp_settings: [array names ppp_settings]"
+
+							eval { [set [set ppp_setting]_menu] add radio -label $flow_control -variable \
+											flow_control  -value $flow_control -command {
+												.prefs.pref_frame.flow_control_frame.flow_control \
+												configure -text $flow_control
+											}
+							}
+					}
+					set flow_control $ppp_settings(flow_control)
+D 4
+			}
+		}
+			
+E 4
+
+I 4
+		} elseif { $ppp_setting == "port_speed" } {
+E 4
+
+I 4
+				#port_speeds { 38400 57600 115200 230400 } 
+
+				foreach port_speed  $port_speeds  {
+					puts "[set ppp_setting]_menu add command -label $port_speed -command"
+					puts "ppp_settings: [array names ppp_settings]"
+
+							eval { [set [set ppp_setting]_menu] add radio -label $port_speed \
+							-variable port_speed  -value $port_speed -command {
+												.prefs.pref_frame.port_speed_frame.port_speed \
+												configure -text $port_speed
+											}
+							}
+				}
+				set port_speed $ppp_settings(port_speed)
+
+		}
+	}
+
+E 4
+			#### Entry items ###
+
+			set last_width 0 
+D 4
+			foreach ppp_setting { port_speed init_string connect_string ppp_options } {
+E 4
+I 4
+			foreach ppp_setting { init_string connect_string ppp_options } {
+E 4
+				puts "ppp_setting $ppp_setting"
+				set entry_width [string length $ppp_settings($ppp_setting)]
+				if { $entry_width < 20 } { set entry_width 25 }
+				if { $entry_width > $last_width } { set last_width $entry_width }
+			}
+				if { $entry_width < $last_width } { set entry_width [expr $last_width + 5] }
+				.prefs.pref_frame.modem_port_frame.modem_port configure -width $entry_width
+				.prefs.pref_frame.flow_control_frame.flow_control configure -width $entry_width
+			
+
+D 4
+			foreach ppp_setting { port_speed init_string connect_string ppp_options } {
+E 4
+I 4
+			foreach ppp_setting { init_string connect_string ppp_options } {
+E 4
+
+				frame .prefs.pref_frame.[set ppp_setting]_frame
+				label .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label -text $ppp_setting 
+				entry .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry -width $entry_width
+				.prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry insert 0 $ppp_settings($ppp_setting)
+
+				pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry -side right 
+				pack .prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_label  -side right
+				pack .prefs.pref_frame.[set ppp_setting]_frame -fill x -expand 1 -pady 2
+			}
+
+
+
+			#set ppp_settings(port_speed) 38400
+			#set ppp_settings(flow_control) hardware
+
+			#set ppp_settings(init_string) "atz" 
+			#set ppp_settings(connect_string) ""
+			#set ppp_settings(ppp_options) "" 
+
+			pack .prefs.pref_frame -pady 2
+
+		frame .prefs.prefbuttons
+D 4
+		button .prefs.prefbuttons.prefs_save -text "Save" -command { 
+E 4
+I 4
+		button .prefs.prefbuttons.prefs_save -text "Save" -command {
+E 4
+			puts "Save Prefs" 
+D 4
+			foreach ppp_setting { port_speed init_string connect_string ppp_options } {
+E 4
+I 4
+			foreach ppp_setting { init_string connect_string ppp_options } {
+E 4
+				set ppp_settings($ppp_setting) \
+				[.prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry get]
+				puts "saved ppp_setting $ppp_setting as \
+				[.prefs.pref_frame.[set ppp_setting]_frame.[set ppp_setting]_entry get]"
+			}
+D 4
+			foreach ppp_setting { modem_port flow_control } {
+E 4
+I 4
+			foreach ppp_setting { modem_port flow_control port_speed } {
+				puts "port_speed == $port_speed"
+				puts "$ppp_setting = [set [set ppp_setting]]"
+E 4
+				set ppp_settings($ppp_setting) [set [set ppp_setting]] 
+				puts "saved ppp_setting $ppp_setting as $ppp_settings($ppp_setting)" 
+			}
+			
+D 4
+		save_prefs
+E 4
+I 4
+			save_prefs
+E 4
+			## write_global #
+I 4
+			#destroy .prefs
+			wm withdraw .prefs
+E 4
+		}
+D 4
+		button .prefs.prefbuttons.prefs_close -text "Close" -command { destroy .prefs }
+E 4
+I 4
+
+		button .prefs.prefbuttons.prefs_close -text "Close" -command { wm withdraw .prefs }
+E 4
+		pack .prefs.prefbuttons.prefs_save -side left
+		pack .prefs.prefbuttons.prefs_close -side right
+		pack .prefs.prefbuttons -side bottom -pady 5
+	
+}
+
+proc log_message { message } {
+
+	catch { [.log_win.log_text insert end $message] }
+	catch [.log_win.log_text yview end]
+
+}
+
+proc view_log { } {
+	catch { [wm deiconify .log_win] }
+}
+
+proc build_log_win { } {
+
+	global accounts
+	global active_account
+
+
+	toplevel .log_win 
+	wm title .log_win "PPP Log"
+	wm withdraw .log_win
+
+	frame .log_win.log_frame -relief flat
+	text .log_win.log_text -relief sunken -borderwidth 2 \
+	-yscrollcommand { .log_win.scroll_y set} \
+	-height 20 -width 65 -setgrid true
+	scrollbar .log_win.scroll_y -command ".log_win.log_text yview"
+	pack .log_win.log_text -in .log_win.log_frame -side left -pady 1m -fill both
+	pack .log_win.scroll_y -in .log_win.log_frame -side right -fill y
+
+	frame .log_win.button_frame -relief flat
+	button .log_win.close_button -text "Close" -command {\
+		wm withdraw .log_win
+	}
+
+	pack .log_win.close_button -side bottom -in .log_win.button_frame \
+	-ipadx 2 -padx 2
+
+	pack .log_win.log_frame .log_win.button_frame -side top
+
+
+
+}
+
+proc add_accounts { } {
+
+	global menubar_widget
+	global acct_widget
+	global color_array
+	global account_list
+	global accounts
+
+	foreach account $account_list {
+		add_account_menu $account "END"
+	}
+}
+
+proc set_active { } {
+
+	global active_account
+	global accounts
+	global account_list
+
+	foreach acct $account_list {
+
+		if { [info exists accounts($acct,status)] } {
+			if { $accounts($acct,status) == "active" } {
+				puts "Setting account $acct to 'active' status"
+				set active_account $acct
+				set_account $acct
+			}
+		} else {
+				puts "Setting account $acct to 'inactive' status"
+D 4
+				set accounts($acct,status ""
+E 4
+I 4
+				set accounts($acct,status) ""
+E 4
+		}
+
+	}
+
+}
+
+proc set_account {value } {
+
+	# display active account 
+
+	global menubar_widget
+	global active_account
+	global color_array
+	global accounts
+	global account_list
+	global acct_width
+
+I 7
+	if { [string length $active_account] > 0 && \
+			$accounts($active_account,status) == "DELETED" } {
+
+		.acct_label configure -text "Active Account:"
+		.namef.name_r configure -text ""
+
+		.uidf.uid_r delete 0 end 
+		.uidf.uid_r configure -state disabled 
+		.passwdf.passwd_r configure -state disabled 
+		.numberf.number_r configure -text ""
+		.authtypef.authtype_r configure -text ""
+		.connect configure -state disabled
+		return
+	}
+
+E 7
+	if { [string length $active_account] > 0 } {
+
+		.acct_label configure -text \
+		"Active Account: $accounts($active_account,name)" \
+		-width [expr \
+		[string length "Active Account: $accounts($active_account,name)"] + 10]
+
+		set namelabel_width [expr [string length $accounts($active_account,name)] + 5]
+
+		if { [.namef.name_r cget -width] < $namelabel_width } { 
+			.namef.name_r configure -width $namelabel_width 
+			.uidf.uid_r configure -width $namelabel_width
+			.passwdf.passwd_r configure -width $namelabel_width
+			.numberf.number_r configure -width $namelabel_width
+			.authtypef.authtype_r configure -width $namelabel_width
+		} else {
+			.namef.name_r configure -width $acct_width
+			.uidf.uid_r configure -width $acct_width
+			.passwdf.passwd_r configure -width $acct_width 
+			.numberf.number_r configure -width $acct_width
+			.authtypef.authtype_r configure -width $acct_width
+		}
+
+		.namef.name_r configure -text "$accounts($active_account,name)" 
+
+
+		.uidf.uid_r delete 0 end 
+		.uidf.uid_r insert 0 "$accounts($active_account,uid)"
+
+		if { $accounts($active_account,authtype) == "tokencard" } {
+I 7
+			.uidf.uid_r configure -state normal 
+E 7
+			.passwdf.passwd_r delete 0 end 
+			.passwdf.passwd_r configure -state disabled 
+		} else {
+I 7
+			.uidf.uid_r configure -state normal 
+E 7
+			.passwdf.passwd_r configure -state normal 
+			.passwdf.passwd_r delete 0 end 
+			.passwdf.passwd_r insert 0 "$accounts($active_account,passwd)" 
+		}
+
+		.numberf.number_r configure -text "$accounts($active_account,number)"
+
+		.authtypef.authtype_r configure -text "$accounts($active_account,authtype)"
+
+		if { [info exists active_account] } {
+			.connect configure -state normal
+		} else {
+			.connect configure -state disabled
+		}
+	} else {
+		.acct_label configure -text "Active Account:"
+		.namef.name_r configure -text ""
+
+		.uidf.uid_r delete 0 end 
+		.passwdf.passwd_r delete 0 end 
+		.numberf.number_r configure -text ""
+		.authtypef.authtype_r configure -text ""
+		.connect configure -state disabled
+	}
+
+	# reset active key
+	foreach acct $account_list {
+
+		if { $acct == $active_account } {
+			puts "Setting account $acct to 'active' status"
+			set accounts($active_account,status) "active"
+		} else {
+			puts "Setting account $acct to 'inactive' status"
+			set accounts($acct,status) ""
+		}
+	}
+}
+
+proc set_menu {value } {
+	global menubar_widget
+	global active_account
+	$menubar_widget entryconfigure 3 -label $value
+}
+
+proc add_account_menu {name index} {
+
+	global menubar_widget
+	global acct_widget
+	global active_account
+	global accounts
+
+	if { $index != "END" } {
+		$acct_widget insert $index radio  -variable active_account \
+		-value $name -label $accounts($name,name) -command { set_account $active_account }
+	} else {
+		$acct_widget add radio  -variable active_account \
+		-value $name -label $accounts($name,name) -command { set_account $active_account }
+	}
+	
+	# save menu position
+
+}
+
+
+proc delete_account_menu {name} {
+
+	global menubar_widget
+	global acct_widget
+	global active_account
+	global accounts
+	global account_list
+	global account_keys
+	global saved_accounts
+
+
+	# find where it is
+	# number of indexes should correspond to llength $account_list
+	puts "Looking for menu entry $name"
+	set index [$acct_widget index $accounts($name,name)]
+
+	# delete accounts entry
+	foreach key $account_keys {
+		set accounts($name,$key) DELETED 
+		set saved_accounts($name,$key) DELETED 
+	}
+
+	# delete account_list entry
+	set account_list [lreplace $account_list \
+	[lsearch $account_list $name] \
+	[lsearch $account_list $name]]
+
+	puts "Deleting index $name at index $index"
+	$acct_widget delete $index
+
+	puts "account_list now contains: $account_list"
+	puts "accounts now contains:"
+	puts [array get accounts]
+
+	set saved_account_list $account_list
+	
+	# save menu position
+	# return index
+	return $index
+
+}
+
+# load global settings
+proc load_global { } {
+I 4
+
+E 4
+	global ppp_dir
+	global ppp_config_file
+	global ppp_settings
+I 4
+	global ppp_settings_saved
+E 4
+	global port_speeds
+D 3
+	set port_speeds { 38400 57600 115200 } 
+E 3
+I 3
+	set port_speeds { 38400 57600 115200 230400 } 
+E 3
+
+	global g_modem_port
+	global g_flow_control
+
+	set ppp_settings(init_string) "atz" 
+	set ppp_settings(connect_string) ""
+	set ppp_settings(port_speed) [lindex $port_speeds 0] 
+	set ppp_settings(flow_control) hardware
+	set ppp_settings(modem_port) /dev/term/b
+	set ppp_settings(ppp_options) "" 
+
+	set ppp_config_file "$ppp_dir/ppp_settings"
+
+	if { [file exists  $ppp_config_file] != 1 } {
+		puts "Creating $ppp_config_file"
+		set global_fd [open $ppp_config_file w]
+		# put in defaults
+		foreach key [array names ppp_settings] {
+			puts $global_fd "$key\t$ppp_settings($key)"
+		}
+		close $global_fd
+	} else {
+		puts "Reading $ppp_config_file"
+		set ppp_fd [open $ppp_config_file r]
+		while { [gets $ppp_fd line] != -1 } {
+			set split_line [split $line "\t"]
+			set ppp_settings([lindex $split_line 0]) [lindex $split_line 1]
+I 4
+			set ppp_settings_saved([lindex $split_line 0]) [lindex $split_line 1]
+E 4
+			puts "set ppp_settings([lindex $split_line 0]) [lindex $split_line 1]"
+		}
+	}
+
+	set g_modem_port ppp_settings(modem_port)
+	set g_flow_control ppp_settings(flow_control)
+I 4
+
+E 4
+	#pppopts
+	# init_string
+	# connect_string
+	# port_speed
+	# flow_control
+	# modem_port
+
+}
+
+proc load_current_accts { } {
+
+	global env
+	global ppp_dir
+
+	# list
+	global saved_account_list
+
+	# array (saved_account_name,key)
+	global saved_accounts
+
+	# account file names
+	global saved_account_file
+
+	global account_keys
+
+	set saved_account_name ""
+
+	if { [file exists $account_file] } {
+
+		set saved_account_fd [open $account_file r]
+
+				# parse into acct_array
+				for { set i 0 } { [gets $saved_account_fd line] != -1 } {incr i} {
+
+					if { [string length $line] < 1 } { continue }
+					set field [split $line "\t"]
+					set key [lindex $field 0]
+					string trim $key
+					puts "Key=$key"
+					set value [lindex $field 1]
+					puts "Value=$value"
+
+					# check key
+					if { [lsearch $saved_account_keys $key] == -1 } {
+						puts "Invalid key $key found in account file $acct"
+						continue
+					}
+
+					# make sure account name is same as file prefix
+					if { $key == "name" } {
+						# New account
+						puts "Account $value"
+						set saved_account_name $value
+						lappend saved_account_list $value
+					}
+					puts "Adding key '$key' value '$value' to saved_accounts"
+					set saved_accounts($saved_account_name,$key) $value
+				}
+
+				close $saved_account_fd
+	} 
+			# done
+			puts "Loaded saved_accounts"
+
+}
+
+
+proc load_accts { } {
+
+	global env
+	global ppp_dir
+	# list
+	global account_list
+	global saved_account_list
+	set saved_account_list {}
+	# array (account_name,key)
+	global accounts
+	global saved_accounts
+	# account file names
+	global account_file
+	global account_keys
+
+	global active_account
+
+	set account_name ""
+I 10
+	set previous_name ""
+E 10
+
+	if { [file exists $account_file] } {
+
+		set account_fd [open $account_file r]
+
+				# parse into acct_array
+				for { set i 0 } { [gets $account_fd line] != -1 } {incr i} {
+
+					if { [string length $line] < 1 } { continue }
+					set field [split $line "\t"]
+					set key [lindex $field 0]
+					string trim $key
+					puts "Key=$key"
+					set value [lindex $field 1]
+					puts "Value=$value"
+
+					# check key
+					if { [lsearch $account_keys $key] == -1 } {
+D 11
+						puts "Invalid key $key found in account file $acct"
+E 11
+I 11
+						puts "Invalid key $key found in account file accounts"
+E 11
+						continue
+					}
+
+					# make sure account name is same as file prefix
+					if { $key == "name" } {
+						# New account
+I 10
+						# first check last account
+E 10
+						puts "Account $value"
+						set account_name [list $value]
+I 10
+						set previous_name $account_name 
+E 10
+						puts "Adding account name $account_name to account_list"
+						lappend account_list $account_name
+						puts "Adding account name $account_name to saved_account_list"
+						lappend saved_account_list $account_name
+							puts "Adding key '$key' value '$value' to accounts"
+							set accounts($account_name,$key) $value
+							puts "Adding key '$key' value '$value' to saved_accounts"
+							set saved_accounts($account_name,$key) $value
+					} else {
+							puts "Adding key '$key' value '$value' to accounts"
+							set accounts($account_name,$key) $value
+							puts "Adding key '$key' value '$value' to saved_accounts"
+							set saved_accounts($account_name,$key) $value
+					}
+				}
+D 4
+
+E 4
+				close $account_fd
+I 4
+
+I 10
+				# verify
+				puts "verifying accounts"
+				foreach account $account_list {
+							foreach key $account_keys {
+								puts "key $key"
+								puts "account $account"
+								if { [info exists accounts($account,$key)] == 0 } {
+										puts "key $key not found in accounts file"
+										puts "set accounts($account,$key)"
+										set accounts($account,$key) ""
+								}
+							}
+
+				}
+
+
+E 10
+				# check for resolv_file entries?
+E 4
+	} 
+			# done
+			puts "Loaded accounts"
+
+}
+#======================================================================
+# Close the PPP tunnel. Log any messages.
+#======================================================================
+
+proc close_ppp_tunnel {} {
+  puts "proc close_ppp_tunnel {} "
+
+  global network_interface message spawn_id 
+  global tip_id connection_type global pppd_pid pppd_id
+
+  #set spawn_id $tip_id
+
+	if { [info exists connection_type] != 1 } { return }
+
+	puts "spawn_id = $spawn_id"
+  catch {
+		if { $connection_type == "pppd" } {
+			exp_send ""
+			puts "Sending kill -TERM $pppd_pid"
+			catch { exec kill -TERM $pppd_pid }
+		} else {
+			exp_send "~."
+			expect "[EOT]"
+			# might as well try and close any tips
+			catch { [exec pkill tip] }
+		}
+		catch { exec kill -TERM $pppd_pid }
+		#close $tip_id
+		#close $spawn_id
+		
+		#set kill_pid [exp_pid -i $spawn_id] 
+		#puts "Sending kill to pid $kill_pid"
+		#exec kill -TERM $kill_pid
+	}
+
+  
+	.footer.footer_r configure -text "Disconnecting" -justify left
+	.footer.footer_r configure -text "Disconnecting:\nPPP process closed by user" -anchor w -justify left
+   log_messages "\ntip closed by user.\n"
+	 puts "close_ppp_tunnel done"
+}
+
+
+proc log_messages {message} {
+
+  puts "proc log_messages {message} "
+
+   global log_file
+   regsub "\r" $message "\n" newline_message 
+   set message $newline_message
+
+  if { [info exists message] == 1 } {
+     .log_win.log_text insert end "$message\n"
+     .log_win.log_text yview end
+
+     set fd [open $log_file a]
+     if {$fd == ""} {
+        return 0
+     }
+     puts $fd "$message\n"
+     close $fd
+  }
+}
+
+
+proc des_countdown { } {
+
+	global seconds_remaining
+
+	if { [winfo exists .des_dialog] != 1 } {  return } 
+
+	if { $seconds_remaining == "null" } {
+		
+
+	} elseif { $seconds_remaining == 0 } {
+		.des_dialog.time_remaining configure -text "Challenge Entry Interval Expired!"
+		#wm withdraw .des_dialog
+		#destroy .des_dialog
+		return -1
+	} else {
+		.des_dialog.time_remaining configure -text "Seconds Remaining: $seconds_remaining"
+		incr seconds_remaining -1
+		after 1000 des_countdown
+	}
+
+}
+
+proc down_interface { } {
+
+	global ppp_interface serial_port ip_address
+	global ifconfig_cmd
+
+	# check if i/f is up
+	if { [string length $ppp_interface] < 1 } { return }
+	puts "Taking down interface $ppp_interface"
+	
+	puts "spawn /usr/bin/pfsh"
+
+	spawn /usr/bin/pfsh
+	expect "\$ "
+
+	puts "Sending /usr/sbin/ifconfig $ppp_interface down"
+	exp_send "/usr/sbin/ifconfig $ppp_interface down\r"
+
+	expect "\$ "
+
+
+	set ppp_interface ""
+	set ip_address ""
+
+	close $spawn_id
+
+}
+
+proc close_pppd { } {
+
+	puts "proc close_pppd" 
+	global ppp_interface serial_port 
+	global connection_type ip_address spawn_id tip_id
+	global pppd_pid pppd_id
+	global kill_pppd
+
+	if { [info exists connection_type] != 1 } { return }
+
+	if { [info exists ppp_interface] != 1  || \
+			[string length $ppp_interface] < 1 } {
+
+		puts "no ppp_interface found, trying to close spawn_id"
+
+		if { $connection_type == "pppd" } {
+			catch {
+				exp_send ""
+				puts "kill -TERM $pppd_pid"
+				catch { exec kill -TERM $pppd_pid }
+				set kill_pid [exp_pid -i $spawn_id] 
+				puts "Sending kill to pid $kill_pid"
+				exec kill -TERM $kill_pid
+				puts "pppd_pid == $pppd_pid"
+				
+			}
+		
+		} else {
+			catch { [exp_send "~.\r"] }
+		}
+	} else {
+		puts "Looking for /var/run/[set ppp_interface].pid"
+		set pppd_pid_file "/var/run/[set ppp_interface].pid"
+		if { [file exists $pppd_pid_file] == 1 } {
+			puts "Running $kill_pppd $pppd_pid_file"
+			exec $kill_pppd $pppd_pid_file
+		}
+	}
+
+	puts "close_pppd done"
+}
+proc disconnect { } {
+	
+	puts "proc disconnect" 
+
+	global accounts
+	global active_account 
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global pppd_id pppd_pid tip_id
+
+	global ppp_interface serial_port ip_address
+	global connection_type
+	set connection_state "disconnecting"
+
+	# connection scripts
+	#pre_disconnect
+
+	log_message "Disconnecting .."
+	.footer.footer_r configure -text "Disconnecting .." -justify left
+	catch { destroy .des_dialog }
+
+I 4
+	global backup_resolv
+	global manage_resolv
+
+	# restore resolv.conf
+D 12
+	if { [file exists $backup_resolv] == 1 } {
+		exec $manage_resolv restore $backup_resolv
+	} 
+E 12
+I 12
+	if { $accounts($active_account,resolv) == 1 } {
+		puts "restoring file $backup_resolv"
+		if { [file exists $backup_resolv] == 1 } {
+			exec $manage_resolv restore $backup_resolv
+		} 
+	}
+E 12
+
+
+E 4
+	if { [info exists ppp_interface] != 1 ||
+					[string length $ppp_interface] < 1 } {
+					.footer.footer_r configure -text "Unable to determine ppp interface, trying IP address"  -anchor w -justify left
+
+				# see if ip_address present
+				if { [info exists ip_address] != 1  ||
+							[string length $ip_address] < 1 } {
+					.footer.footer_r configure -text "Unable to determine ip interface, exit ppptool to reset"
+					log_message "Unable to determine ip interface, exit ppptool to reset"
+					puts "close_pppd (a)"
+					close_pppd
+					close_ppp_tunnel
+				} else {
+				
+					puts "find i/f based on $ip_address"
+					set if_fd [open "|ifconfig -a"]
+					set save ""
+					while { [gets $if_fd line] != -1 } {
+						puts "i/f line: $line"
+						if { [string first $ip_address $line] != -1 } {
+							puts "found $ip_address in $line"
+							puts "looking for i/f name in: $save"
+							set ppp_interface [lindex [split $save ":"] 0]
+							puts "ppp_interface: $ppp_interface"
+							.footer.footer_r configure -text "Found ppp_interface:\n$ppp_interface" -justify left
+							break
+						}
+						set save $line
+					}
+					close $if_fd
+					#puts "Taking down interface $ppp_interface"
+					#.footer.footer_r configure -text "Taking down interface $ppp_interface"
+					if { [string length $ppp_interface] > 0 } {
+						puts "Terminating pppd process (a)"
+						.footer.footer_r configure -text "Terminating pppd process (a)"
+						#down_interface
+						puts "close_pppd (b)"
+						close_pppd
+						close_ppp_tunnel
+					}
+					
+				}
+			} else {
+
+				#puts "Taking down interface $ppp_interface"
+				#.footer.footer_r configure -text "Taking down interface $ppp_interface"
+				puts "Terminating pppd process (b)"
+				.footer.footer_r configure -text  "Terminating pppd process (b)"
+
+				#down_interface
+				puts "close_pppd (c)"
+				close_pppd
+				close_ppp_tunnel
+			}
+
+
+	.connect configure -state disabled 
+	.connect configure -text "Connect" -command connect  -state normal
+	puts "disconnect done"
+
+	# connection script
+	#post_disconnect
+
+}
+I 2
+
+proc init_modem { } {
+		puts "init_modem"
+
+		global ppp_settings
+D 3
+		set init_string "AT &F1 S11=65"
+E 3
+I 3
+		set init_string "AT &F1"
+E 3
+
+		if { [info exists ppp_settings(init_string)] && \
+				 [string length $ppp_settings(init_string)] > 2 } {
+
+				set init_string $ppp_settings(init_string)
+		} 
+	
+	set timeout 5
+	if {	[catch { [spawn -noecho -open \
+			 	[ open $ppp_settings(modem_port) "RDWR NONBLOCK" ]] } err]  != 1 } {
+				puts "error initializing modem: $err"
+				return -1
+	} else {
+		 # wakey wakey
+		 exp_send "AT\r"
+		 expect {
+
+			 "OK" { 
+						puts "Sending init string $init_string"
+					 exp_send "$init_string\r" 
+				}
+				timeout {
+					puts "timeout waiting for OK from AT command"
+					return -1
+				}
+		}
+		expect {
+			"OK" {
+					return 0
+			}
+			timeout {
+					puts "timeout waiting for OK from AT command"
+					return -1
+			}
+
+		}
+	}
+
+
+}
+
+E 2
+proc connect { } {
+
+	global accounts
+	global active_account 
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+	set seconds_remaining 30
+	global connection_state
+	set challenge_entered "false"
+	global ppp_interface serial_port ip_address
+
+	# pre-connection scripts
+	#pre_connect
+
+	log_messages "Connecting"
+	set connection_state "connecting"
+	init_blinking_bulbs
+	.footer.footer_r configure -text "Connecting .."
+	.connect configure -text "Disconnect" -command disconnect -state disabled
+
+I 2
+
+I 4
+	global backup_resolv
+I 12
+	set backup_resolv "" 
+E 12
+	global manage_resolv
+
+D 11
+	# create resolv.conf, backup resolv.conf
+	if { [file exists $accounts($active_account,resolv_file)] == 1 } {
+		set backup_resolv "/etc/resolv.conf.ppp"
+		# backup 'to'
+		exec $manage_resolv backup $backup_resolv 
+		# copy 'from'
+		exec $manage_resolv copy $accounts($active_account,resolv_file)
+	} else {
+		set backup_resolv "" 
+E 11
+I 11
+D 12
+	if { $accounts($active_account,create_resolv) == 1 } {
+E 12
+I 12
+	if { $accounts($active_account,resolv) == 1 } {
+E 12
+
+		# create resolv.conf, backup resolv.conf
+		if { [file exists $accounts($active_account,resolv_file)] == 1 } {
+			set backup_resolv "/etc/resolv.conf.ppp"
+			# backup 'to'
+			exec $manage_resolv backup $backup_resolv 
+			# copy 'from'
+			exec $manage_resolv copy $accounts($active_account,resolv_file)
+		} else {
+			set backup_resolv "" 
+		}
+
+E 11
+	}
+
+
+E 4
+	# initialize modem
+	if { [init_modem] != 0 } { 
+		.footer.footer_r configure -text "Error Initializing Modem" 
+		.connect configure -text "Connect" -command connect -state normal
+		return
+	} else {
+		.footer.footer_r configure -text "Modem Initialized" 
+	}
+
+I 3
+
+E 3
+E 2
+	if { $accounts($active_account,authtype) == "tokencard" } {
+
+ 		toplevel .des_dialog
+		entry .des_dialog.des_entry -width 20
+		label .des_dialog.challenge_label -text "Host:  Challenge:"
+		label .des_dialog.instruction_label -text "\n\
+					 Get your DES card ready\n\
+					 Enter your authorization number\n\
+					 Then get ready to key in the Host Number\n\
+					 and Challenge when they appear above\n\n\
+					 Then press 'E' and wait for the response string,\n\
+					 and enter the 'response' from your DES card\n\
+					 into the entry box above"
+
+		label .des_dialog.time_remaining -text "Waiting for Remote Connection"
+		log_messages "Waiting for Remote Connection"
+		button .des_dialog.des_send_button -text "Send Response" \
+		-command { 
+				set des_response [.des_dialog.des_entry get]	
+				set challenge_entered "true"
+				#wm withdraw .des_dialog
+				set seconds_remaining "null"
+				destroy .des_dialog
+		}	
+		button .des_dialog.close -text "Close" \
+		-command {
+
+			#wm iconify .des_dialog
+			set seconds_remaining "null"
+			destroy .des_dialog
+		}
+		pack .des_dialog.challenge_label -anchor n
+		pack .des_dialog.des_entry -after .des_dialog.challenge_label
+		pack .des_dialog.instruction_label -anchor n
+		pack .des_dialog.time_remaining -anchor n
+		pack .des_dialog.des_send_button -side left -anchor n
+		pack .des_dialog.close -side right -anchor n 
+
+
+		modempool_connect
+	} else {
+		isp_connect
+	}
+
+}
+
+I 4
+proc restore_resolv { } {
+	global accounts
+	global active_account
+	global backup_resolv
+	exec $restore_resolv $backup_resolv
+}
+
+proc backup_resolv { } {
+	global accounts
+	global active_account
+	global backup_resolv
+	set backup_resolv [exec $backup_resolv]
+}
+
+proc create_resolv { } {
+	global accounts
+	global active_account
+	#account_strings(domain) "DNS Domain Name:"
+	#account_strings(ns1) "Account Nameserver #1:"
+	#account_strings(ns2) "Account Nameserver #2:"
+
+	exec $create_resolv \
+	$account_strings($active_account,domain) \
+	$account_strings($active_account,ns1) \
+	$account_strings($active_account,ns2) 
+}
+
+proc create_ip_up { } {
+	global accounts
+	set ip_up_file "/etc/ppp/ip-up"
+}
+
+proc create_ip_down { } {
+	global accounts
+	set ip_down_file "/etc/ppp/ip-down"
+}
+
+E 4
+proc isp_connect { } {
+	puts "proc isp_connect { } "
+
+	global 	accounts account_list active_account baud_rate 
+	global	env flow_control init_string ip_enabled 
+	global 	log_file log_messages message modem_port
+	global 	nat_transparency_mode network_interface 
+	global 	password phone_number
+	global	port port_speed spawn_id tokencard_response username
+	global baud_rate pppd_config_file username
+
+	global connection_state
+	global pppd_id
+	global pppd_pid
+	global ppp_interface serial_port ip_address
+
+	# create connect script
+		# ttyb
+		# 38400
+		# debug
+		# lock
+		# noproxyarp
+		# updetach
+		# usepeerdns
+		# crtscts
+		# nodefaultroute
+		# noipdefault
+		# user internet.smus.MNGF11D
+		# password tgrtgr 
+		# connect '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"'
+
+
+	.passwdf.passwd_r configure -state normal
+
+	global phone_number port baud_rate pppd pppd_config_file env username
+	global tip_id
+	global connection_type
+	set connection_type "pppd"
+	global ppp_settings
+
+D 2
+	set phone_number $accounts($active_account,number)
+E 2
+I 2
+	#set phone_number $accounts($active_account,number)
+I 3
+
+	# strip out non-numeric
+E 3
+	regsub -all "\[^0-9\]" $accounts($active_account,number) "" phone_number 
+I 3
+
+E 3
+E 2
+	set baud_rate $ppp_settings(port_speed) 
+	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+	set port $ppp_settings(modem_port)
+	set pppd /usr/bin/pppd
+	set pppd_cmd "$pppd file $pppd_config_file"
+
+	.footer.footer_r config -text "Connect: Creating chat script"
+
+	set fd [open $pppd_config_file w]
+
+	set username [.uidf.uid_r get] 
+	set password [.passwdf.passwd_r get] 
+
+	if { $username != $accounts($active_account,uid) } {
+		set accounts($active_account,uid) $username
+	}
+	if { $password != $accounts($active_account,passwd) } {
+		set accounts($active_account,passwd) $password
+	}
+
+	#set username $accounts($active_account,uid) 
+	#set password $accounts($active_account,passwd)
+
+D 3
+	# initialize modem
+E 3
+I 3
+D 4
+	# create ip-up/down scripts
+E 4
+E 3
+
+	puts "$phone_number $port $baud_rate $pppd_config_file $username $password"
+
+	puts $fd $port
+	puts $fd $baud_rate
+	puts $fd debug
+	puts $fd lock
+	puts $fd noproxyarp
+	puts $fd updetach
+	puts $fd usepeerdns
+D 3
+	puts $fd crtscts
+E 3
+
+I 3
+	# flow control
+	switch  $ppp_settings(flow_control) {
+		"hardware" { puts $fd crtscts }
+		"software" { puts $fd xonxoff }
+		"none" { puts $fd  nocrtscts }
+	}
+
+E 3
+	if { $accounts($active_account,defroute) == 1 } {
+		puts $fd "defaultroute"
+	} else {
+		puts $fd "nodefaultroute"
+	}
+	puts $fd "noipdefault"
+	puts $fd "user $username"
+	puts $fd "password $password"
+
+	puts $fd "connect '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT \"NO CARRIER\" \"\" atdt$phone_number \"CONNECT\"'"
+
+	close $fd
+	set pppd_cmd "$pppd file $pppd_config_file"
+	puts "$pppd_cmd"
+
+	.footer.footer_r config -text "Connecting with Chat script"
+
+	eval spawn $pppd_cmd
+	set pppd_id $spawn_id
+
+	.footer.footer_r config -text "Starting Process:\n$pppd_cmd" -font {times 10 bold} -justify left
+	set ctr 0
+	expect_background -i $pppd_id -re  "\[^\r]*\r\n"  {
+
+			if { [string first "is locked by pid" $expect_out(0,string)] != -1 } {
+				# get pid and run close_pppd
+				#Device /dev/term/b is locked by pid 6482
+				#pppd exp6: Device /dev/term/b is locked by pid 6482
+
+				set split_line [split $expect_out(0,string) "\[ \t]*"]
+				set lock_pid [lindex $split_line [expr [llength $split_line] -1]] 
+				puts "Found locking pid $lock_pid, looking for /var/run/ files with pid"
+				# look for file in /var/run containing pid
+				foreach f [exec ls /var/run] {
+					if { [regexp "pid$" $f] == 1 } {
+						# check if file contains pid
+						if { [exec cat "/var/run/$f"] == $lock_pid } {
+							#send file name to close_pppd
+							set ppp_interface [lindex [split $f "."] 0]
+							puts "Setting ppp_interface file name to $ppp_interface"
+							puts "Running close_pppd"
+							close_pppd 	
+							break
+						}
+					}
+				}
+					
+			}
+
+			# look for connection success
+			# Connect: sppp0 <--> /dev/term/b
+			if { [string first "Connect" $expect_out(0,string)] != -1 } {
+					set ppp_interface \
+					[lindex [split $expect_out(0,string) " \t"] 1]
+
+					set serial_port \
+					[lindex [split $expect_out(0,string) " \t"] 3]
+					puts "\n==> PPP Interface: $ppp_interface <==\n"
+					puts "\n==> serial port: $serial_port <==\n"
+			}
+
+			if {	[string first "local" $expect_out(0,string)] != -1 && \
+						[string first "IP address" $expect_out(0,string)] != -1 } {
+
+					set ip_address \
+					[string trim [lindex [split $expect_out(0,string) "\[ ]*"] 4]]
+					puts "\n==> IP address for interface: $ip_address <==\n"
+					.footer.footer_r configure \
+					-text "PPP Connected.\nNetwork Interface: $ppp_interface\nIP address: $ip_address" -anchor w -justify left
+			}
+			# rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+			# local  IP address 32.100.234.63
+			# remote IP address 204.146.246.229
+			# pppd exp6: rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+			# local  IP address 32.100.234.63
+			# remote IP address 204.146.246.229
+
+			# get pid 
+			if { [string first "CONNECT" $expect_out(0,string)] != -1 && \
+					[string first "started" $expect_out(0,string)] != -1 } {
+
+					puts "pppd $spawn_id"
+					# the pid of the pppd 
+					set pid_line [split $expect_out(0,string) "\[ \t]*"] 
+					puts "pid_line: $pid_line"
+
+					# get last string of line
+					set pid_string [lindex $pid_line end] 
+					puts "pid_string: $pid_string"
+
+					set pppd_pid [string trimright [lindex [split $pid_string] 0] ")"]
+					puts "pppd_pid: $pppd_pid"
+					.connect configure -state normal
+
+			}
+
+			puts "pppd $spawn_id: $expect_out(0,string)"
+			log_message $expect_out(0,string)
+		}
+	
+		#post_connect
+}
+
+proc modempool_connect { } {
+	puts "proc modempool_connect { } "
+	global connection_type
+  set connection_type "tip"
+
+	global 	accounts account_list active_account baud_rate 
+	global	env flow_control init_string ip_enabled 
+	global 	log_file log_messages message modem_port
+	global 	nat_transparency_mode network_interface 
+	global 	password phone_number
+	global	port port_speed spawn_id tokencard_response username
+	global baud_rate pppd_config_file username
+
+	global tip_id
+	global ppp_settings
+
+	global challenge_entered
+	global des_response
+	global seconds_remaining
+
+	global ppp_interface serial_port ip_address
+	
+	#set ppp_settings(init_string) "atz" 
+	#set ppp_settings(connect_string) ""
+	#set ppp_settings(port_speed) 38400
+	#set ppp_settings(flow_control) hardware
+	#set ppp_settings(modem_port) /dev/term/b
+	#set ppp_settings(ppp_options) "" 
+
+	set phone_number $accounts($active_account,number)
+	set baud_rate $ppp_settings(port_speed) 
+	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+	set port $ppp_settings(modem_port) 
+
+	#set username $accounts($active_account,uid) 
+	set username [.uidf.uid_r get] 
+	if { $username != $accounts($active_account,uid) } {
+		set accounts($active_account,uid) $username
+	}
+
+	# don't need passwd field
+
+	.passwdf.passwd_r configure -state disabled
+	.connect configure -state normal
+
+	puts "$phone_number $port $baud_rate $pppd_config_file $username"
+	log_messages "$phone_number $port $baud_rate $pppd_config_file $username"
+
+	set timeout 60
+	# close any tip_id's in case
+	catch { [exec pkill tip] }
+	spawn tip "-$baud_rate" $port 
+	log_messages "spawn tip -$baud_rate $port" 
+	#set tip_id $spawn_id
+
+	expect {
+
+				"Authentication failed." {
+					puts "Check User ID/Password"
+					#disconnect
+					log_messages $expect_out(buffer)
+					log_messages "Check User ID/Password"
+					.footer.footer_r configure -text \
+					"Authentication failed.\nCheck User ID/Password" -anchor w -justify left
+					#close_ppp_tunnel
+					return
+				}
+				"NO CARRIER" {
+					log_messages $expect_out(buffer)
+					#close_ppp_tunnel
+					sleep 2
+					puts "Modem connection dropped" 
+					#modempool_connect	
+				}
+				"EOT" {
+					puts "Received: $expect_out(buffer)"
+					#puts "Modem disconnected"
+					exp_continue
+				}
+				"all ports busy" { 
+					log_messages $expect_out(buffer)
+					exp_send "~.\r"
+					#catch { close $tip_id }
+					#catch { close $spawn_id }
+					#close_ppp_tunnel
+					#sleep 10
+					#modempool_connect	
+				}	
+				"NO DIAL TONE" { 
+					log_messages $expect_out(buffer)
+					puts "NO DIAL TONE"
+					#close_ppp_tunnel
+					#sleep 10
+					#modempool_connect	
+				}
+				"connected" {
+					log_messages $expect_out(buffer)
+					# dial
+					puts "Sending $phone_number"
+					puts "******************************\n"
+					puts "  Get your DES card ready"
+					puts "  Enter your authorization #"
+					puts "  Then get read to key in:"
+					puts "  1.) Host number"
+					puts "  2.) Challenge"
+					puts "  Then enter the 'response' into the popup"
+					puts "******************************"
+
+					exp_send "atdt $phone_number\r"
+					exp_continue
+				}
+
+				# auth
+				Username: { 
+					log_messages $expect_out(buffer)
+					exp_send "$username\r" 
+					exp_continue
+				}
+				password: { 
+					log_messages $expect_out(buffer)
+					exp_send "\r" 
+					exp_continue
+				}
+
+				# des card challenge/response
+				Challenge {
+					log_messages $expect_out(buffer)
+					exp_continue	
+				}
+
+				esponse?  { 
+					log_messages $expect_out(buffer)
+					#puts "expect_out(0,string) = $expect_out(0,string)"
+					#puts "expect_out(buffer) = $expect_out(buffer)"
+
+					# pop up entry, display challenge
+					#Challenge: 9 6024 Response? 0f68pc72
+
+
+					if { [winfo exists .des_dialog] != 1 } {  return } 
+
+					set host_challenge [lindex [split $expect_out(buffer)] 1]
+					set secret [lindex [split $expect_out(buffer)] 2]
+
+					.des_dialog.challenge_label configure -text \
+					"Host: $host_challenge Challenge: $secret"
+
+					puts "\nhost_challenge=$host_challenge"
+					puts "secret=$secret"
+
+					des_countdown
+
+					tkwait variable challenge_entered
+
+					puts "Challenge: $des_response"
+					exp_send "$des_response\r" 
+					set timeout -1
+					exp_continue
+				}
+
+
+				"Local command?" {
+
+              if { [string first "Your IP address is" $expect_out(buffer)] != -1 } {
+                  puts "\n**** Found IP: $expect_out(buffer) ****\n"
+                  foreach line [split $expect_out(buffer) "\r\n"] {
+                    puts "PPPD: $line"
+                    if { [string first "Your IP" $line] != -1 } {
+											set ip_address [lindex [split $line " 	"] 4]	
+											set ip_address [string trimright $ip_address "."]
+											puts "IP address: $ip_address"
+											set mtu [lindex [split $line "  "] 7]
+											puts "MTU:  $mtu"
+											.footer.footer_r configure -text "ppp Connected: $line" -font {times 10 bold} -justify left
+                      break
+                    }
+                  }
+              }
+
+								log_messages $expect_out(buffer)
+								#puts "exp_send /usr/bin/pppd debug lock updetach crtscts defaultroute noipdefault noccp novj\r"
+								#exp_send "/usr/bin/pppd debug lock updetach crtscts defaultroute noipdefault noccp novj\r"
+								puts "exp_send /usr/bin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+								exp_send "/usr/bin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+
+								# best guess that connected is here
+								post_connect
+								
+								exp_continue
+				}
+
+				">" {
+							log_messages $expect_out(buffer)
+								exp_send "ppp\r" 
+								sleep 1
+								exp_send "~C"
+								exp_continue
+
+				}
+
+				timeout { 
+					log_messages $expect_out(buffer)
+					#close_ppp_tunnel
+					puts "timeout: try again"
+					#sleep 2
+					#modempool_connect	
+				}
+
+				eof {
+					log_messages $expect_out(buffer)
+					puts "eof: Modem connection closed"
+					#close_ppp_tunnel
+				}
+		}
+
+}
+
+
+proc post_connect { } {
+
+	global post_connect_script
+
+	if { [file exists $post_connect_script] } {
+	  puts "exec $post_connect_script"
+	  exec $post_connect_script & 
+	} 
+
+	return
+}
+
+
+proc pre_connect { } {
+
+	global pre_connect_script 
+
+	if { [file exists $pre_connect_script] } {
+	  puts "exec $pre_connect_script" 
+	  exec $pre_connect_script & 
+	}
+
+	return
+}
+proc pre_disconnect { } {
+
+	global pre_disconnect_script 
+
+	if { [file exists $pre_disconnect_script] } {
+	  puts "exec $pre_disconnect_script"
+	  exec $pre_disconnect_script & 
+	}
+
+	return
+}
+proc post_disconnect { } {
+
+	global post_disconnect_script 
+
+	if { [file exists $post_disconnect_script] } {
+	  puts "exec $post_disconnect_script"
+	  exec $post_disconnect_script & 
+	}
+
+	return
+}
+
+proc init { } {
+
+	global ppp_settings
+	global env
+	global ppp_dir
+	global pkghome
+
+	puts "Connection Script Env 'USER_ID': $env(USER_ID)"
+	puts "Connection Script Env 'CONNECTION_TYPE': $env(CONNECTION_TYPE)"
+	set pkghome $env(PKGHOME)
+
+	set copy_opts "[set pkghome]/copy_pppopts"	
+
+I 4
+	global manage_resolv
+	set manage_resolv "[set pkghome]/manage_resolv"
+	#"copy"  
+	#"restore"
+	#"srcfile=s"
+	#"backup_file=s" 
+
+E 4
+	set ppp_dir "$env(HOME)/.ppptool" 
+
+	global ppp_config_file
+	set ppp_config_file "$ppp_dir/ppp_config"
+
+	global ppp_options_file
+	set ppp_options_file "/etc/ppp/options"
+	set ppp_options_template "[set pkghome]/options"
+
+	puts "Checking for $ppp_options_file file"
+	if { [file exists $ppp_options_file] != 1 } {
+
+		if { [file exists $ppp_options_template] != 1 } {
+			puts "Options file  $ppp_options_template not found"
+			exit -1
+		}
+
+		puts "$ppp_options_file file not found, creating .."
+		if { [file exists $copy_opts] } {
+			exec $copy_opts
+			if { [file exists $ppp_options_file] != 1 } {
+				puts "Create of PPP options file $ppp_options_file failed!"
+				exit -1
+			}
+		} else {
+			puts "File $copy_opts not found, cannot create $ppp_options_file file"
+			exit -1
+		}
+
+	}
+
+	# list
+	global active_account
+	global account_list
+	set account_list {}
+
+	# array (account_name,key)
+	global accounts
+
+	# connection scripts
+
+D 4
+  # User configurable scripts in $HOME/.ppptool
+E 4
+I 4
+  # User configurable scripts in $HOME/.connect
+E 4
+  global pre_connect_script
+  global post_connect_script
+  global pre_disconnect_script
+  global post_disconnect_script
+
+	if [file exists /etc/connect/pre-connect] {
+		set pre_connect_script /etc/connect/pre-connect
+	} else {
+		set pre_connect_script "" 
+	}
+	if [file exists /etc/connect/post-connect] {
+		set post_connect_script /etc/connect/post-connect
+	} else {
+		set post_connect_script "" 
+	}
+	if [file exists /etc/connect/pre-disconnect] {
+		set pre_disconnect_script /etc/connect/pre-disconnect
+	} else {
+		set pre_disconnect_script "" 
+	}
+	if [file exists /etc/connect/post-disconnect] {
+		set post_disconnect_script /etc/connect/post-disconnect
+	} else {
+		set post_disconnect_script "" 
+	}
+	
+	global account_keys
+	set account_keys {\
+				 name\
+				 uid\
+				 passwd\
+				 number\
+				 domain\
+I 10
+				 search \
+E 10
+				 ns1\
+				 ns2\
+				 authtype\
+				 defroute\
+I 11
+				 resolv\
+E 11
+				 status\
+I 4
+				 resolv_file\
+E 4
+	}
+
+	global account_strings
+	set account_strings(name) "Account Name:"
+	set account_strings(uid) "User ID:"
+	set account_strings(passwd) "Password:"
+	set account_strings(number) "Phone Number:"
+D 3
+	set account_strings(domain) "Account Domain:"
+E 3
+I 3
+	set account_strings(domain) "DNS Domain Name:"
+I 10
+	set account_strings(search) "DNS Search Domains:"
+E 10
+E 3
+	set account_strings(ns1) "Account Nameserver #1:"
+	set account_strings(ns2) "Account Nameserver #2:"
+	set account_strings(authtype) "Authentication Type:"
+	set account_strings(defroute) "Default Route:"
+I 11
+	set account_strings(resolv) "Create /etc/resolv.conf:"
+E 11
+I 6
+	
+	global required_keys 
+	set required_keys { name uid number authtype }
+E 6
+
+D 6
+
+E 6
+	global account_file
+	set account_file "$ppp_dir/accounts"
+	RandomInit [pid]
+
+	if { [string first "sun" [exec arch]] != -1 } { 
+		option add *font {palatino 12 bold} 
+		option add *font {sun 12 bold} 
+	}
+
+	global log_file
+	set log_file "$ppp_dir/ppp_log"
+
+	global kill_pppd
+	set kill_pppd "[set pkghome]/kill_pppd.sh"
+
+	load_global
+	load_accts
+	build_log_win
+	build_menus
+
+}
+
+init
+
+# serial speed set to 38400 bps
+# pppd exp6: serial speed set to 38400 bps
+# 
+# connect option: '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"' started (pid 1058)
+# pppd exp6: connect option: '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"' started (pid 1058)
+# 
+# chat:  Feb 26 19:56:09 CONNECT 28800/ARQ/V34/LAPM/V42BIS
+# Serial connection established.
+# serial speed set to 38400 bps
+# Using interface sppp0
+# Connect: sppp0 <--> /dev/term/b
+# pppd exp6: chat:  Feb 26 19:56:09 CONNECT 28800/ARQ/V34/LAPM/V42BIS
+# Serial connection established.
+# serial speed set to 38400 bps
+# Using interface sppp0
+# Connect: sppp0 <--> /dev/term/b
+# 
+# sent [LCP ConfReq id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# pppd exp6: sent [LCP ConfReq id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfAck id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# pppd exp6: rcvd [LCP ConfAck id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfReq id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP Ident id=0x92 magic=0x1504974d "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x1 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: rcvd [LCP ConfReq id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP Ident id=0x92 magic=0x1504974d "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x1 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x2 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x2 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x3 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x3 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# rcvd [LCP ConfReq id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfReq id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# pppd exp6: rcvd [LCP ConfReq id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfReq id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfAck id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP Ident id=0x94 magic=0x90235e21 "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x4 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: rcvd [LCP ConfAck id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP Ident id=0x94 magic=0x90235e21 "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x4 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x5 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x5 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# rcvd [PAP AuthAck id=0x5 ""]
+# sent [IPCP ConfReq id=0x88 <addr 0.0.0.0> <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [CCP ConfReq id=0x4d <deflate 15> <deflate(old#) 15> <bsd v1 15>]
+# pppd exp6: rcvd [PAP AuthAck id=0x5 ""]
+# sent [IPCP ConfReq id=0x88 <addr 0.0.0.0> <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [CCP ConfReq id=0x4d <deflate 15> <deflate(old#) 15> <bsd v1 15>]
+# 
+# rcvd [IPCP ConfReq id=0x3 <addr 204.146.246.229>]
+# sent [IPCP ConfAck id=0x3 <addr 204.146.246.229>]
+# pppd exp6: rcvd [IPCP ConfReq id=0x3 <addr 204.146.246.229>]
+# sent [IPCP ConfAck id=0x3 <addr 204.146.246.229>]
+# 
+# rcvd [IPCP ConfRej id=0x88 <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [IPCP ConfReq id=0x89 <addr 0.0.0.0>]
+# pppd exp6: rcvd [IPCP ConfRej id=0x88 <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [IPCP ConfReq id=0x89 <addr 0.0.0.0>]
+# 
+# rcvd [LCP ProtRej id=0x4 80 fd 01 4d 00 0f 1a 04 78 00 18 04 78 00 15 03 2f]
+# pppd exp6: rcvd [LCP ProtRej id=0x4 80 fd 01 4d 00 0f 1a 04 78 00 18 04 78 00 15 03 2f]
+# 
+# rcvd [IPCP ConfNak id=0x89 <addr 32.100.234.63>]
+# sent [IPCP ConfReq id=0x8a <addr 32.100.234.63>]
+# pppd exp6: rcvd [IPCP ConfNak id=0x89 <addr 32.100.234.63>]
+# sent [IPCP ConfReq id=0x8a <addr 32.100.234.63>]
+# 
+# rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# local  IP address 32.100.234.63
+# remote IP address 204.146.246.229
+# pppd exp6: rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# local  IP address 32.100.234.63
+# remote IP address 204.146.246.229
+E 1

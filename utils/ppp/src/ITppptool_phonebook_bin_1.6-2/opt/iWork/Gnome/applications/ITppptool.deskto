@@ -1,0 +1,14 @@
+[Desktop Entry]
+
+Name=PPPTool
+
+Comment=PPPTool Graphical Interface for dialup accounts
+
+Exec=/opt/ITppptool/bin/ppptool
+
+Terminal=0
+
+Type=Application
+
+Categories=Application;iWork
+Icon=/opt/ITppptool/ppptool.png

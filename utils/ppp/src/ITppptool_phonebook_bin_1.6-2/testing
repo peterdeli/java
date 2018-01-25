@@ -1,0 +1,60 @@
+Build:
+  Version 
+  Solaris:
+  Linux: 1.5-7 ok
+  Verify correct interpreter paths
+    Solaris: /opt/sfw/bin/expectk (not checked)
+    Linux:  /usr/bin/expectk (ok)
+  Verify correct files used
+  Solaris:
+  Linux: ok
+  Verify all files in package or .rpm
+  Solaris:
+  Linux: ok
+Install:
+  Verify package or .rpm installs all files correctly
+  Solaris:
+  Linux: ok
+
+( Linux only ):
+Run ppptool:
+  Launches from menu or command line correctly - ok
+  agnstool launches and creates account - ok
+  Creates configuration files correctly:
+    - ppptool creates $HOME/.ppptool if none exists - ok
+    - location - ok
+    - permissions - ok
+
+  Exercise menu items:
+   File menu - save, view log, quit - ok
+   Edit menu - manage, edit
+     Manage menu item - Make Active, New, Edit, Delete, Close - ok
+     Edit Prefs menu item   - ok
+   Accounts menu - Select account - ok
+   Help menu - About, Help - ok
+  
+   Colors correct - ok 
+   Connect -
+     dials number and special characters - 
+     ( only tested numeric 0-9, ',', and '-' ) 
+  
+  Disconnect -
+   Hangs up modem - 
+   tested: during dialing, while connected. 
+   Removes connection script - ok
+  
+  Connection
+    Sets route correctly - ok
+    Creates connnect.script - ok
+    Uses modem settings - ok
+    Creates resolv.conf correctly - ok
+    Debug option displays information in log window - ok
+    
+  
+  Special prompts -
+    - prompt for save account - ok
+    - prompt for delete account - ok 
+  
+  Quit -
+   Disconnects - ok
+   Removes connection script - ok

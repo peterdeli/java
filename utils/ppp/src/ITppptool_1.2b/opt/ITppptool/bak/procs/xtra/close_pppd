@@ -1,0 +1,26 @@
+proc close_pppd { } {
+
+	puts "proc close_pppd" 
+	global ppp_interface serial_port \
+	connection_type ip_address spawn_id tip_id \
+	pppd_pid pppd_id connection_state \
+	link_disconnected  
+
+	if { [info exists connection_type] != 1 } { return }
+
+		if { $connection_type == "pppd" } {
+				puts "pkill pppd"
+				catch { [exec pkill pppd] }
+		} else {
+			catch { 
+				catch { [exec pkill pppd] }
+				set timeout 10
+				exp_send "~.\r"
+				expect "EOT\]"
+				exec pkill tip
+			}
+		}
+	set connection_state "disconnected"	
+	set link_disconnected "true"
+}
+

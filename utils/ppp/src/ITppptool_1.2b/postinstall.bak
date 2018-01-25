@@ -1,0 +1,124 @@
+#!/bin/sh
+
+echo "This is $0"
+
+# Gnome integration
+
+if [ "$PKG_INSTALL_ROOT" = "/" ]; then
+        PKG_INSTALL_ROOT=""
+fi
+
+if test -f ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate 
+then
+  if [ "XX$PKG_INSTALL_ROOT" = "XX" ]; then 
+    /opt/iWork/bin/it_gintegrate -i -R / -d ITppptool.desktop
+  else 
+    ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate -i -R $PKG_INSTALL_ROOT -d ITppptool.desktop
+  fi
+fi
+
+
+# RBAC
+
+exec_attr_line="ppptool:suser:cmd:::/opt/ITppptool/ppptool.tk:uid=0"
+exec_attr_file="/etc/security/exec_attr"
+
+if [ -f $exec_attr_file ]; then
+
+        grep_result=`grep $exec_attr_line $exec_attr_file` 
+        status=$?
+
+        if [ $status -ne 0 ]; then
+                echo $exec_attr_line >> /etc/security/exec_attr
+                status=$?
+                if [ $status -ne 0 ]; then
+                        exit $status
+                fi
+        else
+                echo "$exec_attr_line found in $exec_attr_file"
+        fi
+
+else
+
+        echo "File $exec_attr_file not found"
+        status=1
+
+fi
+
+
+
+prof_attr_line_a="ppptool:::Start PPPTool:"
+prof_attr_line_b="ppptool"
+
+prof_attr_file="/etc/security/prof_attr"
+prof_tmpfile="/tmp/prof_attr.$$"
+
+# add line a
+ppptool_line=`grep "$prof_attr_line_a" $prof_attr_file`
+if [ -z "$ppptool_line" ]; then
+	echo "$prof_attr_line_a not found in $prof_attr_file, appending .."
+  echo $prof_attr_line_a >> $prof_attr_file
+fi
+
+# add line b
+basic_solaris_line=`grep 'Basic Solaris User' $prof_attr_file`
+basic_fields=`echo $basic_solaris_line | awk -F';' '{print NF}'`
+
+count=1
+while [ $count -le $basic_fields ]; do
+	profile_line=`echo $basic_solaris_line | cut -d';' -f$count | grep '^profiles='`
+	if [ ! -z "$profile_line" ]; then
+		echo "profile_line = $profile_line"
+		break
+	fi
+	count=`expr $count + 1`
+done
+
+profiles=`echo $profile_line | awk -F'=' '{print $2}'` 
+
+profile_fields=`echo $profiles | awk -F',' '{print NF}'`
+count=1
+if [ $profile_fields -eq $count ]; then
+	if  [ "$profiles" = "ppptool" ]; then
+		ppptool_profile="ppptool"
+	fi
+else
+	while [ $count -le $profile_fields ]; do
+			line=`echo $profiles | cut -d',' -f$count`
+			if [ "$line" = "ppptool" ]; then
+				ppptool_profile=$line
+				break
+			fi
+			count=`expr $count + 1` 
+	done
+fi
+
+if [  -z "$ppptool_profile" ]; then
+  #add the profile
+	echo "$prof_attr_line_b not found in profiles field for Basic Solaris User"
+	echo "Adding .."
+  new_profile_line=`echo $profile_line | sed 's/profiles=/profiles=ppptool,/'`
+
+	count=1
+	while [ $count -le $basic_fields ]; do
+
+		line=`echo $basic_solaris_line | cut -d';' -f$count`
+		if [ "$line" = "$profile_line" ]; then
+			line="$new_profile_line"
+		fi
+		if [ -z "$new_basic_solaris_line" ]; then
+			new_basic_solaris_line="$line"
+		else
+			new_basic_solaris_line="${new_basic_solaris_line};$line"
+		fi
+		count=`expr $count + 1`
+  done
+
+  # replace the entire basic line
+  cat $prof_attr_file | grep -v 'Basic Solaris User' > $prof_tmpfile
+  #echo $new_basic_solaris_line 
+  echo $new_basic_solaris_line >> $prof_tmpfile
+  mv $prof_tmpfile $prof_attr_file
+fi
+
+echo "prof_attr updated"

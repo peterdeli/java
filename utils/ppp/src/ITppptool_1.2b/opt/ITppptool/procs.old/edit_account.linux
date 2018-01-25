@@ -1,0 +1,290 @@
+proc edit_account {edited_account_name} {
+
+
+		puts "edit_account"
+		#create window
+		#name    Account1
+		#uid     cbj
+		#passwd  bongo
+		#number  303 123-4567
+		#domain  craig.com
+		#ns1     123.456.789.000
+		#ns2     987.654.321.000
+		#authtype        DES challenge
+		#defroute        1
+		global edit_account_name
+		set edit_account_name $edited_account_name
+
+		global accounts
+		global account_list
+		global account_keys
+		global account_strings
+		global authtype
+		global defroute
+		global resolv
+		global active_account
+		global required_keys
+
+		#.account_manager_win.account_list selection clear 0 end
+		.account_manager_win.edit_button configure -state disabled	
+		.account_manager_win.delete_button configure -state disabled
+		set top .edit_account
+
+		if { [winfo exists $top] == 1 } { destroy $top }
+		toplevel [set top] 
+
+    frame [set top].required_key_frame
+    label [set top].required_key_frame.required_key -text "Required Fields indicated by '**'"
+    pack [set top].required_key_frame.required_key
+    pack [set top].required_key_frame -anchor n
+	
+
+		foreach key [set account_keys] {
+
+			if { $key == "status" } { continue }
+			if { $key == "resolv_file" } { continue }
+
+			set value $account_strings($key)
+			set [set key]_frame [set top].[set key]_frame
+
+			frame [set [set key]_frame]
+
+			#puts "key = $key"
+			if { $key == "authtype" } {
+				# radio buttons for
+				# pap chap challenge card
+
+				radiobutton [set [set key]_frame].[set key]_radio_pap -text \
+				"PAP" -variable authtype -value "pap" -width 11
+
+				pack [set [set key]_frame].[set key]_radio_pap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_chap -text \
+				"CHAP" -variable authtype -value "chap" -width 11
+				pack [set [set key]_frame].[set key]_radio_chap -side right
+
+				radiobutton [set [set key]_frame].[set key]_radio_token -text \
+				"Token Card" -variable authtype -value "tokencard" -width 11
+				pack [set [set key]_frame].[set key]_radio_token -side right
+
+				label [set [set key]_frame].[set key]_label -text "** $value" 
+				pack [set [set key]_frame].[set key]_label -side right
+
+				set authtype $accounts($edit_account_name,authtype)
+
+			} elseif { $key == "defroute" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Set default route" -anchor w -onvalue "1" \
+				-offvalue "0" -variable defroute -width 42 
+
+				set defroute $accounts($edit_account_name,defroute)
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+			} elseif { $key == "resolv" } {
+
+				checkbutton [set [set key]_frame].[set key]_check \
+				-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+				-offvalue "0" -variable resolv -width 42 
+
+				#puts "resolv for account $edit_account_name = \
+				#			$accounts($edit_account_name,resolv)"
+				set resolv $accounts($edit_account_name,resolv)
+
+				#puts "resolv == $resolv"
+
+				pack [set [set key]_frame].[set key]_check -side right
+
+				label [set [set key]_frame].[set key]_label -text $value 
+				pack [set [set key]_frame].[set key]_label -side right
+
+			} else {
+				entry [set [set key]_frame].[set key]_entry -width 45
+
+				eval [set [set key]_frame].[set key]_entry insert 0 \
+				\"$accounts($edit_account_name,$key)\"
+
+				pack [set [set key]_frame].[set key]_entry -side right
+
+        if { [lsearch $required_keys $key] != -1 } {
+          label [set [set key]_frame].[set key]_label -text "** $value"
+        } else {
+          label [set [set key]_frame].[set key]_label -text $value
+        }
+
+				pack [set [set key]_frame].[set key]_label -side right
+				pack [set [set key]_frame].[set key]_entry -anchor w
+			}
+
+			pack [set [set key]_frame] -fill x -expand 1 -pady 5
+		}
+
+		frame [set top].button_frame
+		button [set top].button_frame.save -text "Save Edits" -command {
+
+			puts "Save Edits"
+			# get all entries
+			# Check if 'name' has been changed
+			# if so, lreplace old account name from account_list
+			# add new account name
+			# add to accounts array and account_list
+			global edit_account
+			global edit_account_name
+			global authtype
+			global defroute
+			global resolv
+			global active_account
+
+      # check if name is already taken
+      set new_account_name [list [.edit_account.name_frame.name_entry get]]
+
+      if { $new_account_name == "" } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+      } elseif { [string length $new_account_name] < 1 } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+
+      }
+
+			#set new_account_name {}
+			set delete_account_flag "true"
+			foreach key [set account_keys] {
+					# popup for required fields
+					if { $key == "status" } { continue }
+					if { $key == "resolv_file" } { continue	}
+					if { $key == "authtype" } {
+            if { [string length $authtype] < 1 } {
+              tk_messageBox -type ok -icon error -title \
+              "$account_strings($key) Required" -message  \
+              "Please Enter $account_strings($key)"
+              return
+            } else {
+              set edit_account($key) $authtype
+            }
+					} elseif { $key == "defroute" } {
+						set edit_account($key) $defroute
+					} elseif { $key == "resolv" } {
+						set edit_account($key) $resolv
+					} else {
+								set [set key]_frame .edit_account.[set key]_frame
+								set key_value [[set [set key]_frame].[set key]_entry get]
+                if { [lsearch $required_keys $key] != -1 && \
+															[string length $key_value] < 1 } {
+                    tk_messageBox -type ok -icon error -title \
+                    "$account_strings($key) Required" -message  \
+                    "Please Enter $account_strings($key)"
+                    return
+								}
+								#puts "=====> $key: $key_value" 
+								set edit_account($key) $key_value 
+								if { $key == "name" } { 
+									set new_account_name  [list $key_value] 
+									set new_account_string $key_value
+									set old_account_string $accounts($edit_account_name,name) 
+									set replace_index [lsearch $account_list $edit_account_name]
+									# Check if name has changed
+									if { $edit_account_name != $new_account_name } {
+										#puts "replacing $edit_account_name with $new_account_name\
+										#at index $replace_index"
+										set account_list [lreplace $account_list $replace_index \
+										$replace_index  $new_account_name]
+										#puts "account_list == $account_list"
+
+										# save resolv_file name from old account
+										set edit_account(resolv_file) \
+										$accounts($edit_account_name,resolv_file)
+										set edit_account(status) \
+										$accounts($edit_account_name,status)
+
+									} else {
+										# name has not changed, don't delete from accounts
+										# in delete_account_menu
+										set delete_account_flag "false"
+									}
+								}
+
+
+					}
+						
+			}
+
+
+
+
+			if { $delete_account_flag == "false" } {
+
+				foreach { key value } [array get edit_account] {
+					#puts "accounts($new_account_name,$key) = $value" 
+					set accounts($new_account_name,$key) $value 
+				}
+				set_account $new_account_name
+
+				# write resolv file in case changed
+				write_resolv_file $accounts($new_account_name,name)	
+
+			} else {
+					
+				# add to accounts
+				#puts "account name: $new_account_name"
+				#puts "account string: $new_account_string"
+				set accounts($new_account_name,name) $new_account_string
+
+				foreach { key value } [array get edit_account] {
+					#puts "accounts($new_account_name,$key) = $value" 
+					set accounts($new_account_name,$key) $value 
+				}
+				# write resolv file in case changed
+				write_resolv_file $accounts($new_account_name,name)	
+
+				# delete old account	
+				set deleted_index [delete_account_menu $edit_account_name] 
+				# add to Accounts menu and acct manager
+				add_account_menu $new_account_name $deleted_index
+
+				# remove from account list
+				set account_box_items [.account_manager_win.account_list get 0 end]
+				foreach item $account_box_items {
+					if { $item == $old_account_string } {
+						#puts "deleting $item from account list at index \
+						#[lsearch $account_box_items $item]"
+						.account_manager_win.account_list delete \
+						[lsearch $account_box_items $item]
+					}
+				}
+				
+				.account_manager_win.account_list insert $replace_index "$accounts($new_account_name,name)"
+
+				# if account is active, adjust front panel values
+				#puts "Comparing edited account $edit_account_name to\
+				#active account $active_account"
+				if { $edit_account_name == $active_account } {
+					set active_account $new_account_name
+					set_account $new_account_name
+				}
+				set edit_account_name $new_account_name
+			}
+
+				.account_manager_win.edit_button configure -state normal	
+				.account_manager_win.delete_button configure -state normal
+				destroy .edit_account 
+		}
+
+		button [set top].button_frame.close -text "Close" -command {
+				.account_manager_win.edit_button configure -state normal	
+				.account_manager_win.delete_button configure -state normal
+				destroy .edit_account 
+		}
+
+		pack .edit_account.button_frame.close -side right 
+		pack .edit_account.button_frame.save -side left 
+		pack .edit_account.button_frame -side bottom -pady 10 
+
+}
+

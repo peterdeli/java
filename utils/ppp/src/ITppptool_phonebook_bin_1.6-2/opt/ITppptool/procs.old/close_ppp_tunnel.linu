@@ -1,0 +1,32 @@
+proc close_ppp_tunnel {} {
+  #puts "proc close_ppp_tunnel {} "
+  global network_interface message spawn_id  port_id
+  global tip_id connection_type global pppd_pid pppd_id
+
+  #set spawn_id $tip_id
+	#puts "spawn_id = $spawn_id"
+
+	if { [info exists connection_type] != 1 } { return }
+
+  catch {
+		if { $connection_type == "pppd" } {
+			exp_send -i $pppd_id ""
+			exec pkill pppd
+			#puts "Sending kill -TERM $pppd_pid"
+			catch { exec kill -TERM $pppd_pid }
+		} else {
+			exp_send "~."
+			expect "[EOT]"
+		}
+
+		#close $tip_id
+		#close $spawn_id
+		#set kill_pid [exp_pid -i $spawn_id] 
+		#puts "Sending kill to pid $kill_pid"
+		#exec kill -TERM $kill_pid
+	}
+  
+	 #puts "close_ppp_tunnel done"
+}
+
+

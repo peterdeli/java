@@ -1,0 +1,132 @@
+proc write_ppp_resolv { } {
+
+
+	global manage_resolv
+	global backup_resolv
+	global accounts
+	global active_account
+	set domain_len 2
+
+	#write /etc/ppp/resolv.conf contents to
+	#/etc/resolv.conf, replacing any nameserver lines
+
+	# check if 'create_resolv from DNS' is checked.
+	# if it is, resolv has already been backed up
+	# if not, backup resolv
+
+
+	# /etc/ppp/resolv.conf
+	global ppp_resolv
+
+	set resolv_contents {}
+	set ppp_resolv_contents {}
+
+
+	puts "write_ppp_resolv"
+	set resolv_file "/etc/resolv.conf"
+
+	set ppp_resolv_found "false"
+	set max_retries 5 
+	for { set i 0 } { $i < $max_retries } { incr i } {
+		puts "Checking for $ppp_resolv"
+		if { [file exists $ppp_resolv] != 1 } {
+			sleep 2
+		} else {
+			sleep 1
+			set ppp_resolv_found "true"
+			break
+		}
+	}
+
+	if { $ppp_resolv_found == "false" } {
+		puts "No $ppp_resolv found"
+		log_message "Error: $ppp_resolv not found, Cannot create $resolv_file\n"
+		log_message "Error: No peer DNS information returned from Remote Server\n"
+		set message "ERROR: No peer DNS information returned from Remote Server.\n\
+		Either correct the problem at the Remote Server end, or\n\
+		add DNS information to this account and configure the account \n\
+		to use the account DNS information"
+		tk_messageBox -default "ok" -message $message -title "ERROR"
+		return -1
+	}
+
+	set fd [open $ppp_resolv r]
+	while { [gets $fd line] != -1 } {
+		if { [string length $line] > 0 } {
+			lappend ppp_resolv_contents $line
+		}
+	}
+	close $fd
+
+
+	if { [lsearch -regexp $ppp_resolv_contents "nameserver"] < 0 } {
+
+		set message "PPP Peer returned 0 nameservers.\n\
+		Add nameserver information to this account"
+		tk_messageBox -default "ok" -icon warning -message \
+		 $message -title "Warning"
+		return -1
+
+	}
+	if { [llength $ppp_resolv_contents] < 1 } {
+		return -1
+	}
+
+	if { [file exists $resolv_file] == 1 } {
+		if { $accounts($active_account,resolv) != "none" } {
+				if { [file exists $backup_resolv] == 0 } {
+					set backup_resolv "/etc/resolv.conf.ppp"
+					puts "creating file $backup_resolv"
+					exec $manage_resolv backup $backup_resolv
+				}
+		}
+		file delete $resolv_file
+	}
+
+	# now append 'domain and search' from account if needed
+	set fd [open $resolv_file w ]
+	set domain ""
+
+	if { [lsearch -regexp $ppp_resolv_contents "domain"] < 0 } {
+		if { [info exists accounts($active_account,domain)] == 1 } {
+			set domain $accounts($active_account,domain)
+		}
+	} else {
+		set domain [lindex $ppp_resolv_contents [lsearch -regexp $ppp_resolv_contents "domain"]]
+	}
+
+	set search_list {}
+
+	if { [string length $domain] < $domain_len } {
+
+		set message "No domain information found\n\ 
+		Add domain information to this account"
+		tk_messageBox -default "ok" -icon warning -message \
+		$message -title "Warning"
+		return -1
+
+	} else {
+		puts $fd "domain $domain"
+		lappend search_list $domain 
+		foreach item $accounts($active_account,search) {
+			if { [lsearch -exact $search_list $item] == -1 } {
+				lappend search_list $item 
+			}
+		}
+		if { [llength $search_list] < 1 } {
+				puts $fd "search $domain"
+		} else {
+				puts $fd "search $search_list"
+		}
+	} 
+
+	foreach line $ppp_resolv_contents {
+		if { [string first "nameserver" $line] != -1 } {
+			puts $fd $line
+		}
+	}
+
+	close $fd
+
+}
+

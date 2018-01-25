@@ -1,0 +1,123 @@
+proc init_modem_SunOS { } {
+		puts "init_modem"
+
+		global ppp_settings
+		set init_string "AT &F1"
+		set baud_rate "-28800"
+
+		if { [info exists ppp_settings(init_string)] && \
+				 [string length $ppp_settings(init_string)] > 2 } {
+
+				set init_string $ppp_settings(init_string)
+		} 
+	
+	set timeout 10
+	if { [info exists ppp_settings(port_speed)] } {
+		set baud_rate "-[set ppp_settings(port_speed)]"
+	} 
+
+	#catch { exec pkill tip }
+
+	if { [catch { spawn tip $baud_rate $ppp_settings(modem_port) } ] != 0 } {
+		return -1
+	} else {
+		puts "spawn tip $baud_rate $ppp_settings(modem_port) returned 0"
+	}
+
+	set return -1
+
+		expect {
+				 "connected" { 
+						sleep 2
+						set return 0
+						puts "tip returned connected"
+						if { [catch { exp_send "AT\r" }] == 0 } {
+							exp_continue
+						} else {
+							return -1
+						}
+					}
+				 "OK" { 
+						set return 0
+							puts "Sending init string $init_string"
+						if { [catch { exp_send "$init_string\r" } ] != 0 } {
+							return -1
+						}
+					}
+					timeout {
+						puts "timeout waiting for OK from AT command in init_modem"
+						catch { exec pkill tip }
+						return -1
+					}
+					EOF {
+						puts "EOF from tip $baud_rate $ppp_settings(modem_port)"
+						catch { exec pkill tip }
+						return -1
+					}
+					"all ports busy" {
+						.footer.footer_r configure -text "all ports busy"
+						puts "all ports busy returned from tip $baud_rate $ppp_settings(modem_port)"
+						catch { exec pkill tip }
+						return -1
+					}
+		}
+
+		if { $return != 0 } { return -1 }
+
+		expect {
+			"OK" {
+				
+				if { [catch { exp_send "~.\r" } ] != 0 } {
+					return -1
+				} 
+			}
+			"NO CARRIER" {
+				set timeout 5
+				if { [catch { exp_send "~.\r" } ] != 0 } {
+					return -1
+				}
+				expect "EOF\]"
+				set  connection_state "disconnected"
+				log_message $expect_out(buffer)
+				.connect configure -state normal -command connect
+				puts "Modem connection dropped" 
+				return 0
+			}
+			timeout {
+					puts "timeout waiting for OK from AT command"
+					catch { exec pkill tip }
+					return -1
+			}
+			EOF {
+				puts "EOF from $init_string" 
+				catch { exec pkill tip }
+				return -1
+			}
+			"all ports busy" {
+				puts "all ports busy returned from tip $baud_rate $ppp_settings(modem_port)"
+				.footer.footer_r configure -text "all ports busy"
+				catch { exec pkill tip }
+				return -1
+			}
+
+		}
+		expect {
+			"EOT\]" {
+				puts "Modem initialized"
+				return 0
+			}
+			timeout {
+				puts "timeout waiting for tip to close"
+				catch { exec pkill tip }
+				return -1
+			}
+			"all ports busy" {
+				puts "all ports busy returned from tip $baud_rate $ppp_settings(modem_port)"
+				.footer.footer_r configure -text "all ports busy"
+				catch { exec pkill tip }
+				return -1
+			}
+
+		}
+	return 0
+}

@@ -1,0 +1,48 @@
+proc choose_account { } {
+	
+	toplevel .account_chooser
+  set title_text "Choose an Account Type"
+	wm title .account_chooser $title_text
+	
+
+	frame .account_chooser.chooser_frame
+	label .account_chooser.chooser_frame.account_chooser_label \
+	-text $title_text -width [expr [string length $title_text] * 2] 
+
+	tk_optionMenu .account_chooser.chooser_frame.account_menu \
+	account_type "AGNS" "ISP" "Sun" 
+
+	button .account_chooser.chooser_frame.continue_button \
+	-text "Continue ->" -command {
+			destroy .account_chooser
+			create_account $account_type
+	}
+
+	button .account_chooser.chooser_frame.close_button \
+	-text "Close" -command {
+		destroy .account_chooser
+
+		if { [winfo exists .new_account] != 1 } {
+			.account_manager_win.new_button configure -state normal 
+		} else {
+			.account_manager_win.new_button configure -state disabled 
+		}
+	}
+
+	pack .account_chooser.chooser_frame.account_chooser_label \
+	-padx 10 -pady 10 -side top
+
+	pack .account_chooser.chooser_frame.account_menu \
+	-padx 10 -pady 10 -side top
+
+	pack .account_chooser.chooser_frame.close_button \
+	-padx 10 -pady 10 -side left -anchor s
+
+	pack .account_chooser.chooser_frame.continue_button \
+	-padx 10 -pady 10 -side right -anchor s
+	
+	pack .account_chooser.chooser_frame 
+	center_window .account_chooser 3 3
+
+}
+

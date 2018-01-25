@@ -1,0 +1,112 @@
+proc set_account {value } {
+
+	# display active account 
+
+	global menubar_widget
+	global active_account
+	global color_array
+	global accounts
+	global account_list
+	global acct_width
+
+	if { [string length $active_account] > 0 && \
+			$accounts($active_account,status) == "DELETED" } {
+
+		.acct_label configure -text "Active Account:"
+		.namef.name_r configure -text ""
+
+		.uidf.uid_r delete 0 end 
+		.uidf.uid_r configure -state disabled 
+		.passwdf.passwd_r configure -state disabled 
+		.numberf.number_r configure -text ""
+		#.authtypef.authtype_r configure -text ""
+		.connect configure -state disabled
+		return
+	}
+
+	if { [string length $active_account] > 0 } {
+
+		.acct_label configure -text \
+		"Active Account: $accounts($active_account,name)" \
+		-width [expr \
+		[string length "Active Account: $accounts($active_account,name)"] + 10]
+
+		set namelabel_width [expr [string length $accounts($active_account,name)] + 5]
+
+		if { [.namef.name_r cget -width] < $namelabel_width } { 
+			.namef.name_r configure -width $namelabel_width 
+			.uidf.uid_r configure -width $namelabel_width
+			.passwdf.passwd_r configure -width $namelabel_width
+			.numberf.number_r configure -width $namelabel_width
+			#.authtypef.authtype_r configure -width $namelabel_width
+		} else {
+			.namef.name_r configure -width $acct_width
+			.uidf.uid_r configure -width $acct_width
+			.passwdf.passwd_r configure -width $acct_width 
+			.numberf.number_r configure -width $acct_width
+			#.authtypef.authtype_r configure -width $acct_width
+		}
+
+		.namef.name_r configure -text "$accounts($active_account,name)" 
+
+
+		.uidf.uid_r delete 0 end 
+		.uidf.uid_r insert 0 "$accounts($active_account,uid)"
+
+		if { $accounts($active_account,authtype) == "tokencard" } {
+			.uidf.uid_r configure -state normal 
+			.passwdf.passwd_r delete 0 end 
+			destroy .passwdf.passwd_r 
+			entry .passwdf.passwd_r -bg lightBlue -width $acct_width \
+			-relief groove
+
+			.passwdf.passwd_r insert 0 "- tokencard challenge -"
+			.passwdf.passwd_r configure -state disabled 
+
+			pack .passwdf.passwd_r -side right -pady 3 \
+			-before .passwdf.passwd_l
+		} else {
+			.uidf.uid_r configure -state normal 
+			destroy .passwdf.passwd_r 
+			entry .passwdf.passwd_r -bg lightYellow -width $acct_width \
+			-relief groove
+			.passwdf.passwd_r configure -state normal -show *
+			.passwdf.passwd_r delete 0 end 
+			.passwdf.passwd_r insert 0 "$accounts($active_account,passwd)" 
+			pack .passwdf.passwd_r -side right -pady 3 \
+			-before .passwdf.passwd_l
+		}
+
+		.numberf.number_r configure -text "$accounts($active_account,number)"
+
+		#.authtypef.authtype_r configure -text "$accounts($active_account,authtype)"
+
+		if { [info exists active_account] } {
+			.connect configure -state normal
+		} else {
+			.connect configure -state disabled
+		}
+	} else {
+		.acct_label configure -text "Active Account:"
+		.namef.name_r configure -text ""
+
+		.uidf.uid_r delete 0 end 
+		.passwdf.passwd_r delete 0 end 
+		.numberf.number_r configure -text ""
+		#.authtypef.authtype_r configure -text ""
+		.connect configure -state disabled
+	}
+
+	# reset active key
+	foreach acct $account_list {
+
+		if { $acct == $active_account } {
+			puts "Setting account $acct to 'active' status"
+			set accounts($active_account,status) "active"
+		} else {
+			puts "Setting account $acct to 'inactive' status"
+			set accounts($acct,status) "inactive"
+		}
+	}
+}
+

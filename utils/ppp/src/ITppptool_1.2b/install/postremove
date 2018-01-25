@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo "This is $0"
+
+if [ "$PKG_INSTALL_ROOT" = "/" ]; then
+        PKG_INSTALL_ROOT=""
+fi
+
+if test -f ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate.sh 
+then
+  if [ "XX$PKG_INSTALL_ROOT" = "XX" ]; then 
+    /opt/iWork/bin/it_gintegrate.sh -r -R / -d ITppptool.desktop
+  else 
+    ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate.sh -r -R $PKG_INSTALL_ROOT -d ITppptool.desktop
+  fi
+fi
+

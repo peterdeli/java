@@ -1,0 +1,2 @@
+						if { [catch { eval [exec init_modem.tcl atz \ 
+						$ppp_settings(modem_port) $ppp_settings(port_speed) } err]] == 1 } {

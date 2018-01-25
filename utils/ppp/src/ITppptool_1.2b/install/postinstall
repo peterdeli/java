@@ -1,0 +1,31 @@
+#!/bin/sh
+
+echo "This is $0"
+
+if [ "$PKG_INSTALL_ROOT" = "/" ]; then
+        PKG_INSTALL_ROOT=""
+fi
+
+echo "Adding entries to RBAC .."
+if [ -f ${PKG_INSTALL_ROOT}/etc/security/exec_attr ]; then
+  /bin/rm -rf ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp 
+  /usr/bin/sed '/ITppptool/d' ${PKG_INSTALL_ROOT}/etc/security/exec_attr > ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp
+  /bin/mv ${PKG_INSTALL_ROOT}/etc/security/exec_attr ${PKG_INSTALL_ROOT}/etc/security/exec_attr_bak
+  if test -f ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp
+  then
+    /bin/echo "Toolkit Management:suser:cmd:::/opt/ITppptool/bin/ppptool.tk:uid=0" >> ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp
+    /bin/echo "Toolkit Management:suser:cmd:::/opt/ITppptool/ppptool.tk:uid=0" >> ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp
+    /bin/mv ${PKG_INSTALL_ROOT}/etc/security/exec_attr_tmp ${PKG_INSTALL_ROOT}/etc/security/exec_attr
+  fi
+fi
+/bin/echo "Added entries to RBAC"
+
+# Gnome integration
+if [ -f ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate.sh ]; then
+  if [ "XX$PKG_INSTALL_ROOT" = "XX" ]; then 
+    /opt/iWork/bin/it_gintegrate.sh -i -R / -d ITppptool.desktop
+  else 
+    ${PKG_INSTALL_ROOT}/opt/iWork/bin/it_gintegrate.sh -i -R $PKG_INSTALL_ROOT -d ITppptool.desktop
+  fi
+fi
+

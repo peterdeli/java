@@ -1,0 +1,25 @@
+#!/bin/pfsh
+
+VERBOSE="false"
+
+while getopts v opt
+do
+    case $opt in
+      v ) echo "Verbose setting"
+          VERBOSE=true
+          ;;
+      *) echo "Bad argument $opt"; help
+         OPT_ERROR="TRUE"
+         exit
+        ;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if [ -f "/opt/ITppptool/bin/ppptool.tk" ]; then
+	if [ "$VERBOSE" = "true" ]; then
+	exec /opt/ITppptool/bin/ppptool.tk -debug "$@"
+	else
+	exec /opt/ITppptool/bin/ppptool.tk "$@" >/dev/null 2>&1
+	fi
+fi

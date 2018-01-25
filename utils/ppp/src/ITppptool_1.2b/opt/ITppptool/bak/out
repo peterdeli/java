@@ -1,0 +1,181 @@
+Linux version 2.4.18-24.8.0 (bhcompile@tweety.devel.redhat.com) (gcc version 3.2 20020903 (Red Hat Linux 8.0 3.2-7)) #1 Fri Jan 31 06:51:30 EST 2003
+BIOS-provided physical RAM map:
+ BIOS-e820: 0000000000000000 - 000000000009fc00 (usable)
+ BIOS-e820: 000000000009fc00 - 00000000000a0000 (reserved)
+ BIOS-e820: 00000000000e0000 - 0000000000100000 (reserved)
+ BIOS-e820: 0000000000100000 - 000000000ffc0000 (usable)
+ BIOS-e820: 000000000ffc0000 - 000000000fff8000 (ACPI data)
+ BIOS-e820: 000000000fff8000 - 0000000010000000 (ACPI NVS)
+ BIOS-e820: 00000000fec00000 - 00000000fec01000 (reserved)
+ BIOS-e820: 00000000fee00000 - 00000000fee01000 (reserved)
+ BIOS-e820: 00000000ffb80000 - 00000000ffc00000 (reserved)
+ BIOS-e820: 00000000fff00000 - 0000000100000000 (reserved)
+0MB HIGHMEM available.
+255MB LOWMEM available.
+On node 0 totalpages: 65472
+zone(0): 4096 pages.
+zone(1): 61376 pages.
+zone(2): 0 pages.
+Kernel command line: ro root=LABEL=/
+Initializing CPU#0
+Detected 1495.106 MHz processor.
+Speakup v-1.00 CVS: Tue Jun 11 14:22:53 EDT 2002 : initialized
+Console: colour VGA+ 80x25
+Calibrating delay loop... 2971.18 BogoMIPS
+Memory: 252864k/261888k available (1315k kernel code, 6592k reserved, 990k data, 172k init, 0k highmem)
+Dentry cache hash table entries: 32768 (order: 6, 262144 bytes)
+Inode cache hash table entries: 16384 (order: 5, 131072 bytes)
+Mount cache hash table entries: 4096 (order: 3, 32768 bytes)
+ramfs: mounted with options: <defaults>
+ramfs: max_pages=31863 max_file_pages=0 max_inodes=0 max_dentries=31863
+Buffer cache hash table entries: 16384 (order: 4, 65536 bytes)
+Page-cache hash table entries: 65536 (order: 6, 262144 bytes)
+CPU: Before vendor init, caps: 3febfbff 00000000 00000000, vendor = 0
+CPU: L1 I cache: 0K, L1 D cache: 8K
+CPU: L2 cache: 256K
+CPU: After vendor init, caps: 3febfbff 00000000 00000000 00000000
+Intel machine check architecture supported.
+Intel machine check reporting enabled on CPU#0.
+CPU:     After generic, caps: 3febfbff 00000000 00000000 00000000
+CPU:             Common caps: 3febfbff 00000000 00000000 00000000
+CPU: Intel(R) Pentium(R) 4 CPU 1.50GHz stepping 02
+Enabling fast FPU save and restore... done.
+Enabling unmasked SIMD FPU exception support... done.
+Checking 'hlt' instruction... OK.
+POSIX conformance testing by UNIFIX
+mtrr: v1.40 (20010327) Richard Gooch (rgooch@atnf.csiro.au)
+mtrr: detected mtrr type: Intel
+PCI: PCI BIOS revision 2.10 entry at 0xfda95, last bus=2
+PCI: Using configuration type 1
+PCI: Probing PCI hardware
+Transparent bridge - Intel Corp. 82801BA/CA/DB PCI Bridge
+PCI: Using IRQ router PIIX [8086/2440] at 00:1f.0
+isapnp: Scanning for PnP cards...
+isapnp: No Plug & Play device found
+speakup:  initialized device: /dev/synth, node (MAJOR 10, MINOR 25)
+Linux NET4.0 for Linux 2.4
+Based upon Swansea University Computer Society NET3.039
+Initializing RT netlink socket
+apm: BIOS not found.
+Starting kswapd
+VFS: Diskquotas version dquot_6.5.0 initialized
+pty: 2048 Unix98 ptys configured
+Serial driver version 5.05c (2001-07-08) with MANY_PORTS MULTIPORT SHARE_IRQ SERIAL_PCI ISAPNP enabled
+ttyS0 at 0x03f8 (irq = 4) is a 16550A
+PCI: Found IRQ 10 for device 02:0b.0
+PCI: Sharing IRQ 10 with 00:1f.4
+Redundant entry in serial pci_table.  Please send the output of
+lspci -vv, this message (14e4,4212,14e4,0002)
+and the manufacturer and name of serial board or modem board
+to serial-pci-info@lists.sourceforge.net.
+register_serial(): autoconfig failed
+Real Time Clock Driver v1.10e
+block: 480 slots per queue, batch=120
+Uniform Multi-Platform E-IDE driver Revision: 6.31
+ide: Assuming 33MHz system bus speed for PIO modes; override with idebus=xx
+PIIX4: IDE controller on PCI bus 00 dev f9
+PIIX4: chipset revision 18
+PIIX4: not 100% native mode: will probe irqs later
+    ide0: BM-DMA at 0xffa0-0xffa7, BIOS settings: hda:DMA, hdb:pio
+    ide1: BM-DMA at 0xffa8-0xffaf, BIOS settings: hdc:DMA, hdd:pio
+hda: WDC WD400BB-53CLB0, ATA DISK drive
+hdc: HITACHI DVD-ROM GD-8000, ATAPI CD/DVD-ROM drive
+ide0 at 0x1f0-0x1f7,0x3f6 on irq 14
+ide1 at 0x170-0x177,0x376 on irq 15
+blk: queue c03b26c4, I/O limit 4095Mb (mask 0xffffffff)
+blk: queue c03b26c4, I/O limit 4095Mb (mask 0xffffffff)
+hda: 78165360 sectors (40021 MB) w/2048KiB Cache, CHS=4865/255/63, UDMA(100)
+ide-floppy driver 0.99.newide
+Partition check:
+ hda: hda1 hda2 hda3
+Floppy drive(s): fd0 is 1.44M
+FDC 0 is a post-1991 82077
+NET4: Frame Diverter 0.46
+RAMDISK driver initialized: 16 RAM disks of 4096K size 1024 blocksize
+ide-floppy driver 0.99.newide
+md: md driver 0.90.0 MAX_MD_DEVS=256, MD_SB_DISKS=27
+md: Autodetecting RAID arrays.
+md: autorun ...
+md: ... autorun DONE.
+NET4: Linux TCP/IP 1.0 for NET4.0
+IP Protocols: ICMP, UDP, TCP, IGMP
+IP: routing cache hash table of 2048 buckets, 16Kbytes
+TCP: Hash tables configured (established 16384 bind 32768)
+Linux IP multicast router 0.06 plus PIM-SM
+NET4: Unix domain sockets 1.0/SMP for Linux NET4.0.
+RAMDISK: Compressed image found at block 0
+Freeing initrd memory: 127k freed
+VFS: Mounted root (ext2 filesystem).
+Journalled Block Device driver loaded
+kjournald starting.  Commit interval 5 seconds
+EXT3-fs: mounted filesystem with ordered data mode.
+Freeing unused kernel memory: 172k freed
+usb.c: registered new driver usbdevfs
+usb.c: registered new driver hub
+usb-uhci.c: $Revision: 1.1 $ time 07:04:00 Jan 31 2003
+usb-uhci.c: High bandwidth mode enabled
+PCI: Found IRQ 3 for device 00:1f.2
+PCI: Setting latency timer of device 00:1f.2 to 64
+usb-uhci.c: USB UHCI at I/O 0xef40, IRQ 3
+usb-uhci.c: Detected 2 ports
+usb.c: new USB bus registered, assigned bus number 1
+hub.c: USB hub found
+hub.c: 2 ports detected
+PCI: Found IRQ 10 for device 00:1f.4
+PCI: Sharing IRQ 10 with 02:0b.0
+PCI: Setting latency timer of device 00:1f.4 to 64
+usb-uhci.c: USB UHCI at I/O 0xef80, IRQ 10
+usb-uhci.c: Detected 2 ports
+usb.c: new USB bus registered, assigned bus number 2
+hub.c: USB hub found
+hub.c: 2 ports detected
+usb-uhci.c: v1.275:USB Universal Host Controller Interface driver
+usb.c: registered new driver hiddev
+usb.c: registered new driver hid
+hid-core.c: v1.8.1 Andreas Gal, Vojtech Pavlik <vojtech@suse.cz>
+hid-core.c: USB HID support drivers
+mice: PS/2 mouse device common for all mice
+hub.c: USB new device connect on bus2/2, assigned device number 2
+hub.c: USB hub found
+hub.c: 4 ports detected
+EXT3 FS 2.4-0.9.18, 14 May 2002 on ide0(3,1), internal journal
+Adding Swap: 393584k swap-space (priority -1)
+kjournald starting.  Commit interval 5 seconds
+EXT3 FS 2.4-0.9.18, 14 May 2002 on ide0(3,3), internal journal
+EXT3-fs: mounted filesystem with ordered data mode.
+IA-32 Microcode Update Driver: v1.11 <tigran@veritas.com>
+microcode: CPU0 no microcode found! (sig=f12, pflags=4)
+parport0: PC-style at 0x378 (0x778) [PCSPP,TRISTATE]
+parport0: irq 7 detected
+ohci1394: pci_module_init failed
+ip_tables: (C) 2000-2002 Netfilter core team
+eepro100.c:v1.09j-t 9/29/99 Donald Becker http://www.scyld.com/network/eepro100.html
+eepro100.c: $Revision: 1.1 $ 2000/11/17 Modified by Andrey V. Savochkin <saw@saw.sw.com.sg> and others
+PCI: Found IRQ 11 for device 02:08.0
+divert: allocating divert_blk for eth0
+eth0: Intel Corp. 82801BA/BAM/CA/CAM Ethernet Controller, 00:03:47:B3:CA:0F, IRQ 11.
+  Board assembly 000000-000, Physical connectors present: RJ45
+  Primary interface chip i82555 PHY #1.
+  General self-test: passed.
+  Serial sub-system self-test: passed.
+  Internal registers self-test: passed.
+  ROM checksum self-test: passed (0x04f4518b).
+divert: not allocating divert_blk for non-ethernet device vpn0
+Intel 810 + AC97 Audio, version 0.22, 07:04:29 Jan 31 2003
+PCI: Found IRQ 9 for device 00:1f.5
+PCI: Sharing IRQ 9 with 00:1f.3
+PCI: Setting latency timer of device 00:1f.5 to 64
+i810: Intel ICH2 found at IO 0xef00 and 0xe800, IRQ 9
+i810_audio: Audio Controller supports 6 channels.
+i810_audio: Defaulting to base 2 channel mode.
+ac97_codec: AC97 Audio codec, id: 0x4144:0x5361 (Analog Devices AD1886)
+i810_audio: AC'97 codec 0 Unable to map surround DAC's (or DAC's not present), total channels = 2
+ide-floppy driver 0.99.newide
+hdc: ATAPI 48X DVD-ROM drive, 512kB Cache
+Uniform CD-ROM driver Revision: 3.12
+cdrom: This disc doesn't have any tracks I recognize!
+VPN module open ok (1)
+tty_io.c: process 8292 (stty) used obsolete /dev/cua - update software to use /dev/ttyS0
+tty_io.c: process 8339 (stty) used obsolete /dev/cua - update software to use /dev/ttyS0
+tty_io.c: process 8343 (stty) used obsolete /dev/cua - update software to use /dev/ttyS0
+tty_io.c: process 8344 (stty) used obsolete /dev/cua - update software to use /dev/ttyS0

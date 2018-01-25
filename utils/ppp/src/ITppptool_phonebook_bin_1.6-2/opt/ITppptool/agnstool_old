@@ -1,0 +1,724 @@
+#!/usr/bin/wish
+
+# agnstool -phonefile <file>
+
+proc init {  } {
+	global userdir argv env appdir user_file_to_load pop_file_to_load user_profile_file font
+
+	set AGNSTool_ver 1.0
+	set appdir /opt/ITppptool
+	set userdir $env(HOME)/.ppptool
+	set user_file_to_load $userdir/agns
+	set user_profile_file $userdir/accounts
+	set font {Helvetica -12}
+
+	if {! [file isdirectory $userdir]} {
+		catch [exec mkdir $userdir]
+	}
+	set arglen [llength $argv]
+	
+		switch [llength $argv]  1 {
+			set opt [string tolower [lindex $argv 0]]
+			if { $opt == "-help" || $opt == "-usage" } {
+				help
+			}
+		} 2 {
+			set opt [string tolower [lindex $argv 0]]
+			if { $opt == "-phonefile" } {
+				set pop_file_to_load [lindex $argv 1]
+			}
+
+		} default {
+			help
+		}
+
+		if { [string length $pop_file_to_load] > 0 && \
+		     [file exists $pop_file_to_load] } {
+
+		} elseif { [file exists "${userdir}/agns-numbers"] } {
+			set pop_file_to_load "${userdir}/agns-numbers"
+		} elseif { [file exists "${appdir}/agns-numbers"] } {
+			set pop_file_to_load "${appdir}/agns-numbers"
+		} else {
+				tk_messageBox -type ok -icon error -title \
+				"AGNS PhoneBook Error" -message "PhoneBook Database file not found!"
+				exit
+		}
+
+}
+
+# Copyright © 2001 Sun Microsystems, Inc.  All rights reserved.  
+#
+# [Insert Trademark Notice.]
+#
+# Government Rights Notice
+#
+# Use, duplication, or disclosure by the U.S. Government is subject to
+# restrictions set forth in the Sun Microsystems, Inc. license agreements and
+# as provided in DFARS 227.7202-1(a) and 227.7202-3(a) (1995),
+# DFARS 252.227-7013(c)(ii) (OCT 1988),FAR 12.212(a)(1995), FAR 52.227-19,
+# or FAR 52.227-14 (ALT III), as applicable.  Sun Microsystems, Inc.
+
+#======================================================================
+# Build the front screen
+#======================================================================
+
+proc build_gui {} {
+
+	 global account userid password country_list font w
+
+	 if {![info exists password]} {
+			set password ""
+	 }
+
+	 tk appname "AGNS PhoneBook and Account Creator for PPPTool"
+
+	 option add *font fixed startup
+
+	 # various screen areas (frames) for holding things
+
+	 frame .accountinfo_frame -bd 2
+	 frame .pop_section_frame -relief flat
+	 frame .phone_frame -relief flat
+	 frame .button_frame -bd 2
+	 pack .accountinfo_frame .pop_section_frame .phone_frame .button_frame \
+			-side top -fill x
+
+	 # The top section, where AGNS account info is configured.
+	 # Need account, userid and password (optional)
+	 frame .accountinfo_frame.account_frame
+	 frame .accountinfo_frame.userid_frame
+	 frame .accountinfo_frame.password_frame
+	 pack .accountinfo_frame.account_frame \
+			.accountinfo_frame.userid_frame \
+			.accountinfo_frame.password_frame \
+			-in .accountinfo_frame -side top -pady 0m -padx 2m 
+
+	 label .accountinfo_frame.account_frame.account_label -text "AGNS Account:" \
+			-width 20 -anchor e
+	 entry .accountinfo_frame.account_frame.account_entry -width 50 \
+			-textvariable account
+	 pack .accountinfo_frame.account_frame.account_label \
+			.accountinfo_frame.account_frame.account_entry \
+			-in .accountinfo_frame.account_frame \
+			-side left -fill x -padx 0m -pady 0m -ipadx 1m -ipady 0m
+
+	 label .accountinfo_frame.userid_frame.userid_label -text "User ID:" \
+			-width 20 -anchor e
+	 entry .accountinfo_frame.userid_frame.userid_entry -width 50 \
+			-textvariable userid
+	 pack .accountinfo_frame.userid_frame.userid_label \
+			.accountinfo_frame.userid_frame.userid_entry \
+			-in .accountinfo_frame.userid_frame \
+			-side left -fill x -padx 0m -pady 0m -ipadx 1m -ipady 0m
+
+	 label .accountinfo_frame.password_frame.password_label \
+			-text "Password (optional):" -width 20 -anchor e
+	 entry .accountinfo_frame.password_frame.password_entry -width 50 \
+			-textvariable password -show *
+	 pack .accountinfo_frame.password_frame.password_label \
+			.accountinfo_frame.password_frame.password_entry \
+			-in .accountinfo_frame.password_frame \
+			-side left -fill x -padx 0m -pady 0m -ipadx 1m -ipady 0m
+
+	 # The middle section (the bit with two scrolling lists - one for the 
+	 # countries and one for the POPs in those countries
+	 frame .pop_section_left_frame -relief flat
+	 frame .pop_section_right_frame -relief flat
+	 pack .pop_section_left_frame .pop_section_right_frame \
+			-in .pop_section_frame -side left -padx 2m
+
+	 # The Country section of the POP selection
+	 canvas .pop_section_left_frame.country_list_title -width 165 -height 20 \
+			-bd 1 -relief ridge -highlightthickness 0 -bg gray90
+	 .pop_section_left_frame.country_list_title create text 70 10 \
+			-text "Country" -font $font
+
+	 listbox .pop_section_left_frame.country_list -yscrollcommand \
+		 ".pop_section_left_frame.scroll_bar set" -bd 2 -relief groove \
+		 -font $font -highlightthickness 0
+	 .pop_section_left_frame.country_list configure -height 10
+	 scrollbar .pop_section_left_frame.scroll_bar -command \
+		 ".pop_section_left_frame.country_list yview" -relief sunken
+	 .pop_section_left_frame.scroll_bar set 5 5 0 4
+	 pack .pop_section_left_frame.country_list_title \
+			-in .pop_section_left_frame -side top
+	 pack .pop_section_left_frame.country_list \
+			.pop_section_left_frame.scroll_bar \
+			-in .pop_section_left_frame -side left -fill y
+	 bind .pop_section_left_frame.country_list <ButtonRelease-1> {
+		 list_pops [selection get]
+	 }
+
+	 # The POPs within the countries
+	 multilist .pop_section_right_frame.pop_list -width1 40 -width2 20 \
+			-titles {1 City 2 "Phone Number"} -lheight 10
+	 bind .pop_section_right_frame.pop_list.f.l1 <ButtonRelease-1> {
+			set phone [.pop_section_right_frame.pop_list.f.l2 get [.pop_section_right_frame.pop_list.f.l1 cursel]]
+			set city [.pop_section_right_frame.pop_list.f.l1 get [.pop_section_right_frame.pop_list.f.l1 cursel]]
+      set country [ .pop_section_left_frame.country_list get [.pop_section_left_frame.country_list cursel]]
+
+	 }
+	 bind .pop_section_right_frame.pop_list.f.l2 <ButtonRelease-1> {
+			set phone [.pop_section_right_frame.pop_list.f.l2 get [.pop_section_right_frame.pop_list.f.l1 cursel]]
+			set city [.pop_section_right_frame.pop_list.f.l1 get [.pop_section_right_frame.pop_list.f.l1 cursel]]
+      set country [ .pop_section_left_frame.country_list get [.pop_section_left_frame.country_list cursel]]
+	 }
+
+	 label .phone_frame.phone_label -text "Phone number to dial:" \
+			-width 20 -anchor w
+	 entry .phone_frame.phone_entry -width 20 -textvariable phone
+	 pack .phone_frame.phone_entry .phone_frame.phone_label \
+			-in .phone_frame -side right -padx 0m -pady 0m -ipadx 1m -ipady 0m
+
+
+	 # The buttons - "Create account" and "Exit"
+	 button .button_frame.exit_button -text "Exit" \
+			-command exit
+	 button .button_frame.help_button -text "Help" \
+			-command help
+	 button .button_frame.create_button -text "Create Account" \
+			-command {create_account $country $city $phone}
+	 pack .button_frame.exit_button \
+			-in .button_frame -ipadx 2 -ipady 2 -padx 8 -pady 2 -side left -fill x
+	 pack .button_frame.help_button \
+			-in .button_frame -ipadx 2 -ipady 2 -padx 8 -pady 2 -side \
+      left -fill x -after .button_frame.exit_button
+	 pack .button_frame.create_button \
+			-in .button_frame -ipadx 2 -ipady 2 -padx 8 -pady 2 -side right -fill x
+	 
+
+	 foreach country [set country_list] {
+			.pop_section_left_frame.country_list insert end "$country"
+	 }
+			
+}
+
+
+proc help { } {
+		
+	if { [winfo exists .help_win] } { 
+		 catch { wm deiconify .help_win }	
+		 catch { focus .help_win }
+		 return
+	} 
+			
+		toplevel .help_win 
+		wm title .help_win "AGNS PhoneBook Tool Help"
+		frame .help_win.help_frame -relief flat
+		text .help_win.help_text -wrap word -relief sunken -borderwidth 2 \
+		-yscrollcommand { .help_win.scroll_y set} \
+		-height 30 -width 80 -setgrid true
+		scrollbar .help_win.scroll_y -command ".help_win.help_text yview"
+		pack .help_win.help_text -in .help_win.help_frame -side left -pady 1m -fill both -expand 1
+		pack .help_win.scroll_y -in .help_win.help_frame -side right -fill y
+
+		frame .help_win.button_frame -relief flat
+		button .help_win.close_button -text "Close" -command {\
+			destroy .help_win
+		}
+		pack .help_win.close_button -side bottom -in .help_win.button_frame \
+		-ipadx 2 -padx 2
+
+		pack .help_win.help_frame -side top -fill both -expand 1
+		pack .help_win.button_frame -side bottom
+
+		.help_win.help_text tag configure bold \
+		 -font  -*-helvetica-bold-r-normal--*-140-* 
+
+		.help_win.help_text tag configure normal \
+		-font -*-helvetica-medium-r-normal--*-120-*
+
+		set helptext [split [get_helptext] "\n"]
+		foreach line $helptext {
+
+			if { [string first "<b>" $line] != -1 } {
+				regsub -all "<b>" $line "" newline
+				.help_win.help_text insert end $newline bold 
+				#.help_win.help_text insert end "\n" 
+			} else {
+				.help_win.help_text insert end $line normal
+				.help_win.help_text insert end "\n" 
+			}
+		}
+}
+
+
+proc get_helptext { } {
+	return "  \
+<b>AGNS PhoneBook Tool Help\
+\n\
+\n\
+\n  \
+The AGNS PhoneBook is a phone number lookup tool designed\n  \
+to make it easy to create a dialup account for IT PPP Tool.\
+\n\
+\n  \
+<b>Usage:\
+\n\
+\n\
+\n  \
+<b>Method #1 ( Quick Account Creation ):\
+\n\n  \
+First find the country in the Country column.\
+\n  \
+Clicking on the country will bring up all the cities and\n  \
+their corresponding phone numbers.\
+\n  \
+Click on a city or a phone number to highlight it, then click\n  \
+the 'Create Account' button. An account will be added to the\n  \
+ppptool accounts file. You may immediately begin using the\n  \
+account in ppptool.\
+\n\
+\n\
+<b>Method #2 ( Normal Account Creation ):\
+\n\n  \
+First follow the instructions in Method #1 above, and then\n  \
+you may also fill out the three fields in the top of the form\n  \
+before clicking the 'Create Account' button:\
+\n\n  \
+<b>AGNS Account:\
+\n\n  \
+This is the AGNS account name given when your account was assigned.\n  \
+For example: SUNONE\
+\n\n  \
+<b>User ID:\
+\n\n  \
+This is the 'ID' portion of your AGNS account.\n  \
+For example: SUNONE1234\
+\n\n  \
+<b>Password:\
+\n\n  \
+This is an optional field, and for optimal security, may be left blank\n  \
+up until the time that the account is used to connect. The actual password\n  \
+is the one that you created when you first connected with your account.\
+\n\
+"
+
+}
+
+
+#======================================================================
+# Polulate the city list when a country is selected
+#======================================================================
+
+proc list_pops {sel_country} {
+
+	 global pop_array pop
+
+	 set sizeof [.pop_section_right_frame.pop_list.f.l1 size]
+	 .pop_section_right_frame.pop_list.f.l1 delete 0 $sizeof
+	 .pop_section_right_frame.pop_list.f.l2 delete 0 $sizeof
+
+	 for {set element 1} {$element < $pop} {incr element} {
+			if {"$pop_array($element,c_name)" == $sel_country} {
+				 if {[string length "$pop_array($element,s_code)"] > 0} {
+			.pop_section_right_frame.pop_list.f.l1 insert end \
+			"$pop_array($element,city), $pop_array($element,s_code)"
+					} else {
+						.pop_section_right_frame.pop_list.f.l1 insert end \
+				 $pop_array($element,city)
+					}
+	 .pop_section_right_frame.pop_list.f.l2 insert end \
+			$pop_array($element,phone)
+			}
+	 }
+}
+
+#======================================================================
+# This procedure opens an external file, returns file handle
+# upon success or "" upon failure
+#======================================================================
+
+proc open_file {file mode} {
+		if [catch {set fd [open $file $mode]} err_str] {
+			tk_messageBox -type ok -icon error -title \
+			"File open Error" -message "$file: $err_str"
+			return ""
+		}
+		return $fd
+}
+
+#======================================================================
+# Load config file - main program has determined whether to
+# load $user_config_file or $system_config_file
+#======================================================================
+
+proc load_config {} {
+
+	 global user_file_to_load pop_file_to_load
+	 global account userid password account_save userid_save password_save
+
+	 set account ""
+	 set userid ""
+	 set password ""
+	 
+	 if [file exists $user_file_to_load ] {
+			set fd [open_file $user_file_to_load r]
+
+			if {$fd == ""} {
+							return 0
+			}
+			for {set line_no 1} {[gets $fd line] >= 0} {incr line_no} {
+					if {[string index $line 0] == "#"} {
+						continue
+					}
+
+					set token [lindex [split $line " "] 0]	
+
+					switch "$token" \
+							Account {
+								set account [lrange [split $line " "] 1 [llength $line]] 
+							} UserID {
+								set userid [lrange [split $line " "] 1 [llength $line]] 
+							} Password {
+								set password [lrange [split $line " "] 1 [llength $line]] 
+							} default {
+								continue
+							}
+			}
+	 
+			close $fd
+	 }
+
+	 set account_save $account
+	 set userid_save $userid
+	 set password_save $password
+}
+
+#======================================================================
+# Load POP data
+#======================================================================
+
+proc load_pops {} {
+
+	 global pop_file_to_load pop_array country_list pop
+	 set pop_list ""
+
+	 # POP file is a comma-delimited file structured as:
+	 # "Country code","Country Name","State code","State name","Phone No.","City","Modem capabilities"
+
+	 # take command option first, then $HOME/.ppptool/agns.numbers,
+   # then /opt/ITppptool/agns.numbers
+
+	 set fd [open_file $pop_file_to_load r]
+	 if {$fd == ""} {
+					 return 0
+	 }
+	 for {set line_no 1} {[gets $fd line] >= 0} {incr line_no} {
+			if {[string index $line 0] == "#"} {
+				 continue
+			} elseif {[string index $line 0] == "*"} {
+				 continue
+			} elseif {[regexp {^$} $line] == 1} {
+				 continue
+			}
+
+			#regsub ", " $line ". " line
+			#set sline [split $line ","]
+			set sline [split $line "|"]
+			if {[llength $sline] != 7} {
+	 set f [llength $sline]
+				 errorbox bad_token "$pop_file_to_load, skipping line $line_no"
+				 continue
+			}
+
+			set pop $line_no
+
+			# 2-character country code.
+			if [regexp {^\"[A-Z][A-Z]\"$} [lindex $sline 0]] {
+				regsub -all \" [lindex $sline 0] "" pop_array($pop,c_code)
+			} else {
+				errorbox bad_token "2 $pop_file_to_load, skipping line $line_no"
+				continue
+			}
+
+			# Country name.
+			regsub -all \" [lindex $sline 1] "" pop_array($pop,c_name)
+			#set pop_array($pop,c_name) [lindex $sline 1]
+
+			# State/Province abbreviation
+			regsub -all \" [lindex $sline 2] "" pop_array($pop,s_code)
+			#set pop_array($pop,s_code) [lindex $sline 2]
+			
+			# State/Province name
+			regsub -all \" [lindex $sline 3] "" pop_array($pop,s_name)
+			#set pop_array($pop,s_name) [lindex $sline 3]
+
+			# Phone number. Mandatory.
+			if [regexp {^\"[0-9\-\#]+\"$} [lindex $sline 4]] {
+				 regsub -all \" [lindex $sline 4] "" pop_array($pop,phone)
+			 #set pop_array($pop,phone) [lindex $sline 4]
+			} else {
+				 errorbox bad_token \
+	 "$pop_file_to_load contains a bad phone number. Skipping."
+	 continue
+			}
+
+			# City
+			if [regexp {^\"[0-9A-Za-z_].+\"} [lindex $sline 5]] {
+				 regsub -all \" [lindex $sline 5] "" pop_array($pop,city)
+				 #set pop_array($pop,city) [lindex $sline 5]
+			} else {
+				 errorbox bad_token \
+				 "$pop_file_to_load contains an illegal city name. Skipping."
+				 continue
+			}
+
+			# Modem capabilities
+			regsub -all \" [lindex $sline 6] "" pop_array($pop,modem)
+			#set pop_array($pop,modem) [lindex $sline 6]
+
+			set pop_list "$pop_list {$pop_array($pop,c_name)}"
+	 }
+	 close $fd
+	 set country_list [lsort -unique $pop_list]
+}
+
+#======================================================================
+# Save profile information in the profile file specified by user_profile_file
+#======================================================================
+proc create_account {country city phone} {
+
+	 global account userid password user_profile_file appdir
+
+	# get names from account file - compare in case of duplicates
+	 
+	 # Open the file for writing.
+	 set fd [open_file $user_profile_file a]
+
+	 puts $fd "name\tAGNS $city $country"
+	 puts $fd "type\tISP_ModemPool"
+	 puts $fd "uid\tinternet.${account}.${userid}"
+	 puts $fd "passwd\t$password"
+	 puts $fd "number\t$phone"
+	 puts $fd "domain\tattbusiness.net"
+	 puts $fd "search\tsun.com"
+	 puts $fd "ns1\t165.87.194.244"
+	 puts $fd "ns2\t165.87.201.244"
+	 puts $fd "authtype\tpap"
+	 puts $fd "defroute\t1"
+	 puts $fd "resolv\taccount"
+	 puts $fd "status\tinactive"
+	 puts $fd "resolv_file\t${appdir}/resolv.conf.AGNS"
+	 puts $fd "ppp_opts\t"
+	 puts $fd "debug\t0"
+
+	 close $fd
+	 catch [exec chmod 0600 $user_profile_file]
+	 bye
+}
+
+#======================================================================
+# Save account info and exit
+#======================================================================
+proc bye {} {
+
+	 global account userid password appdir user_file_to_load
+	 global account_save userid_save password_save
+	 
+	 if {($account != $account_save) ||
+			($userid != $userid_save) ||
+			($password != $password_save)} {
+				 set fd [open_file $user_file_to_load w]
+	 puts $fd "Account\t$account"
+	 puts $fd "UserID\t$userid"
+	 puts $fd "Password\t$password"
+	 close $fd
+	 catch [exec chmod 0600 $user_file_to_load]
+	 }
+
+	 exit
+}
+
+#======================================================================
+# Build a generic errorbox using the arguments specified
+#======================================================================
+proc errorbox {error_type field} {
+	 
+	 switch "$error_type" \
+					 mandatory {
+							 set message_text "is a mandatory field and must be set before\
+																 proceeding."
+							 set boxtitle "Data Missing"
+				 } syntax {
+							 set message_text "contains a syntax error. Please investigate."
+							 set boxtitle "Syntax Error"
+				 } gateway_duplicate {
+							 set message_text "already present in the profile list. Try\
+																 changing or deleting the existing profile"
+							 set boxtitle "Duplicate Profile Error"
+				 } bad_token {
+							 set message_text "contains the wrong number of fields."
+							 set boxtitle "File Format Error"
+				 }
+
+	 tk_messageBox -type ok -icon error -title $boxtitle \
+								 -message "$field $message_text"
+}
+
+
+#======================================================================
+# a minimal multi listboxes megawidget
+#
+# All credit to Ulis. http://wiki.tcl.tk/9590
+#======================================================================
+
+	namespace eval multilist \
+	{
+		namespace export multilist
+
+		# -----------------
+		# the constructor
+		# -----------------
+		proc multilist {w args} \
+		{
+			global phone
+			variable {}
+			# variables
+			set ($w:yview) 0
+			set ($w:started) 0
+			set ($w:resizing) 0
+			# options
+			set lheight 20
+			set theight 20
+			set width1 40
+			set width2 20
+			set font {Helvetica -12}
+			set lcolor white
+			set tcolor gray90
+			array set titles {1 1 2 2}
+			foreach {key value} $args \
+			{
+				switch -glob -- $key \
+				{
+					-font     { set font $value }
+					-lcolor   { set lcolor $value }
+					-tcolor   { set tcolor $value }
+					-lheight  { set lheight $value }
+					-theight  { set theight $value }
+					-titles   { array set titles $value }
+					-width1   { set width1 $value }
+					-width2   { set width2 $value }
+				}
+			}
+			set ($w:chwidth) [font measure $font 0]
+			set ($w:theight) $theight
+			# widgets
+			pack [frame $w] -fill both -expand 1
+			frame $w.t -cursor sb_h_double_arrow
+			frame $w.f -bg beige
+			set ty [expr {$theight / 2}]
+			foreach i {1 2} \
+			{
+				set width [set width$i]
+				set pwidth [expr {$width * $($w:chwidth)}]
+				canvas $w.t.l$i -width $pwidth -height $theight -bg $tcolor -bd 1 -relief ridge \
+					-highlightthickness 0 -cursor arrow
+				$w.t.l$i create text [expr {$pwidth / 2}] $ty -text $titles($i) -font $font
+				listbox $w.f.l$i -yscrollc [namespace code [list yscroll $w]] \
+					-font $font -width $width -height $lheight \
+					-bd 2 -relief groove -highlightthickness 0 \
+					-exportselection 0
+			}
+			scrollbar $w.vs -command [namespace code [list yview $w]]
+			grid $w.t  -column 0 -row 0 -sticky nsew
+			grid $w.f  -column 0 -row 1 -sticky nsew
+			grid $w.vs -column 1 -row 0 -rowspan 2 -sticky ns
+			grid $w.t.l1 -column 0 -row 0 -padx 1
+			grid $w.t.l2 -column 2 -row 0 -padx 1 -sticky ew
+			grid $w.f.l1 -column 0 -row 1 -sticky ns
+			grid $w.f.l2 -column 2 -row 1 -sticky ewns
+			grid rowconfigure    $w 1 -weight 1
+			grid columnconfigure $w 0 -weight 1
+			grid rowconfigure    $w.t 1 -weight 1
+			grid columnconfigure $w.t 2 -weight 1
+			grid rowconfigure    $w.f 1 -weight 1
+			grid columnconfigure $w.f 2 -weight 1
+			# bind the Motion event
+			bind $w.t <ButtonPress-1>   [namespace code [list start  $w %x]]
+			bind $w.t <ButtonRelease-1> [namespace code [list stop   $w %x]]
+			bind $w.t <Motion>          [namespace code [list resize $w %x]]
+			# bind the select events
+			bind $w.f.l1 <<ListboxSelect>> [namespace code [list synchro $w 1 2]]
+			bind $w.f.l2 <<ListboxSelect>> [namespace code [list synchro $w 2 1]]
+			# return ref
+			return $w
+		}
+
+		# -----------------
+		# the scroll procs
+		# -----------------
+			# called by a listbox
+		proc yscroll {w args} \
+		{
+			if {![winfo exists $w.vs]} { return }
+			eval [linsert $args 0 $w.vs set]
+			yview $w moveto [lindex [$w.vs get] 0]
+		}
+			# called by the scroll bar
+		proc yview {w args} \
+		{
+			variable {}
+			if {$($w:yview)} { return }
+			set ($w:yview) 1
+			foreach i {1 2} { eval $w.f.l$i yview $args }
+			set ($w:yview) 0
+		}
+			# called by a select event
+		proc synchro {w i1 i2} \
+		{
+			set sel [$w.f.l$i1 cursel]
+			$w.f.l$i2 selection clear 0 end
+			foreach item $sel { $w.f.l$i2 selection set $item }
+		}
+
+		# -----------------
+		# the resize procs
+		# -----------------
+			# start resizing
+		proc start {w x} \
+		{
+			variable {}
+			set ($w:started) 1
+			set i 0
+			set ww 0
+			while {$ww < $x} \
+			{
+				incr i
+				incr ww [winfo width $w.f.l$i]
+			}
+			set ($w:i) $i
+		}
+			# stop resizing
+		proc stop {w x} { variable {}; set ($w:started) 0 }
+			# resize
+		proc resize {w x} \
+		{
+			variable {}
+			if {!$($w:started) || $($w:resizing) || $($w:i) == 0} { return }
+			set ($w:resizing) 1
+			set ww 0
+			set i 1
+			while {$i < $($w:i)} \
+			{
+				incr ww [winfo width $w.f.l$i]
+				incr i
+			}
+			set i $($w:i)
+			set lwidth [expr {($x - $ww) / $($w:chwidth)}]
+			set twidth [expr {$lwidth * $($w:chwidth)}]
+			$w.t.l$i config -width $twidth
+			$w.t.l$i coord all [expr {$twidth / 2}] [expr {$($w:theight) / 2}]
+			$w.f.l$i config -width $lwidth
+			update
+			set ($w:resizing) 0
+		}
+}
+
+
+namespace import ::multilist::multilist
+init
+load_config
+load_pops
+build_gui

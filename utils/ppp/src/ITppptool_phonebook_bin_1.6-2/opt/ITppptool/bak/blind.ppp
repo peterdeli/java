@@ -1,0 +1,8 @@
+#!/bin/sh
+     #       Set up a PPP link blindly - script called blind.ppp 
+     DEVICE=$1
+     (
+             stty 38400 -tostop
+             /usr/sbin/pppd -detach debug noipdefault defaultroute mru 1500 /dev/$DEVICE &
+             exit 0
+     ) < /dev/$DEVICE > /dev/$DEVICE

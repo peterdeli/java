@@ -1,0 +1,24 @@
+proc log_messages {message} {
+
+	global env
+  puts "proc log_messages {message} "
+
+   global log_file
+   regsub "\r" $message "\n" newline_message 
+   set message $newline_message
+
+	if { [info exists message] == 1 } {
+    .log_win.log_text insert end "$message\n"
+    .log_win.log_text yview end
+
+    set fd [open $log_file a]
+    if {$fd == ""} {
+       return 0
+    }
+    puts $fd "$message\n"
+    close $fd
+		exec chown $env(USER_ID) $log_file
+  }
+}
+
+

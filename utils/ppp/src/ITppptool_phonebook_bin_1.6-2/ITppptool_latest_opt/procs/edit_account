@@ -1,0 +1,414 @@
+proc edit_account {edited_account_name} {
+
+    # if edited_account_name is null then take last acct in account_list
+
+    puts "edit_account testing"
+    #create window
+    #name    Account1
+    #uid     cbj
+    #passwd  bongo
+    #number  303 123-4567
+    #domain  craig.com
+    #ns1     123.456.789.000
+    #ns2     987.654.321.000
+    #authtype        DES challenge
+    #defroute        1
+    global edit_account_name
+    set edit_account_name $edited_account_name
+
+    global accounts
+    global account_list
+    global account_keys
+    global account_strings
+    #global authtype
+    global defroute
+    global use_peerdns
+    global resolv
+    global active_account
+    global required_keys
+    global required_keys_verify
+    global required_peer_dns
+    global required_acct_dns
+    global debug
+
+    puts "account_list: $account_list"
+    if { $edited_account_name == "" } {
+       # if edited_account_name is null then take last acct in account_list
+       puts "account_list: $account_list"
+       set index [expr [llength $account_list] - 1]
+       set edit_account_name [lindex $account_list $index] 
+       set edited_account_name $edit_account_name 
+    }
+
+    #.account_manager_win.account_list selection clear 0 end
+    if { [winfo exists .account_manager_win] == 1 } { 
+      .account_manager_win.edit_button configure -state disabled  
+      .account_manager_win.delete_button configure -state disabled
+    }
+
+    set top .edit_account
+    
+    if { [winfo exists $top] == 1 } {
+        
+        tk_messageBox -type ok -icon error -title "Edit" \
+        -message  "Only one Account can be edited at a time"
+        return
+    }
+
+    toplevel [set top]
+    wm title $top "Edit Account: $accounts($edit_account_name,name)" 
+
+    frame [set top].required_key_frame
+    label [set top].required_key_frame.required_key -text "Required Fields indicated by '**'"
+    label [set top].required_key_frame.optional -text "( Account Nameserver not required for 'Use peer DNS' )"
+    pack [set top].required_key_frame.required_key
+    pack [set top].required_key_frame.optional
+    pack [set top].required_key_frame -anchor n
+  
+    set field_width 55
+
+    foreach key [set account_keys] {
+
+      if { $key == "status" } { continue }
+      if { $key == "resolv_file" } { continue }
+
+      set value $account_strings($key)
+      set [set key]_frame [set top].[set key]_frame
+
+      frame [set [set key]_frame]
+
+      puts "key = $key"
+      if { $key == "authtype" } {
+        continue
+        # radio buttons for
+        # pap chap challenge card
+
+        #  radiobutton [set [set key]_frame].[set key]_radio_pap -text \
+        #  "PAP" -variable authtype -value "pap" -width 11
+
+        #  pack [set [set key]_frame].[set key]_radio_pap -side right
+
+        #  radiobutton [set [set key]_frame].[set key]_radio_chap -text \
+        #  "CHAP" -variable authtype -value "chap" -width 11
+        #  pack [set [set key]_frame].[set key]_radio_chap -side right
+
+        #  radiobutton [set [set key]_frame].[set key]_radio_token -text \
+        #  "Token Card" -variable authtype -value "tokencard" -width 11
+        #  pack [set [set key]_frame].[set key]_radio_token -side right
+
+        #  label [set [set key]_frame].[set key]_label -text "** $value" 
+        #  pack [set [set key]_frame].[set key]_label -side right
+
+        #  set authtype $accounts($edit_account_name,authtype)
+
+      } elseif { $key == "passwd" && \
+        $accounts($edit_account_name,type) == "Sun" } {
+        continue
+      } elseif { $key == "defroute" } {
+
+        checkbutton [set [set key]_frame].[set key]_check \
+        -text "Set default route" -anchor w -onvalue "1" \
+        -offvalue "0" -variable defroute -width [expr $field_width -3]
+
+        set defroute $accounts($edit_account_name,defroute)
+
+        pack [set [set key]_frame].[set key]_check -side right
+
+        label [set [set key]_frame].[set key]_label -text $value 
+        pack [set [set key]_frame].[set key]_label -side right
+
+      } elseif { $key == "resolv" } {
+
+        set resolv $accounts($edit_account_name,resolv)
+
+        radiobutton [set [set key]_frame].[set key]_radio_acct_resolv -text \
+        "Use account DNS" -variable resolv -value "account" -width  [string length " Use account DNS " ] 
+        pack [set [set key]_frame].[set key]_radio_acct_resolv -side right -padx 5
+
+        radiobutton [set [set key]_frame].[set key]_radio_peer_resolv -text \
+        "Use peer DNS" -variable resolv -value "peer" -width  [string length "Use peer DNS" ] 
+        pack [set [set key]_frame].[set key]_radio_peer_resolv -side right -padx 5
+        radiobutton [set [set key]_frame].[set key]_radio_no_resolv -text \
+        "Do not create" -variable resolv -value "none" -width [string length "Do not create"] 
+        pack [set [set key]_frame].[set key]_radio_no_resolv -side right -padx 5
+        label [set [set key]_frame].[set key]_label -text "** $value" 
+        pack [set [set key]_frame].[set key]_label -side right
+
+        #checkbutton [set [set key]_frame].[set key]_check \
+        #-text "Create /etc/resolv.conf from DNS settings" -anchor w -onvalue "1" \
+        #-offvalue "0" -variable resolv -width $field_width 
+        #puts "resolv for account $edit_account_name = \
+        #      $accounts($edit_account_name,resolv)"
+        #set resolv $accounts($edit_account_name,resolv)
+        #puts "resolv == $resolv"
+        #pack [set [set key]_frame].[set key]_check -side right
+        #label [set [set key]_frame].[set key]_label -text $value 
+        #pack [set [set key]_frame].[set key]_label -side right
+
+      } elseif { $key == "type" } {
+        entry [set [set key]_frame].[set key]_entry -width $field_width 
+        label [set [set key]_frame].[set key]_label -text $value  
+
+        eval [set [set key]_frame].[set key]_entry insert 0 \
+        \"$accounts($edit_account_name,$key)\"
+
+        pack [set [set key]_frame].[set key]_entry -side right
+        pack [set [set key]_frame].[set key]_label -side right
+        pack [set [set key]_frame].[set key]_label -anchor w
+        [set [set key]_frame].[set key]_entry configure -state disabled
+
+      } elseif { $key == "debug" } {
+
+        set debug $accounts($edit_account_name,debug)
+
+        label [set [set key]_frame].[set key]_label -text $value 
+
+        checkbutton [set [set key]_frame].[set key]_check \
+        -text "Enable debugging" -anchor w -onvalue "1" \
+        -offvalue "0" -variable debug -width [expr  $field_width -3]
+
+        pack [set [set key]_frame].[set key]_check -side right
+        pack [set [set key]_frame].[set key]_label -side right
+
+        
+      } else {
+        if { $key == "passwd" } {
+          entry [set [set key]_frame].[set key]_entry -width $field_width -show *
+        } else {
+          entry [set [set key]_frame].[set key]_entry -width $field_width
+        }
+
+        eval [set [set key]_frame].[set key]_entry insert 0 \
+        \"$accounts($edit_account_name,$key)\"
+
+        pack [set [set key]_frame].[set key]_entry -side right
+
+        if { [lsearch $required_keys $key] != -1 } {
+          label [set [set key]_frame].[set key]_label -text "** $value"
+        } else {
+          label [set [set key]_frame].[set key]_label -text $value
+        }
+
+        pack [set [set key]_frame].[set key]_label -side right
+        pack [set [set key]_frame].[set key]_entry -anchor w
+      }
+
+      pack [set [set key]_frame] -fill x -expand 1 -pady 5
+    }
+
+    frame [set top].button_frame
+    button [set top].button_frame.save -text "Save Edits" -command {
+
+      puts "Save Edits"
+      # get all entries
+      # Check if 'name' has been changed
+      # if so, lreplace old account name from account_list
+      # add new account name
+      # add to accounts array and account_list
+      global edit_account
+      global edit_account_name
+      #global authtype
+      global defroute
+      global resolv
+      global active_account
+      global debug
+      global required_acct_dns
+      global required_peer_dns
+
+      # check if name is already taken
+      set new_account_name [list [.edit_account.name_frame.name_entry get]]
+
+      if { $new_account_name == "" } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+      } elseif { [string length $new_account_name] < 1 } {
+        tk_messageBox -type ok -icon error -title "Missing Account Name" \
+        -message  "Please Enter an Account Name"
+        return
+
+      }
+      
+
+      #set new_account_name {}
+      set delete_account_flag "true"
+      foreach key [set account_keys] {
+          # popup for required fields
+          if { $key == "status" } { continue }
+          if { $key == "resolv_file" } { continue  }
+          if { $key == "authtype" } {
+            set type $accounts($edit_account_name,type)
+            set authtype $authtypes($type)
+            set edit_account($key) $authtype
+          } elseif { $key == "defroute" } {
+            set edit_account($key) $defroute
+          } elseif { $key == "peerdns" } {
+            set edit_account($key) $use_peerdns
+          } elseif { $key == "resolv" } {
+            set edit_account($key) $resolv
+          } elseif { $key == "passwd"  && \
+            $accounts($edit_account_name,type) == "Sun" } {
+            set edit_account($key) ""
+          } elseif { $key == "type"  } {
+            set edit_account($key) $accounts($edit_account_name,type) 
+          } elseif { $key == "debug"  } {
+            set edit_account($key) $debug 
+          } else {
+                set [set key]_frame .edit_account.[set key]_frame
+                set key_value [[set [set key]_frame].[set key]_entry get]
+              
+                
+                if { [lsearch $required_keys_verify $key] != -1 && \
+                              [string length $key_value] < 1 } {
+                    tk_messageBox -type ok -icon error -title \
+                    "$account_strings($key) Required" -message  \
+                    "Please Enter $account_strings($key)"
+                    return
+                }
+
+                puts "=====> $key: $key_value" 
+                set edit_account($key) $key_value 
+                if { $key == "name" } { 
+                  set new_account_name  [list $key_value] 
+                  set new_account_string $key_value
+                  set old_account_string $accounts($edit_account_name,name) 
+                  set replace_index [lsearch $account_list $edit_account_name]
+                  # Check if name has changed
+                  if { $edit_account_name != $new_account_name } {
+                    puts "replacing $edit_account_name with $new_account_name\
+                    at index $replace_index"
+                    set account_list [lreplace $account_list $replace_index \
+                    $replace_index  $new_account_name]
+                    puts "account_list == $account_list"
+
+                    # save resolv_file name from old account
+                    set edit_account(resolv_file) \
+                    $accounts($edit_account_name,resolv_file)
+                    set edit_account(status) \
+                    $accounts($edit_account_name,status)
+
+                  } else {
+                    # name has not changed, don't delete from accounts
+                    # in delete_account_menu
+                    set delete_account_flag "false"
+                  }
+                }
+
+
+          }
+            
+      }
+
+        # Make sure DNS info exists if 'use account dns' selected
+        foreach key $required_acct_dns {
+          if { $edit_account(resolv) == "account" && [string length $edit_account($key)] < 1 } {
+                      tk_messageBox -type ok -icon error -title \
+                      "$account_strings($key) Required" -message  \
+                      "Please Enter $account_strings($key)"
+                      return
+
+          }
+        }
+
+        foreach key $required_peer_dns {
+          if { $edit_account(resolv) == "peer" && [string length $edit_account($key)] < 1 } {
+                      tk_messageBox -type ok -icon error -title \
+                      "$account_strings($key) Required" -message  \
+                      "Please Enter $account_strings($key)"
+                      return
+
+          }
+        }
+
+      if { $delete_account_flag == "false" } {
+
+        foreach { key value } [array get edit_account] {
+          puts "accounts($new_account_name,$key) = $value" 
+          set accounts($new_account_name,$key) $value 
+        }
+        set_account $new_account_name
+
+        # write resolv file in case changed
+        write_resolv_file $accounts($new_account_name,name)  
+        #if { [winfo exists .account_manager_win] == 1 }  {
+        #  .account_manager_win.account_list selection clear 0 end
+        #}
+
+      } else {
+          
+        # add to accounts
+        puts "account name: $new_account_name"
+        puts "account string: $new_account_string"
+        set accounts($new_account_name,name) $new_account_string
+
+        foreach { key value } [array get edit_account] {
+          puts "accounts($new_account_name,$key) = $value" 
+          set accounts($new_account_name,$key) $value 
+        }
+        # write resolv file in case changed
+        write_resolv_file $accounts($new_account_name,name)  
+
+        # delete old account  
+        set deleted_index [delete_account_menu $edit_account_name] 
+        # add to Accounts menu and acct manager
+        add_account_menu $new_account_name $deleted_index
+
+
+        if { [winfo exists .account_manager_win] == 1 }  {
+
+          # remove from account list
+          set account_box_items [.account_manager_win.account_list get 0 end]
+          foreach item $account_box_items {
+            if { $item == $old_account_string } {
+              puts "deleting $item from account list at index \
+              [lsearch $account_box_items $item]"
+              .account_manager_win.account_list delete \
+              [lsearch $account_box_items $item]
+            }
+          }
+          
+          .account_manager_win.account_list insert $replace_index \
+          "$accounts($new_account_name,name)"
+          .account_manager_win.edit_button configure -state normal  
+          .account_manager_win.delete_button configure -state normal
+          #puts ".account_manager_win.account_list selection clear 0 end"
+          #.account_manager_win.account_list selection clear 0 end
+
+        }
+
+        # if account is active, adjust front panel values
+        puts "Comparing edited account $edit_account_name to\
+        active account $active_account"
+        if { $edit_account_name == $active_account } {
+          set active_account $new_account_name
+          set_account $new_account_name
+        }
+        set edit_account_name $new_account_name
+      }
+
+        if { [winfo exists .account_manager_win] == 1 }  {
+          .account_manager_win.edit_button configure -state disabled  
+          .account_manager_win.delete_button configure -state disabled
+          .account_manager_win.select_button configure -state disabled
+          .account_manager_win.account_list selection clear 0 end
+        }
+        destroy .edit_account 
+    }
+
+    button [set top].button_frame.close -text "Cancel" -command {
+        
+        if { [winfo exists .account_manager_win] == 1 } {
+          .account_manager_win.edit_button configure -state normal  
+          .account_manager_win.delete_button configure -state normal
+          #.account_manager_win.account_list selection clear 0 end
+        } 
+        destroy .edit_account 
+    }
+
+    pack .edit_account.button_frame.close -side right 
+    pack .edit_account.button_frame.save -side left 
+    pack .edit_account.button_frame -side bottom -pady 10 
+
+		center_window $top 3 3
+
+}

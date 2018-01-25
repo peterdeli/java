@@ -1,0 +1,60 @@
+proc load_global { } {
+
+	global ppp_dir
+	global ppp_config_file
+	global ppp_settings
+	global ppp_settings_saved
+	global port_speeds
+	set port_speeds { 38400 57600 115200 230400 } 
+
+	global g_modem_port
+	global g_flow_control
+
+	set ppp_settings(init_string) "atz" 
+	set ppp_settings(connect_string) ""
+	set ppp_settings(port_speed) [lindex $port_speeds 0] 
+	set ppp_settings(flow_control) hardware
+	set ppp_settings(modem_port) /dev/term/b
+	set ppp_settings(ppp_options) "" 
+
+	set ppp_settings_saved(init_string) "atz" 
+	set ppp_settings_saved(connect_string) ""
+	set ppp_settings_saved(port_speed) [lindex $port_speeds 0] 
+	set ppp_settings_saved(flow_control) hardware
+	set ppp_settings_saved(modem_port) /dev/term/b
+	set ppp_settings_saved(ppp_options) "" 
+
+	set ppp_config_file "$ppp_dir/ppp_settings"
+
+	if { [file exists  $ppp_config_file] != 1 } {
+		puts "Creating $ppp_config_file"
+		set global_fd [open $ppp_config_file w]
+		# put in defaults
+		foreach key [array names ppp_settings] {
+			puts $global_fd "$key\t$ppp_settings($key)"
+		}
+		close $global_fd
+		exec chown $env(USER_ID) $ppp_config_file
+	} else {
+		puts "Reading $ppp_config_file"
+		set ppp_fd [open $ppp_config_file r]
+		while { [gets $ppp_fd line] != -1 } {
+			set split_line [split $line "\t"]
+			set ppp_settings([lindex $split_line 0]) [lindex $split_line 1]
+			set ppp_settings_saved([lindex $split_line 0]) [lindex $split_line 1]
+			puts "set ppp_settings([lindex $split_line 0]) [lindex $split_line 1]"
+		}
+	}
+
+	set g_modem_port ppp_settings(modem_port)
+	set g_flow_control ppp_settings(flow_control)
+
+	#pppopts
+	# init_string
+	# connect_string
+	# port_speed
+	# flow_control
+	# modem_port
+
+}
+

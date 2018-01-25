@@ -1,0 +1,4 @@
+proc RandomInit { seed } {
+        global randomSeed
+        set randomSeed $seed
+}

@@ -1,0 +1,266 @@
+proc init { } {
+
+	global ppp_settings env ppp_dir pkghome start_pppd os_defaults ostype copy_opts
+
+
+	set ostype [exec uname -s]	
+
+	set os_defaults(serial_ports,Linux) {/dev/ttyS0 /dev/ttyS1 /dev/ttyS2 /dev/ttyS3 /dev/modem}
+	set os_defaults(serial_ports,SunOS) {/dev/term/a /dev/term/b /dev/modem}
+	
+	set os_defaults(default_serial_port,Linux) [lindex $os_defaults(serial_ports,Linux) 0] 
+	set os_defaults(default_serial_port,SunOS) [lindex $os_defaults(serial_ports,SunOS) 1] 
+
+	set id [lindex [split [exec id] "=()"] 1]
+	puts "id = $id"
+	if { $id != 0 } {
+		tk_messageBox -default "ok" -message \
+		"Must be root to run ppptool." -title "ERROR"
+		exit
+	}
+
+
+
+	foreach env_var { "USER_ID" "CONNECTION_TYPE" "PKGHOME" } {
+
+		if { [info exists env($env_var)] == 1 } {
+			puts "Environment Variable '$env_var': $env($env_var)"
+			if { $env_var == "PKGHOME" } {
+				set pkghome $env(PKGHOME)
+			}
+		} else {
+
+				if { $env_var == "USER_ID" } {
+					set env(USER_ID) $env(USER)
+					tk_messageBox -default "ok" -message \
+					"Error determining $env_var, setting to $env(USER_ID)"  \
+					-title "Error:"
+				} elseif { $env_var == "CONNECTION_TYPE" } {
+					set env(CONNECTION_TYPE) "ppp"	
+					tk_messageBox -default "ok" -message \
+					"Error determining $env_var, setting to $env(CONNECTION_TYPE)"  \
+					-title "Error:"
+				} elseif { $env_var == "PKGHOME" } {
+					set pkghome [pwd] 
+					tk_messageBox -default "ok" -message \
+					"Error determining $env_var, setting to $pkghome"  \
+					-title "Error:"
+				}
+		}
+
+	}
+
+	#puts "Connection Script Env 'CONNECTION_TYPE': $env(CONNECTION_TYPE)"
+
+
+	set start_pppd "$pkghome/start_pppd"
+	set copy_opts "$pkghome/copy_pppopts"
+
+	global manage_resolv
+	set manage_resolv "$pkghome/manage_resolv"
+	#"copy"  
+	#"restore"
+	#"srcfile=s"
+	#"backup_file=s" 
+
+	set ppp_dir "$env(HOME)/.ppptool" 
+
+	global ppp_config_file
+	set ppp_config_file "$ppp_dir/ppp_settings"
+
+	global ppp_options_file
+	set ppp_options_file "/etc/ppp/options"
+	set ppp_options_template "$pkghome/options"
+
+	puts "Checking for $ppp_options_file file"
+	if { [file exists $ppp_options_file] != 1 } {
+
+			set options_fd ""
+			if { [catch { set options_fd \
+			[open $ppp_options_file w] } err] != 0 } {
+
+				log_message "Unable to create $ppp_options_file\n"
+				.footer.footer_r configure -text "Unable to create $ppp_options_file"
+				exit 1
+			}
+
+			foreach option { defaultroute noauth noproxyarp } {
+				puts $options_fd "$option\n"
+			}
+			close $options_fd
+
+		if { [file exists $ppp_options_file] != 1 } {
+			puts "Create of PPP options file $ppp_options_file failed!"
+			exit 1
+		}
+	}
+	puts "Finished config of $ppp_options_file"
+
+	# list
+	global active_account
+	global account_list
+	set account_list {}
+
+	# array (account_name,key)
+	global accounts
+
+	# connection scripts
+
+  # User configurable scripts in $HOME/.connect
+  global pre_connect_script
+  global post_connect_script
+  global pre_disconnect_script
+  global post_disconnect_script
+
+	if [file exists /etc/connect/pre-connect] {
+		set pre_connect_script /etc/connect/pre-connect
+	} else {
+		set pre_connect_script "" 
+	}
+	if [file exists /etc/connect/post-connect] {
+		set post_connect_script /etc/connect/post-connect
+	} else {
+		set post_connect_script "" 
+	}
+	if [file exists /etc/connect/pre-disconnect] {
+		set pre_disconnect_script /etc/connect/pre-disconnect
+	} else {
+		set pre_disconnect_script "" 
+	}
+	if [file exists /etc/connect/post-disconnect] {
+		set post_disconnect_script /etc/connect/post-disconnect
+	} else {
+		set post_disconnect_script "" 
+	}
+
+	global authtypes
+	set "authtypes(Sun_ModemPool)" "tokencard"
+	set "authtypes(ISP_ModemPool)" "pap"
+	
+	
+	global account_keys
+	set account_keys {\
+				 name\
+				 type\
+				 uid\
+				 passwd\
+				 number\
+				 domain\
+				 search \
+				 ns1\
+				 ns2\
+				 authtype\
+				 defroute\
+				 resolv\
+				 status\
+				 resolv_file\
+				 ppp_opts \
+				 debug
+	}
+
+	global account_strings
+	set account_strings(name) "Account Name:"
+	set account_strings(type) "Account Type:"
+	set account_strings(uid) "User ID:"
+	set account_strings(passwd) "Password:"
+	set account_strings(number) "Phone Number:"
+	set account_strings(domain) "DNS Domain Name:"
+	set account_strings(search) "DNS Search Domains:"
+	set account_strings(ns1) "Account Nameserver #1:"
+	set account_strings(ns2) "Account Nameserver #2:"
+	set account_strings(authtype) "Authentication Type:"
+	set account_strings(defroute) "Default Route:"
+	set account_strings(resolv) "Create /etc/resolv.conf:"
+	set account_strings(ppp_opts) "PPP options:"
+	set account_strings(debug) "Debugging:"
+	
+	global required_keys 
+	#set required_keys { name uid passwd number authtype }
+	set required_keys { name uid number authtype ns1 domain }
+
+	global required_keys_verify 
+	set required_keys_verify { name uid number authtype }
+
+	global required_peer_dns
+	set required_peer_dns { domain }
+	global required_acct_dns
+	set required_acct_dns { domain ns1 }
+
+	global account_file
+	set account_file "$ppp_dir/accounts"
+	RandomInit [pid]
+
+	if { [string first "sun" [exec arch]] != -1 } { 
+		option add *font {palatino 12 bold} 
+		option add *font {sun 12 bold} 
+	}
+
+	global footer_font
+	set footer_font {times 12}
+
+	global log_file
+	set log_file "$ppp_dir/ppp_log"
+
+	global kill_pppd
+	set kill_pppd "$pkghome/kill_pppd"
+
+
+	global ip_up_file
+	set ip_up_file "/etc/ppp/ip-up.out"
+	if { [file exists $ip_up_file] } { catch { exec rm -rf $ip_up_file } }
+	global ip_down_file
+	set ip_down_file "/etc/ppp/ip-down.out"
+	if { [file exists $ip_down_file] } { catch { exec rm -rf $ip_down_file } }
+
+		#if_name=$1
+		#tty_device=$2
+		#speed=$3
+		#local_ip=$4
+		#remote_ip=$5
+		#ipparam=$6
+		#DNS1=$DNS1
+		#DNS2=$DNS2
+
+	global ip_up_array
+	foreach key {
+				if_name \
+				tty_device \
+				speed \
+				local_ip \
+				remote_ip \
+				ipparam \
+				DNS1 \
+				DNS2 \
+				PPPD_PID \
+				PPPLOGNAME \
+				SPEED \
+				IPREMOTE \
+				IFNAME \
+				PATH \
+				PWD \
+				SHLVL \
+				DEVICE \
+				ORIG_UID \
+				IPLOCAL } {
+		set ip_up_array($key) ""
+	}
+
+	# 1.1.1.1
+	global ipaddr_len
+	set ipaddr_len 7
+
+	global ppp_resolv
+	set ppp_resolv "/etc/ppp/resolv.conf"
+
+
+
+	puts "load_global"
+	uplevel load_global
+	puts "load_accts"
+	uplevel load_accts
+	puts "build_log_win"
+	uplevel build_log_win
+	puts "build_menus"
+	uplevel build_menus
+
+}

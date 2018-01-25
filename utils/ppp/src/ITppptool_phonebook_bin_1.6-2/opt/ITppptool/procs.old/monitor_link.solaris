@@ -1,0 +1,113 @@
+proc monitor_link { } {
+	puts "monitor_link"
+	global ppp_interface serial_port ip_address \
+	remote_ip_address link_disconnected  mtu port_speed \
+	ppp_settings connection_state monitor_done
+
+	set monitor_done "false"
+	
+	if { $link_disconnected == "true" } { 
+		set monitor_done "true"
+		return 0 
+	}
+
+	if { [info exists mtu] != 1 } { set mtu "" }
+	if { [info exists port_speed] != 1 } { 
+		set port_speed "" 
+	} elseif { [info exists $ppp_settings(port_speed)] != 1 } { 
+		set port_speed $ppp_settings(port_speed) 
+	}
+
+	set timeout 10
+	global ip_up_file
+	global ip_down_file
+	# global ip_up_array
+	# read ip-up output file
+
+	if { [string length $remote_ip_address] < 6 } {
+		puts "Unable to monitor link, no valid remote_ip_address"
+	}
+	# check that ppp_interface is a gateway
+	#0.0.0.0         192.168.1.1     0.0.0.0         UG       40 0          0 eth0
+	set save ""
+	# retry if remote gateway not up immediately
+	set max_retries 5 
+
+	for { set j 1 } { $j <= $max_retries } { incr j } {
+
+		puts "link_check $j"
+		set gateway_list {}
+		set ppp_gateway "false"
+		if { $connection_state != "connected" && \
+				$connection_state != "connecting" } { 
+			puts "monitor_link: connection_state = $connection_state"
+			set monitor_done "true"
+			return 0 
+		}
+		set netstat_fd [open "|netstat -rn"]
+
+		while { [gets $netstat_fd line] != -1 } {
+				if {	[string first "UG" $line] != -1 || [string first "UH" $line] != -1 } {
+					# save all gateways
+					lappend gateway_list $line
+					if { [string first $ppp_interface $line] != -1 } {
+						if { [string first $remote_ip_address $line] != -1 } {
+							puts "found $remote_ip_address in $line"
+							set ppp_gateway "true"
+							break
+						}
+					}
+				}
+		}
+		catch { close $netstat_fd }
+		puts "Gateways: [join $gateway_list \"\n\"]"
+		if { $ppp_gateway == "true" } { 
+			set j [expr $max_retries + 1]	
+			break
+		} else {
+			#puts "No ppp gateway found, trying again .."
+			#.footer.footer_bottom config -text "No ppp gateway found, retrying ($j of $max_retries)" 
+			#pack .footer.footer_bottom -anchor s
+			sleep 5	
+		}
+
+	}
+
+	if { $ppp_gateway == "false" } {
+				puts "No gateway found for $ppp_interface"
+				set connection_state "disconnected"
+				puts "disconnecting .."
+				disconnect "No gateway found for $ppp_interface"
+				return -1
+	} else {
+		#destroy .footer.footer_bottom
+			.footer.footer_r configure -text \
+			"Connected:\n\
+			Network Interface: $ppp_interface\n\
+			IP address: $ip_address\n\
+			MTU: $mtu\n\
+			Port Speed: $port_speed\n\
+			Remote IP address: $remote_ip_address\n" \
+			-font {times 10 bold} -justify left
+	}
+
+	log_user 0	
+	spawn ping -c 1 $remote_ip_address 
+	expect eof 
+	log_user 1
+	if { [info exists expect_out(buffer)] != 1 || 
+		[string first "is alive" $expect_out(buffer)] < 0 } {
+					puts "Cannot reach $remote_ip_address, link may have gone down"
+					.footer.footer_r config -text "Cannot reach $remote_ip_address, \
+					link may have gone down"
+					set connection_state "disconnected"
+					sleep 2
+					puts "disconnecting .."
+					disconnect "link may have gone down" 
+					return -1
+	} else {
+				set connection_state "connecting"
+				after 10000 monitor_link
+	}
+}
+

@@ -1,0 +1,22 @@
+: 1 256
+1 i depend 60 5219 1052936079
+1 d none opt 0755 root sys
+1 d none opt/ITppptool 0755 root other
+1 f none opt/ITppptool/manage_resolv 0755 root other 8460 53586 1052936081
+1 f none opt/ITppptool/options 0644 root other 231 20465 1052936080
+1 f none opt/ITppptool/ppptool 0755 root other 97 8023 1052936080
+1 f none opt/ITppptool/ppptool.tk 0755 root other 96832 50237 1052947122
+1 d none opt/iWork 0755 root other
+1 d none opt/iWork/Gnome 0755 root other
+1 d none opt/iWork/Gnome/applications 0755 root other
+1 f none opt/iWork/Gnome/applications/ITppptool.desktop 0644 root other 257 23535 1053463806
+1 d none opt/iWork/Gnome/icons 0755 root other
+1 f none opt/iWork/Gnome/icons/ppptool.png 0444 root other 3341 30145 1053463776
+1 d none opt/local 0755 root other
+1 d none opt/local/bin 0755 root other
+1 s none opt/local/bin/ppptool=../../$PKGINST/ppptool
+1 i pkginfo 251 20538 1053464858
+1 i postinstall 417 32271 1052936081
+1 i postremove 396 30480 1052936081
+1 i preinstall 30 2025 1052936081
+1 i preremove 30 2025 1052936081

@@ -1,0 +1,5 @@
+proc view_log { } {
+	catch { [wm deiconify .log_win] }
+	catch { focus .log_win }
+}
+

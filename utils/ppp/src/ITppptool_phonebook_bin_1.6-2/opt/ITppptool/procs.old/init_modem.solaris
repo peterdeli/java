@@ -1,0 +1,66 @@
+proc init_modem { } {
+		puts "init_modem"
+
+		global ppp_settings
+		set init_string "AT &F1"
+		set baud_rate "-28800"
+
+		if { [info exists ppp_settings(init_string)] && \
+				 [string length $ppp_settings(init_string)] > 2 } {
+
+				set init_string $ppp_settings(init_string)
+		} 
+	
+	set timeout 10
+	if { [info exists ppp_settings(port_speed)] } {
+		set baud_rate "-[set ppp_settings(port_speed)]"
+	} 
+
+	spawn tip $baud_rate $ppp_settings(modem_port)
+	sleep 1	
+	exp_send "AT\r"
+	expect {
+			 "OK" { 
+						puts "Sending init string $init_string"
+					 exp_send "$init_string\r" 
+				}
+				timeout {
+					puts "timeout waiting for OK from AT command"
+					catch { exec pkill tip }
+					return -1
+				}
+	}
+	expect {
+		"OK" {
+			exp_send "~.\r"
+		}
+		"NO CARRIER" {
+			set timeout 5
+			exp_send "~.\r"
+			expect "EOF\]"
+			set  connection_state "disconnected"
+			log_message $expect_out(buffer)
+			.connect configure -state normal -command connect
+			puts "Modem connection dropped" 
+			return 0
+		}
+		timeout {
+				puts "timeout waiting for OK from AT command"
+				catch { exec pkill tip }
+				return -1
+		}
+
+	}
+	expect {
+		"EOT\]" {
+			puts "Modem initialized"
+			return 0
+		}
+		timeout {
+			puts "timeout waiting for tip to close"
+			catch { exec pkill tip }
+		}
+
+	}
+}
+

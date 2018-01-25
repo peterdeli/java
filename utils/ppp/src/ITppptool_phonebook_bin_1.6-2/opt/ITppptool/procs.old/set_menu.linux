@@ -1,0 +1,6 @@
+proc set_menu {value } {
+	global menubar_widget
+	global active_account
+	$menubar_widget entryconfigure 3 -label $value
+}
+

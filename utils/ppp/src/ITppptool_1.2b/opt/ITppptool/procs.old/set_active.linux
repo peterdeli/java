@@ -1,0 +1,23 @@
+proc set_active { } {
+
+	global active_account
+	global accounts
+	global account_list
+
+	foreach acct $account_list {
+
+		if { [info exists accounts($acct,status)] } {
+			if { $accounts($acct,status) == "active" } {
+				#puts "Setting account $acct to 'active' status"
+				set active_account $acct
+				set_account $acct
+			}
+		} else {
+				#puts "Setting account $acct to 'inactive' status"
+				set accounts($acct,status) ""
+		}
+
+	}
+
+}
+

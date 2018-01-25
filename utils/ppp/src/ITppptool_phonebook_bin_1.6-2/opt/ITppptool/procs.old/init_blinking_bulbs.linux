@@ -1,0 +1,45 @@
+proc init_blinking_bulbs { } {
+
+	puts "init_blinking_bulbs"
+	global connection_state
+	global incr_value
+	global bulblist
+	global bulbs
+	global on_color
+	global off_color
+	global bulb_colors 
+	global after_interval
+
+	# set different intervals
+
+	foreach bulb $bulblist {
+
+		#puts "bulb $bulb"
+		set after_interval [RandomRange 1000] 
+
+		if { [lsearch $bulb_colors $bulbs($bulb,color)] == [expr [llength $bulb_colors] - 1] } {
+			puts "bulbs($bulb,color) = $bulbs($bulb,color)"
+			set bulbs($bulb,color) [lindex $bulb_colors 0]
+		} else {
+			set bulbs($bulb,color) [lindex $bulb_colors [expr [lsearch $bulb_colors $on_color]  + 1]]
+		}
+
+			if { $bulb != "bulb0" && $bulb != "bulb3" && $bulb != "bulb10"  } {	
+				puts "init_blinking: .cframe.can itemconfigure $bulb -fill $bulbs($bulb,color)" 
+				.cframe.can itemconfigure $bulb -fill $bulbs($bulb,color) 
+				#after $after_interval blink_single $bulb
+				blink_single $bulb
+			} else {
+				puts "init_blinking Constant: .cframe.can itemconfigure $bulb -fill green" 
+				if { $bulb == "bulb0" || $bulb == "bulb3" } {
+					puts ".cframe.can itemconfigure $bulb -fill green" 
+					.cframe.can itemconfigure $bulb -fill green 
+				} else {
+					puts ".cframe.can itemconfigure $bulb -fill yellow" 
+					.cframe.can itemconfigure $bulb -fill yellow 
+				}
+			}
+	}
+}
+
+

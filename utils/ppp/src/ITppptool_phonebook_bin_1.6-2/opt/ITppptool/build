@@ -1,0 +1,2 @@
+tar czf $HOME/RPM/SOURCES/ITppptool.tar.gz `cat ../../files`
+rpmbuild -bb $HOME/RPM/SPECS/ITppptool.spec 

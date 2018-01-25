@@ -1,0 +1,28 @@
+proc down_interface { } {
+
+	global ppp_interface serial_port ip_address
+	global ifconfig_cmd
+
+	# check if i/f is up
+	if { [info exists $ppp_interface] != 1 } { return }
+	if { [string length $ppp_interface] < 1 } { return }
+	puts "Taking down interface $ppp_interface"
+	
+	puts "spawn /usr/bin/pfsh"
+
+	spawn /usr/bin/pfsh
+	expect "\$ "
+
+	puts "Sending /usr/sbin/ifconfig $ppp_interface down"
+	exp_send "/usr/sbin/ifconfig $ppp_interface down\r"
+
+	expect "\$ "
+
+
+	set ppp_interface ""
+	set ip_address ""
+
+	close $spawn_id
+
+}
+

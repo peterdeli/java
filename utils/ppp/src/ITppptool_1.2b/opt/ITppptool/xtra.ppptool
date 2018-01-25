@@ -1,0 +1,291 @@
+# serial speed set to 38400 bps
+# pppd exp6: serial speed set to 38400 bps
+# 
+# connect option: '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"' started (pid 1058)
+# pppd exp6: connect option: '/usr/bin/chat -v REPORT CONNECT ABORT BUSY ABORT "NO CARRIER" "" atdt18005904857 "CONNECT"' started (pid 1058)
+# 
+# chat:  Feb 26 19:56:09 CONNECT 28800/ARQ/V34/LAPM/V42BIS
+# Serial connection established.
+# serial speed set to 38400 bps
+# Using interface sppp0
+# start_ppptool Connect: sppp0 <--> /dev/term/b
+# pppd exp6: chat:  Feb 26 19:56:09 CONNECT 28800/ARQ/V34/LAPM/V42BIS
+# Serial connection established.
+# serial speed set to 38400 bps
+# Using interface sppp0
+# Connect: sppp0 <--> /dev/term/b
+# 
+# sent [LCP ConfReq id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# pppd exp6: sent [LCP ConfReq id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfAck id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# pppd exp6: rcvd [LCP ConfAck id=0x91 <asyncmap 0x0> <magic 0x1504974d> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfReq id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP Ident id=0x92 magic=0x1504974d "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x1 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: rcvd [LCP ConfReq id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x1 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP Ident id=0x92 magic=0x1504974d "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x1 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x2 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x2 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x3 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x3 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# rcvd [LCP ConfReq id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfReq id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# pppd exp6: rcvd [LCP ConfReq id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# sent [LCP ConfReq id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP ConfAck id=0x2 <mru 1500> <asyncmap 0x0> <auth pap> <pcomp> <accomp>]
+# 
+# rcvd [LCP ConfAck id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP Ident id=0x94 magic=0x90235e21 "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x4 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: rcvd [LCP ConfAck id=0x93 <asyncmap 0x0> <magic 0x90235e21> <pcomp> <accomp>]
+# sent [LCP Ident id=0x94 magic=0x90235e21 "ppp-2.4.0b1 (Sun Microsystems, Inc., Jul 31 2002 10:08:25)"]
+# Authenticating to peer with PAP
+# sent [PAP AuthReq id=0x4 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# sent [PAP AuthReq id=0x5 user="internet.smus.MERICAA" password=<hidden>]
+# pppd exp6: sent [PAP AuthReq id=0x5 user="internet.smus.MERICAA" password=<hidden>]
+# 
+# rcvd [PAP AuthAck id=0x5 ""]
+# sent [IPCP ConfReq id=0x88 <addr 0.0.0.0> <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [CCP ConfReq id=0x4d <deflate 15> <deflate(old#) 15> <bsd v1 15>]
+# pppd exp6: rcvd [PAP AuthAck id=0x5 ""]
+# sent [IPCP ConfReq id=0x88 <addr 0.0.0.0> <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [CCP ConfReq id=0x4d <deflate 15> <deflate(old#) 15> <bsd v1 15>]
+# 
+# rcvd [IPCP ConfReq id=0x3 <addr 204.146.246.229>]
+# sent [IPCP ConfAck id=0x3 <addr 204.146.246.229>]
+# pppd exp6: rcvd [IPCP ConfReq id=0x3 <addr 204.146.246.229>]
+# sent [IPCP ConfAck id=0x3 <addr 204.146.246.229>]
+# 
+# rcvd [IPCP ConfRej id=0x88 <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [IPCP ConfReq id=0x89 <addr 0.0.0.0>]
+# pppd exp6: rcvd [IPCP ConfRej id=0x88 <compress VJ 0f 01> <ms-dns1 0.0.0.0> <ms-dns2 0.0.0.0>]
+# sent [IPCP ConfReq id=0x89 <addr 0.0.0.0>]
+# 
+# rcvd [LCP ProtRej id=0x4 80 fd 01 4d 00 0f 1a 04 78 00 18 04 78 00 15 03 2f]
+# pppd exp6: rcvd [LCP ProtRej id=0x4 80 fd 01 4d 00 0f 1a 04 78 00 18 04 78 00 15 03 2f]
+# 
+# rcvd [IPCP ConfNak id=0x89 <addr 32.100.234.63>]
+# sent [IPCP ConfReq id=0x8a <addr 32.100.234.63>]
+# pppd exp6: rcvd [IPCP ConfNak id=0x89 <addr 32.100.234.63>]
+# sent [IPCP ConfReq id=0x8a <addr 32.100.234.63>]
+# 
+# rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# local  IP address 32.100.234.63
+# remote IP address 204.146.246.229
+# pppd exp6: rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# local  IP address 32.100.234.63
+# remote IP address 204.146.246.229
+				## This won't work, it's not tip
+# #				"Local command?" {
+# #
+# #              if { [string first "Your IP address is" $expect_out(buffer)] != -1 } {
+# #                 #-puts "\n**** Found IP: $expect_out(buffer) ****\n"
+# #                  foreach line [split $expect_out(buffer) "\r\n"] {
+# #                   #-puts "PPPD: $line"
+# #                    if { [string first "Your IP" $line] != -1 } {
+# #											set ip_address [lindex [split $line " 	"] 4]	
+# #											set ip_address [string trimright $ip_address "."]
+# #											puts "IP address: $ip_address"
+# #											set mtu [lindex [split $line "  "] 7]
+# #											puts "MTU:  $mtu"
+# #											.footer.footer_r configure -text "ppp Connected: $line" -font {times 10 bold} -justify left
+# #                      break
+# #                    }
+# #                  }
+# #              }
+# #
+# #								log_message $expect_out(buffer)
+# #								#puts "exp_send /usr/bin/pppd debug lock updetach crtscts defaultroute noipdefault noccp novj\r"
+# #								#exp_send "/usr/bin/pppd debug lock updetach crtscts defaultroute noipdefault noccp novj\r"
+# #								puts "exp_send /usr/sbin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+# #								exp_send "/usr/sbin/pppd debug lock crtscts defaultroute noipdefault noccp novj\r"
+# #
+# #								# best guess that connected is here
+# #								post_connect
+# #								
+# #								exp_continue
+# #				}
+# # proc linux_isp_connect { } {
+# # 	puts "proc linux_isp_connect { } "
+# # 
+# # 	global 	accounts account_list active_account baud_rate 
+# # 	global	env flow_control init_string ip_enabled 
+# # 	global 	log_file log_messages message modem_port
+# # 	global 	nat_transparency_mode network_interface 
+# # 	global 	password phone_number
+# # 	global	port port_speed spawn_id tokencard_response username
+# # 	global baud_rate pppd_config_file username
+# # 
+# # 	global connection_state
+# # 	global pppd_id
+# # 	global pppd_pid
+# # 	global ppp_interface serial_port ip_address
+# # 	global connection_state 
+# # 
+# # 	.passwdf.passwd_r configure -state normal
+# # 
+# # 	global phone_number port baud_rate pppd pppd_config_file env username
+# # 	global tip_id
+# # 	global connection_type
+# # 	set connection_type "pppd"
+# # 	global ppp_settings
+# # 
+# # 
+# # 	# strip out non-numeric
+# # 	regsub -all "\[^0-9\]" $accounts($active_account,number) "" phone_number 
+# # 
+# # 	set baud_rate $ppp_settings(port_speed) 
+# # 	set pppd_config_file "$env(HOME)/.ppptool/connect.script"
+# # 	set port $ppp_settings(modem_port)
+# # 	set pppd /usr/sbin/pppd
+# # 	set pppd_cmd "$pppd file $pppd_config_file"
+# # 
+# # 	set username [.uidf.uid_r get] 
+# # 	set password [.passwdf.passwd_r get] 
+# # 
+# # 	if { $username != $accounts($active_account,uid) } {
+# # 		set accounts($active_account,uid) $username
+# # 	}
+# # 	if { $password != $accounts($active_account,passwd) } {
+# # 		set accounts($active_account,passwd) $password
+# # 	}
+# # 
+# # 	puts "$phone_number $port $baud_rate $pppd_config_file $username $password"
+# # 
+# # 	# flow control
+# # 	#switch  $ppp_settings(flow_control) {
+# # 	#	"hardware" {#-puts $fd crtscts }
+# # 	#	"software" {#-puts $fd xonxoff }
+# # 	#	"none" {#-puts $fd  nocrtscts }
+# # 	#}
+# # 
+# # 	if { $accounts($active_account,defroute) == 1 } {
+# # 		puts $fd "defaultroute"
+# # 	} else {
+# # 		puts $fd "nodefaultroute"
+# # 	}
+# # 	puts $fd "noipdefault"
+# # 	puts $fd "user $username"
+# # 	puts $fd "password $password"
+# # 
+# # 	#puts $fd "connect '/usr/sbin/chat -v REPORT CONNECT ABORT BUSY ABORT \"NO CARRIER\" \"\" atdt$phone_number \"CONNECT\"'"
+# # 
+# # 	#close $fd
+# # 	#set pppd_cmd "$pppd file $pppd_config_file"
+# # 	#puts "$pppd_cmd"
+# # 
+# # 	.footer.footer_r config -text "Connecting with Chat script"
+# # 
+# # 	set timeout -1
+# # 	#eval spawn $pppd_cmd
+# # 	#set pppd_id $spawn_id
+# # 
+# # 	#.footer.footer_r config -text "Starting Process:\n$pppd_cmd" -font {times 10 bold} -justify left
+# # 	set ctr 0
+# # 
+# # #- 	expect_background -i $spawn_id -re  "\[^\r]*\r\n"  {
+# # #- 
+# # #- 			if { [string first "Hangup" $expect_out(0,string)] != -1 } {
+# # #- 					.footer.footer_r configure -text "Hangup from Modem"
+# # #- 					#set connection_state "disconnected"
+# # #- 					.connect configure -state normal
+# # #- 
+# # #- 			}
+# # #- 			if { [string first "(SIGHUP)" $expect_out(0,string)] != -1 } {
+# # #- 					.footer.footer_r configure -text "Hangup from Modem"
+# # #- 					.connect configure -state normal
+# # #- 			}
+# # #- 
+# # #- 			if { [string first "is locked by pid" $expect_out(0,string)] != -1 } {
+# # #- 				# get pid and run close_pppd
+# # #- 				#Device /dev/term/b is locked by pid 6482
+# # #- 				#pppd exp6: Device /dev/term/b is locked by pid 6482
+# # #- 
+# # #- 				set split_line [split $expect_out(0,string) "\[ \t]*"]
+# # #- 				set lock_pid [lindex $split_line [expr [llength $split_line] -1]] 
+# # #- 				puts "Found locking pid $lock_pid, looking for /var/run/ files with pid"
+# # #- 				# look for file in /var/run containing pid
+# # #- 				foreach f [exec ls /var/run] {
+# # #- 					if { [regexp "pid$" $f] == 1 } {
+# # #- 						# check if file contains pid
+# # #- 						if { [exec cat "/var/run/$f"] == $lock_pid } {
+# # #- 							#send file name to close_pppd
+# # #- 							set ppp_interface [lindex [split $f "."] 0]
+# # #- 							puts "Setting ppp_interface file name to $ppp_interface"
+# # #- 							puts "Running close_pppd"
+# # #- 							close_pppd 	
+# # #- 							break
+# # #- 						}
+# # #- 					}
+# # #- 				}
+# # #- 			}
+# # #- 
+# # #- 			# look for connection success
+# # #- 			# Connect: sppp0 <--> /dev/term/b
+# # #- 			if { [string first "Connect" $expect_out(0,string)] != -1 } {
+# # #- 					set ppp_interface \
+# # #- 					[lindex [split $expect_out(0,string) " \t"] 1]
+# # #- 
+# # #- 					set serial_port \
+# # #- 					[lindex [split $expect_out(0,string) " \t"] 3]
+# # #- 					puts "\n==> PPP Interface: $ppp_interface <==\n"
+# # #- 					puts "\n==> serial port: $serial_port <==\n"
+# # #- 			}
+# # #- 
+# # #- 			if {	[string first "local" $expect_out(0,string)] != -1 && \
+# # #- 						[string first "IP address" $expect_out(0,string)] != -1 } {
+# # #- 
+# # #- 					set ip_address \
+# # #- 					[string trim [lindex [split $expect_out(0,string) "\[ ]*"] 4]]
+# # #- 					puts "\n==> IP address for interface: $ip_address <==\n"
+# # #- 					.footer.footer_r configure \
+# # #- 					-text "PPP Connected.\nNetwork Interface: $ppp_interface\nIP address: $ip_address" -anchor w -justify left
+# # 						.connect configure -state normal -text "Disconnect"
+# # 						set connection_state "connected"
+# # #- 			}
+# # #- 
+# # #- 			# rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# # #- 			# local  IP address 32.100.234.63
+# # #- 			# remote IP address 204.146.246.229
+# # #- 			# pppd exp6: rcvd [IPCP ConfAck id=0x8a <addr 32.100.234.63>]
+# # #- 			# local  IP address 32.100.234.63
+# # #- 			# remote IP address 204.146.246.229
+# # #- 
+# # #- 			# get pid 
+# # #- 			if { [string first "CONNECT" $expect_out(0,string)] != -1 && \
+# # #- 					[string first "started" $expect_out(0,string)] != -1 } {
+# # #- 
+# # #- 					puts "pppd $spawn_id"
+# # #- 					# the pid of the pppd 
+# # #- 					set pid_line [split $expect_out(0,string) "\[ \t]*"] 
+# # #- 					puts "pid_line: $pid_line"
+# # #- 
+# # #- 					# get last string of line
+# # #- 					set pid_string [lindex $pid_line end] 
+# # #- 					puts "pid_string: $pid_string"
+# # #- 
+# # #- 					set pppd_pid [string trimright [lindex [split $pid_string] 0] ")"]
+# # #- 					puts "pppd_pid: $pppd_pid"
+# # #- 					.connect configure -state normal
+# # #- 
+# # #- 			}
+# # #- 
+# # #- 			puts "pppd $spawn_id: $expect_out(0,string)"
+# # #- 			log_message $expect_out(0,string)
+# # #- 		}
+# # 	
+# # 		#post_connect
+# # }

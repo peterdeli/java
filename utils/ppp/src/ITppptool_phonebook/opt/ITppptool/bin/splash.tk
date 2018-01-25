@@ -1,0 +1,15 @@
+#!/opt/sfw/bin/wishx
+proc create_splash { } {
+	puts "Create splash"
+	wm withdraw .
+	set window .splash
+	toplevel $window
+	$window configure -borderwidth 0
+	wm title $window "AGNS Tool"
+	label ${window}.msg -text "Launching AGNS Tool .." -width 35 -height 3
+    wm geometry $window +[expr [winfo screenwidth .splash] / 3 ]+[expr [winfo screenheight .splash] / 3] 
+    pack ${window}.msg
+	wm deiconify $window 
+}
+
+create_splash

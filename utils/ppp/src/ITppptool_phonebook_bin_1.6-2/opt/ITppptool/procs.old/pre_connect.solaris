@@ -1,0 +1,11 @@
+proc pre_connect { } {
+
+	global pre_connect_script 
+
+	if { [file exists $pre_connect_script] } {
+	  puts "exec $pre_connect_script" 
+	  exec $pre_connect_script & 
+	}
+
+	return
+}

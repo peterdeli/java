@@ -1,0 +1,41 @@
+proc blink_single {bulb } {
+
+	global connection_state
+	global incr_value
+	global bulblist
+	global on_color
+	global off_color
+	global bulb_colors 
+	global after_interval
+	global bulbs
+
+	set after_interval [RandomRange 500 ] 
+
+		if { [lsearch $bulb_colors $bulbs($bulb,color)] == [expr [llength $bulb_colors] - 1] } {
+			set bulbs($bulb,color) [lindex $bulb_colors 0]
+		} else {
+			set bulbs($bulb,color) [lindex $bulb_colors [expr [lsearch $bulb_colors $bulbs($bulb,color)]  + 1]]
+		}
+		if { $after_interval > 250 } {
+			.cframe.can itemconfigure $bulb -fill $bulbs($bulb,color) 
+		}
+
+		if { $connection_state != "connecting" } {
+			puts "blink_single: .cframe.can itemconfigure all -fill black"
+			.cframe.can itemconfigure all -fill black 
+			#puts "after $after_interval blink_single $bulb"
+			#after $after_interval blink_single $bulb
+		} else {
+			#puts "blink_single: after $after_interval blink_single $bulb"
+				if { $bulb == "bulb0" || $bulb == "bulb3" } {
+					puts "blink_single: .cframe.can itemconfigure $bulb -fill green" 
+					.cframe.can itemconfigure $bulb -fill green 
+				} elseif  { $bulb == "bulb10" } {
+					puts "blink_single: .cframe.can itemconfigure $bulb -fill yellow" 
+					.cframe.can itemconfigure $bulb -fill yellow 
+				}
+			after $after_interval blink_single $bulb
+		}
+}
+
+

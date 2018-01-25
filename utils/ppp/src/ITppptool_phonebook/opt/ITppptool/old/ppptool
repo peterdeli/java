@@ -1,0 +1,5 @@
+#!/bin/pfsh
+
+if [ -f "/opt/ITppptool/ppptool.tk" ]; then
+	exec /opt/ITppptool/ppptool.tk "$@"
+fi

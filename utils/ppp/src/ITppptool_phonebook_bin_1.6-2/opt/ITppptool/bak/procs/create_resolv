@@ -1,0 +1,13 @@
+proc create_resolv { } {
+	global accounts
+	global active_account
+	#account_strings(domain) "DNS Domain Name:"
+	#account_strings(ns1) "Account Nameserver #1:"
+	#account_strings(ns2) "Account Nameserver #2:"
+
+	exec $create_resolv \
+	$account_strings($active_account,domain) \
+	$account_strings($active_account,ns1) \
+	$account_strings($active_account,ns2) 
+}
+

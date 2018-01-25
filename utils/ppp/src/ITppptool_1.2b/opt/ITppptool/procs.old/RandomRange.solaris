@@ -1,0 +1,4 @@
+proc RandomRange { range } {
+        return [expr int([Random]*$range)]
+}
+
